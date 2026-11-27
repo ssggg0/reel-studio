@@ -507,7 +507,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 
 /* ── audit ──────────────────────────────────────────── */
 .audit-card{border-color:var(--line)}
-.audit-card .btn{margin-left:auto}
+.audit-card .card-head .btn{margin-left:auto}
 .audit-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .audit-item{
   display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:12px;

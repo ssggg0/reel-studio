@@ -520,6 +520,7 @@
     p.bgm = Object.assign({}, p.bgm, { id: bgm, on: true });
     syncProjectToUI(true);
     drawStatic();
+    touch();
     setTab('script');
     el('secAI').open = true;
     setTimeout(() => { const s = el('secCues'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 160);
@@ -1233,6 +1234,7 @@
     syncProjectToUI(true);
     renderCues();
     drawStatic();
+    touch();
     runAudit();
     RS.toast(notes.length ? '자동 수정 완료 — ' + notes.join(' · ') : '이미 고칠 것이 없습니다', notes.length ? 'ok' : '');
   }
