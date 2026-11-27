@@ -92,10 +92,18 @@
   /* ── topbar ─────────────────────────────────────────── */
   function bindTop() {
     el('projName').addEventListener('input', e => { S.project.name = e.target.value || '내 쇼츠'; touch(); });
-    $$('.modal-back').forEach(b => b.addEventListener('click', () => RS.closeModal(b.dataset.close)));
+    $$('[data-close]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.close;
+      RS.closeModal(id);
+      if (id === 'confirm' && RS._cfResolve) { const r = RS._cfResolve; RS._cfResolve = null; r(false); }
+    }));
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        $$('.modal:not([hidden])').forEach(m => RS.closeModal(m.id.replace('Modal', '')));
+        $$('.modal:not([hidden])').forEach(m => {
+          const id = m.id.replace('Modal', '');
+          RS.closeModal(id);
+          if (id === 'confirm' && RS._cfResolve) { const r = RS._cfResolve; RS._cfResolve = null; r(false); }
+        });
       }
       if (e.key === ' ' && !/input|textarea|select/i.test((document.activeElement || {}).tagName || '')) {
         e.preventDefault(); togglePlay();

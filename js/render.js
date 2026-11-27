@@ -238,7 +238,7 @@
   };
 
   /* ── text helpers ───────────────────────────────────── */
-  function fontOf(size, weight, family) { return weight + ' ' + Math.round(size) + 'px ' + (family || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'); }
+  function fontOf(size, weight, family) { return weight + ' ' + Math.round(size) + 'px ' + (family || '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'); }
 
   function richWords(segs) {
     const out = [];
@@ -316,7 +316,7 @@
     const hk = p.hook || {};
     if (!hk.on || (!hk.line1 && !hk.line2)) return;
     const size = (hk.size || 54) * k;
-    const family = hk.font || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+    const family = hk.font || '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const maxW = W * 0.86;
     const lines = [];
     const l1 = layoutLines(ctx, U.rich(hk.line1, false), maxW, size, 900, family)[0];
@@ -396,7 +396,7 @@
   function drawSub(ctx, W, H, p, cue, t, k) {
     if (!p.sub || p.sub.on === false || !cue) return;
     const size = (p.sub.fontSize || 62) * k;
-    const family = p.sub.font || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+    const family = p.sub.font || '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const weight = p.sub.weight || 900;
     const maxW = W * 0.84;
     let fs = size;
@@ -453,7 +453,7 @@
     if (into <= 0) return;
     const ease = 1 - Math.pow(1 - into, 3);
     const fs = 30 * k;
-    const family = '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+    const family = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const maxW = W * 0.74;
     const lines = layoutLines(ctx, U.rich(cue.comment.text, false), maxW, fs, 700, family).slice(0, 3);
     const lh = fs * 1.35;
@@ -503,7 +503,7 @@
     if (!p.tag || !p.tag.on || !p.tag.text) return;
     const size = 30 * k;
     ctx.save();
-    ctx.font = fontOf(size, 800, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif');
+    ctx.font = fontOf(size, 800, '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif');
     ctx.fillStyle = 'rgba(255,255,255,.5)';
     ctx.translate(W * 0.035, H * 0.30);
     ctx.rotate(-Math.PI / 2);
@@ -641,10 +641,15 @@
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     const title = (p.meta.titles[p.meta.selected] || p.meta.titles[0] || p.hook.line1 || p.name || '제목을 넣으세요').trim();
-    const lines = layoutLines(ctx, U.rich(title, false), W * 0.86, 96, 900, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif');
+    const FAM = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     let fs = 96;
-    let ls = lines;
-    if (ls.length > 3) { fs = 80; ls = layoutLines(ctx, U.rich(title, false), W * 0.86, fs, 900, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'); }
+    let ls = layoutLines(ctx, U.rich(title, false), W * 0.86, fs, 900, FAM);
+    for (let pass = 0; pass < 4; pass++) {
+      const orphan = ls.length === 3 && ls[2].w < W * 0.26;
+      if (!orphan && ls.length <= 3) break;
+      fs -= 8;
+      ls = layoutLines(ctx, U.rich(title, false), W * 0.86, fs, 900, FAM);
+    }
     ls = ls.slice(0, 3);
 
     // background frame
@@ -665,7 +670,7 @@
 
     // badge
     const bt = badge || (p.tag && p.tag.text) || (RS.presetById(p.presetId).tag && RS.presetById(p.presetId).tag.text) || 'REEL STUDIO';
-    ctx.font = '900 40px "Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+    ctx.font = '900 40px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const bw = ctx.measureText(bt).width + 52;
     ctx.fillStyle = '#D8FF3E';
     roundRect(ctx, 64, 96, bw, 72, 10); ctx.fill();
