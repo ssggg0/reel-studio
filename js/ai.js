@@ -141,6 +141,50 @@
     }
   };
 
+  /* ── 주제별 데모 대본(동물·힐링 / AI·테크) ─────────────── */
+  const FLAVOR = {
+    animal: {
+      hook: ['포기한 줄 알았는데', '3시간 뒤 벌어진 일'],
+      cues: [
+        '이 영상, 지금 난리가 났습니다',
+        '새끼 한 마리가 물속에서 빠져나오지 못했습니다',
+        '무리는 잠시 자리를 뜨는 것처럼 보였습니다',
+        '다들 포기했다고 생각했습니다',
+        '그런데 #3시간 뒤, 무리가 다시 돌아왔습니다',
+        '가장 큰 어른이 먼저 물속으로 들어갔습니다',
+        '새끼는 그제야 몸을 맡겼습니다',
+        '이 장면은 #27초 만에 400만 회를 넘겼습니다',
+        '사람들은 본능이라고 부르지만, 다음 장면은 아직 설명이 안 됩니다'
+      ],
+      titles: ['{kw} — 떠났던 무리가 돌아온 이유', '포기한 줄 알았던 새끼, 3시간 뒤', '이 장면 하나로 400만 회, 무슨 일이'],
+      desc: '물에 빠진 새끼를 두고 떠난 줄 알았던 무리가 3시간 뒤 다시 돌아왔습니다.\n\n#동물 #힐링 #감동 #쇼츠',
+      tags: '동물,힐링,감동,구조,쇼츠'
+    },
+    tech: {
+      hook: ['{kw}, 30초 정리', '이번엔 진짜 달라졌습니다'],
+      cues: [
+        '{kw} — 지금부터 30초로 정리합니다',
+        '검색창에 질문을 넣으면 답이 아니라 판단이 나옵니다',
+        '기존 서비스가 하던 일을 한 번에 가져갑니다',
+        '숫자로 보면 #3배 빠르고, 비용은 #10분의 1',
+        '문제는 이걸 아직 아무도 통제하지 못한다는 겁니다',
+        '전문가들은 #2년 안에 순서가 바뀐다고 봅니다',
+        '지금 준비한 사람과 아닌 사람의 차이가 여기서 갈립니다',
+        '오늘 확인해야 할 건 딱 하나입니다',
+        '내 업무 중 어디까지 넘길 수 있는지'
+      ],
+      titles: ['{kw}, 30초로 정리', '이번엔 진짜 달라졌습니다 — {kw}', 'AI가 바꾼 것과 아직 못 바꾼 것'],
+      desc: '{kw} 관련 변화를 30초로 정리했습니다.\n\n숫자와 사실만 남겼습니다.\n\n#AI #테크 #쇼츠',
+      tags: 'AI,테크,인공지능,쇼츠,정리'
+    }
+  };
+  function flavorOf(topic) {
+    const t = String(topic || '');
+    if (/(동물|고양이|강아지|코끼리|냥|멍|야생|구조|puppy|cat|dog|animal|paws)/i.test(t)) return 'animal';
+    if (/(AI|테크|아이폰|갤럭시|gemini|기술|로봇|반도체|앱|소프트웨어|tech)/i.test(t)) return 'tech';
+    return '';
+  }
+
   function kwOf(topic) {
     const t = String(topic || '').replace(/[#*\n"'“”‘’]/g, ' ').trim();
     const words = t.split(/[\s,·]+/).filter(w => w.length > 1 && !/^[0-9,.%]+$/.test(w));
@@ -169,7 +213,8 @@
   }
 
   AI.demo = function (topic, lang, lengthSec) {
-    const L = TPL[lang] || TPL.ko;
+    const fl = (lang === 'ko' || !lang) ? flavorOf(topic) : '';
+    const L = fl ? FLAVOR[fl] : (TPL[lang] || TPL.ko);
     const kw = kwOf(topic || '이 이슈');
     const cues = L.cues.map(t => fill(t, kw));
     if (+lengthSec <= 20) cues.splice(2, 2);

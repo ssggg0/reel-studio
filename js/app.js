@@ -492,7 +492,11 @@
   }
 
   /* ── one-click: discover → script ───────────────────── */
-  const COMMENT_POOL = ['이거 실화냐', '나만 몰랐네', '이건 좀 무섭다', '바로 저장함', '조회수 실화?', '개미 또 물렸네', '이게 진짜라고?', '소름 돋았다'];
+  const COMMENTS = {
+    animal: ['심장 쫄깃했다', '이건 못 참지', '눈물 나네', '와 이건 좀', '혼자 보기 아깝다'],
+    tech: ['이거 실화냐', '바로 써봐야지', '미래 온다', '소름 돋았다', '일자리 걱정된다'],
+    issue: ['이거 실화냐', '나만 몰랐네', '이건 좀 무섭다', '바로 저장함', '조회수 실화?', '개미 또 물렸네', '이게 진짜라고?', '소름 돋았다']
+  };
   function oneClickImport(title) {
     const p = S.project;
     p.name = String(title).slice(0, 34);
@@ -501,16 +505,18 @@
     el('aiLen').value = '28';
     const res = RS.ai.demo(title, 'ko', 30);
     applyScript(res, 'ko');
-    const mix = title.length;
+    const t = String(title);
+    const animalish = /(동물|고양이|강아지|코끼리|냥|멍|야생|puppy|cat|dog|animal)/i.test(t);
+    const techish = /(AI|테크|아이폰|갤럭시|gemini|기술|로봇|tech)/i.test(t);
+    const pool = animalish ? COMMENTS.animal : techish ? COMMENTS.tech : COMMENTS.issue;
+    const mix = t.length;
     [2, 5].forEach((i, k) => {
       const c = p.cues[i]; if (!c) return;
-      c.comment = { on: true, text: COMMENT_POOL[(mix + k * 3) % COMMENT_POOL.length], name: '시청자' };
+      c.comment = { on: true, text: pool[(mix + k * 3) % pool.length], name: '시청자' };
     });
     if (p.cues[0]) p.cues[0].sfx = 'impact';
-    const t = String(title);
-    const bgm = /(동물|고양이|강아지|코끼리|냥|멍|puppy|cat|dog)/i.test(t) ? 'emotion'
-      : /(AI|테크|아이폰|gemini|기술|로봇)/i.test(t) ? 'trendy' : 'tension';
-    if (/동물|고양이|강아지|코끼리|냥|멍/i.test(t)) applyPreset(S.presets.find(x => x.id === 'zzaljuwoseo') || S.presets[0]);
+    const bgm = animalish ? 'emotion' : techish ? 'trendy' : 'tension';
+    if (animalish) applyPreset(S.presets.find(x => x.id === 'zzaljuwoseo') || S.presets[0]);
     p.bgm = Object.assign({}, p.bgm, { id: bgm, on: true });
     syncProjectToUI(true);
     drawStatic();
