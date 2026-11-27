@@ -809,3 +809,10 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .cue textarea.cue-text{font-size:13.5px;padding:5px 8px;min-height:30px;line-height:1.4}
   .cue .cue-meta{padding-left:26px;font-size:10px}
 }
+
+.voice-empty{grid-column:1/-1;text-align:center;line-height:1.6}
+@media (max-width:1000px){
+  .tts-row{flex-wrap:wrap}
+  .tts-row .tts-f{flex:1 1 132px}
+  #apiTtsCard .toolbar{flex-wrap:wrap}
+}
