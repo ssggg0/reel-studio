@@ -564,9 +564,16 @@
   /* ── main draw ──────────────────────────────────────── */
   R.draw = function (ctx, W, H, p, t, opts) {
     opts = opts || {};
-    const k = p.ratio === '16:9' ? 0.8 : 1;
+    const ratio = p.ratio || '9:16';
+    const outW = W, outH = H;
+    const sc = outW / 1080;
     ctx.save();
-    ctx.clearRect(0, 0, W, H);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, outW, outH);
+    ctx.scale(sc, sc);
+    W = 1080;
+    H = ratio === '16:9' ? 607.5 : 1920;
+    const k = p.ratio === '16:9' ? 0.8 : 1;
 
     // 1. source
     const src = p.source || { type: 'sample', sample: 'docu' };

@@ -284,7 +284,7 @@
     { id: 'd10', title: '홈플러스 배송 중단, 매장은 어떻게 되나', channel: '유통워치', views: 430000, subs: 15000, len: 27, days: 3, region: 'KR', kw: '홈플러스' },
     { id: 'd11', title: '전세사기 당하기 전에 꼭 확인해야 할 3가지', channel: '집주인노트', views: 2900000, subs: 99000, len: 51, days: 8, region: 'KR', kw: '전세사기' },
     { id: 'd12', title: '이 영상 하나로 AI 편집 끝내기 (무료)', channel: '편집하는사람', views: 3500000, subs: 540000, len: 62, days: 4, region: 'KR', kw: 'AI 편집' }
-  ].map(d => Object.assign({}, d, { total: d.views, ratio: +(d.views / Math.max(1, d.subs)).toFixed(1) }));
+  ].map(d => Object.assign({}, d, { total: d.views, ratio: +(d.views / Math.max(1, d.subs)).toFixed(1), demo: true }));
 
   /* ── storage ─────────────────────────────────────────── */
   const K = RS.KEYS = { project: 'reelstudio.project.v1', settings: 'reelstudio.settings.v1', presets: 'reelstudio.presets.v1' };

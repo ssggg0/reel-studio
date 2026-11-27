@@ -944,9 +944,10 @@
       const views = U.fmtNum(v.views), subs = v.subs ? U.fmtNum(v.subs) : '—';
       const ratio = v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs) || 0).toFixed(2);
       const hot = v.ratio >= 3;
+      const hue = 60 + (i * 37) % 240;
       return `<button class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}">
         <div class="thumb">
-          ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph">${v.demo ? 'SAMPLE' : 'YOUTUBE'}</div>`}
+          ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 45% 17%),#0b0d12 70%)">▶</div>`}
           <span class="ratio">${hot ? '🔥 ' : ''}${ratio}</span>
           <span class="len">${U.fmtClock(v.len)}</span>
         </div>
