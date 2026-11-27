@@ -1,0 +1,2417 @@
+{
+ "pack": "sfx_pack_new",
+ "title": "영상 편집 필수 효과음 100선",
+ "source_video": {
+  "url": "https://youtu.be/2P6QerHOCGE",
+  "title": "Top 100 Sound Effects For Editing (2026)",
+  "channel": "MrShark6000",
+  "duration_s": 252.4
+ },
+ "count": 100,
+ "total_seconds": 192.9,
+ "total_bytes": 3192450,
+ "format": "MP3 44.1kHz stereo 128kbps",
+ "files": [
+  {
+   "id": "001",
+   "name": "휙 (WHOOSH)",
+   "name_ko": "휙",
+   "name_en": "WHOOSH",
+   "duration": 0.45,
+   "file": "001_whoosh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "11.27-11.70"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -16.0
+   },
+   "bytes": 8402,
+   "original_file": "001_휙_WHOOSH.mp3"
+  },
+  {
+   "id": "002",
+   "name": "딸깍 (CLICK)",
+   "name_ko": "딸깍",
+   "name_en": "CLICK",
+   "duration": 0.2,
+   "file": "002_click.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "12.16-12.33"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.7,
+    "mean_dbfs": -28.0
+   },
+   "bytes": 4222,
+   "original_file": "002_딸깍_CLICK.mp3"
+  },
+  {
+   "id": "003",
+   "name": "팡 (POP)",
+   "name_ko": "팡",
+   "name_en": "POP",
+   "duration": 0.29,
+   "file": "003_pop.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "13.28-13.54"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.3,
+    "mean_dbfs": -21.5
+   },
+   "bytes": 5894,
+   "original_file": "003_팡_POP.mp3"
+  },
+  {
+   "id": "004",
+   "name": "돈 소리 (CASH)",
+   "name_ko": "돈 소리",
+   "name_en": "CASH",
+   "duration": 1.13,
+   "file": "004_cash.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "14.48-15.59"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.1,
+    "mean_dbfs": -30.0
+   },
+   "bytes": 19269,
+   "original_file": "004_돈_소리_CASH.mp3"
+  },
+  {
+   "id": "005",
+   "name": "틀렸어 (WRONG)",
+   "name_ko": "틀렸어",
+   "name_en": "WRONG",
+   "duration": 0.93,
+   "file": "005_wrong.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "15.90-16.81"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -8.9,
+    "mean_dbfs": -23.4
+   },
+   "bytes": 15925,
+   "original_file": "005_틀렸어_WRONG.mp3"
+  },
+  {
+   "id": "006",
+   "name": "휙_길게 (WOOSH)",
+   "name_ko": "휙_길게",
+   "name_en": "WOOSH",
+   "duration": 1.63,
+   "file": "006_woosh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "17.73-19.33"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.0,
+    "mean_dbfs": -19.3
+   },
+   "bytes": 27210,
+   "original_file": "006_휙_길게_WOOSH.mp3"
+  },
+  {
+   "id": "007",
+   "name": "디스코드 입장 (DISCORD JOIN)",
+   "name_ko": "디스코드 입장",
+   "name_en": "DISCORD JOIN",
+   "duration": 0.95,
+   "file": "007_discord_join.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "19.78-20.71"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.9,
+    "mean_dbfs": -16.3
+   },
+   "bytes": 16343,
+   "original_file": "007_디스코드_입장_DISCORD_JOIN.mp3"
+  },
+  {
+   "id": "008",
+   "name": "디스코드 퇴장 (DISCORD LEAVE)",
+   "name_ko": "디스코드 퇴장",
+   "name_en": "DISCORD LEAVE",
+   "duration": 0.73,
+   "file": "008_discord_leave.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "20.90-21.61"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.9,
+    "mean_dbfs": -15.3
+   },
+   "bytes": 12581,
+   "original_file": "008_디스코드_퇴장_DISCORD_LEAVE.mp3"
+  },
+  {
+   "id": "009",
+   "name": "애플 알림 (APPLE NOTIFICATION)",
+   "name_ko": "애플 알림",
+   "name_en": "APPLE NOTIFICATION",
+   "duration": 0.75,
+   "file": "009_apple_notification.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "21.93-22.65"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.0,
+    "mean_dbfs": -24.8
+   },
+   "bytes": 12999,
+   "original_file": "009_애플_알림_APPLE_NOTIFICATION.mp3"
+  },
+  {
+   "id": "010",
+   "name": "애니 와우 (ANIME WOW)",
+   "name_ko": "애니 와우",
+   "name_en": "ANIME WOW",
+   "duration": 2.86,
+   "file": "010_anime_wow.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "23.04-25.88"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -15.9,
+    "mean_dbfs": -31.4
+   },
+   "bytes": 46854,
+   "original_file": "010_애니_와우_ANIME_WOW.mp3"
+  },
+  {
+   "id": "011",
+   "name": "오마이갓 (HOLY)",
+   "name_ko": "오마이갓",
+   "name_en": "HOLY",
+   "duration": 5.39,
+   "file": "011_holy.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "25.88-31.24"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -9.0,
+    "mean_dbfs": -23.5
+   },
+   "bytes": 87396,
+   "original_file": "011_오마이갓_HOLY.mp3"
+  },
+  {
+   "id": "012",
+   "name": "펀치 (PUNCH)",
+   "name_ko": "펀치",
+   "name_en": "PUNCH",
+   "duration": 0.36,
+   "file": "012_punch.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "31.80-32.13"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.0,
+    "mean_dbfs": -15.9
+   },
+   "bytes": 6730,
+   "original_file": "012_펀치_PUNCH.mp3"
+  },
+  {
+   "id": "013",
+   "name": "휙 2 (WHOOSH 2)",
+   "name_ko": "휙 2",
+   "name_en": "WHOOSH 2",
+   "duration": 0.3,
+   "file": "013_whoosh_2.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "33.09-33.37"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.6,
+    "mean_dbfs": -19.4
+   },
+   "bytes": 5894,
+   "original_file": "013_휙_2_WHOOSH_2.mp3"
+  },
+  {
+   "id": "014",
+   "name": "종이 (PAPER)",
+   "name_ko": "종이",
+   "name_en": "PAPER",
+   "duration": 1.03,
+   "file": "014_paper.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "34.34-35.34"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -13.3,
+    "mean_dbfs": -31.2
+   },
+   "bytes": 17597,
+   "original_file": "014_종이_PAPER.mp3"
+  },
+  {
+   "id": "015",
+   "name": "동전 (COIN)",
+   "name_ko": "동전",
+   "name_en": "COIN",
+   "duration": 0.79,
+   "file": "015_coin.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "36.13-36.89"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -17.8,
+    "mean_dbfs": -30.9
+   },
+   "bytes": 13835,
+   "original_file": "015_동전_COIN.mp3"
+  },
+  {
+   "id": "016",
+   "name": "스캔 (SCANNIND)",
+   "name_ko": "스캔",
+   "name_en": "SCANNIND",
+   "duration": 1.99,
+   "file": "016_scannind.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "37.67-39.64"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -17.7
+   },
+   "bytes": 33061,
+   "original_file": "016_스캔_SCANNIND.mp3"
+  },
+  {
+   "id": "017",
+   "name": "파티 나팔 (PARTY HORN)",
+   "name_ko": "파티 나팔",
+   "name_en": "PARTY HORN",
+   "duration": 0.8,
+   "file": "017_party_horn.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "40.15-40.93"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -9.8,
+    "mean_dbfs": -25.3
+   },
+   "bytes": 13835,
+   "original_file": "017_파티_나팔_PARTY_HORN.mp3"
+  },
+  {
+   "id": "018",
+   "name": "글리치 (GLITCH)",
+   "name_ko": "글리치",
+   "name_en": "GLITCH",
+   "duration": 0.63,
+   "file": "018_glitch.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "41.47-42.07"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -6.3,
+    "mean_dbfs": -20.7
+   },
+   "bytes": 11327,
+   "original_file": "018_글리치_GLITCH.mp3"
+  },
+  {
+   "id": "019",
+   "name": "모루 (ANVIL)",
+   "name_ko": "모루",
+   "name_en": "ANVIL",
+   "duration": 1.3,
+   "file": "019_anvil.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "42.43-43.70"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.2,
+    "mean_dbfs": -27.1
+   },
+   "bytes": 21776,
+   "original_file": "019_모루_ANVIL.mp3"
+  },
+  {
+   "id": "020",
+   "name": "라이저 (RISER)",
+   "name_ko": "라이저",
+   "name_en": "RISER",
+   "duration": 1.76,
+   "file": "020_riser.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "44.15-45.88"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.1,
+    "mean_dbfs": -24.1
+   },
+   "bytes": 29300,
+   "original_file": "020_라이저_RISER.mp3"
+  },
+  {
+   "id": "021",
+   "name": "갑작스러운 긴장감 (SUDDEN SUSPENSE)",
+   "name_ko": "갑작스러운 긴장감",
+   "name_en": "SUDDEN SUSPENSE",
+   "duration": 1.09,
+   "file": "021_sudden_suspense.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "46.69-47.76"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -18.0
+   },
+   "bytes": 18433,
+   "original_file": "021_갑작스러운_긴장감_SUDDEN_SUSPENSE.mp3"
+  },
+  {
+   "id": "022",
+   "name": "쾅 (BOOM)",
+   "name_ko": "쾅",
+   "name_en": "BOOM",
+   "duration": 1.18,
+   "file": "022_boom.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "48.26-49.42"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.4,
+    "mean_dbfs": -8.3
+   },
+   "bytes": 20105,
+   "original_file": "022_쾅_BOOM.mp3"
+  },
+  {
+   "id": "023",
+   "name": "유리 깨짐 (CRACK GLASS)",
+   "name_ko": "유리 깨짐",
+   "name_en": "CRACK GLASS",
+   "duration": 1.02,
+   "file": "023_crack_glass.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "49.91-50.90"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -21.8
+   },
+   "bytes": 17179,
+   "original_file": "023_유리_깨짐_CRACK_GLASS.mp3"
+  },
+  {
+   "id": "024",
+   "name": "타이머 (TIMER)",
+   "name_ko": "타이머",
+   "name_en": "TIMER",
+   "duration": 2.09,
+   "file": "024_timer.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "51.29-53.35"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.6,
+    "mean_dbfs": -30.1
+   },
+   "bytes": 34315,
+   "original_file": "024_타이머_TIMER.mp3"
+  },
+  {
+   "id": "025",
+   "name": "마리오 코인 (MARIO COIN)",
+   "name_ko": "마리오 코인",
+   "name_en": "MARIO COIN",
+   "duration": 0.98,
+   "file": "025_mario_coin.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "53.88-54.84"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.5,
+    "mean_dbfs": -10.9
+   },
+   "bytes": 16761,
+   "original_file": "025_마리오_코인_MARIO_COIN.mp3"
+  },
+  {
+   "id": "026",
+   "name": "전환 (TRANSITION)",
+   "name_ko": "전환",
+   "name_en": "TRANSITION",
+   "duration": 0.46,
+   "file": "026_transition.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "55.49-55.92"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.7,
+    "mean_dbfs": -20.5
+   },
+   "bytes": 8402,
+   "original_file": "026_전환_TRANSITION.mp3"
+  },
+  {
+   "id": "027",
+   "name": "딩 (DING)",
+   "name_ko": "딩",
+   "name_en": "DING",
+   "duration": 1.17,
+   "file": "027_ding.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "56.62-57.77"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.9,
+    "mean_dbfs": -21.2
+   },
+   "bytes": 19687,
+   "original_file": "027_딩_DING.mp3"
+  },
+  {
+   "id": "028",
+   "name": "키보드 (KEYBOARD)",
+   "name_ko": "키보드",
+   "name_en": "KEYBOARD",
+   "duration": 3.08,
+   "file": "028_keyboard.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "57.87-60.92"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.8,
+    "mean_dbfs": -37.4
+   },
+   "bytes": 50198,
+   "original_file": "028_키보드_KEYBOARD.mp3"
+  },
+  {
+   "id": "029",
+   "name": "파아아 (FAAHHH)",
+   "name_ko": "파아아",
+   "name_en": "FAAHHH",
+   "duration": 2.2,
+   "file": "029_faahhh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "61.54-63.72"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -15.3,
+    "mean_dbfs": -33.5
+   },
+   "bytes": 36405,
+   "original_file": "029_파아아_FAAHHH.mp3"
+  },
+  {
+   "id": "030",
+   "name": "오리 장난감 (DUCK TOY)",
+   "name_ko": "오리 장난감",
+   "name_en": "DUCK TOY",
+   "duration": 0.48,
+   "file": "030_duck_toy.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "64.06-64.51"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -6.7,
+    "mean_dbfs": -20.9
+   },
+   "bytes": 8820,
+   "original_file": "030_오리_장난감_DUCK_TOY.mp3"
+  },
+  {
+   "id": "031",
+   "name": "어색한 정적 (AWKWARD PAUSE)",
+   "name_ko": "어색한 정적",
+   "name_en": "AWKWARD PAUSE",
+   "duration": 3.28,
+   "file": "031_awkward_pause.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "65.03-68.28"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -14.8,
+    "mean_dbfs": -30.8
+   },
+   "bytes": 53541,
+   "original_file": "031_어색한_정적_AWKWARD_PAUSE.mp3"
+  },
+  {
+   "id": "032",
+   "name": "트위치 알림 (TWICH ALERT)",
+   "name_ko": "트위치 알림",
+   "name_en": "TWICH ALERT",
+   "duration": 2.1,
+   "file": "032_twich_alert.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "68.56-70.64"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.7,
+    "mean_dbfs": -28.6
+   },
+   "bytes": 34733,
+   "original_file": "032_트위치_알림_TWICH_ALERT.mp3"
+  },
+  {
+   "id": "033",
+   "name": "팡 2 (POP 2)",
+   "name_ko": "팡 2",
+   "name_en": "POP 2",
+   "duration": 0.19,
+   "file": "033_pop_2.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "71.00-71.17"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.7,
+    "mean_dbfs": -19.4
+   },
+   "bytes": 4222,
+   "original_file": "033_팡_2_POP_2.mp3"
+  },
+  {
+   "id": "034",
+   "name": "카메라 셔터 (CAMERA SHUTTER)",
+   "name_ko": "카메라 셔터",
+   "name_en": "CAMERA SHUTTER",
+   "duration": 0.68,
+   "file": "034_camera_shutter.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "71.74-72.39"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.5,
+    "mean_dbfs": -23.9
+   },
+   "bytes": 11745,
+   "original_file": "034_카메라_셔터_CAMERA_SHUTTER.mp3"
+  },
+  {
+   "id": "035",
+   "name": "휙 3 (WHOOSH 3)",
+   "name_ko": "휙 3",
+   "name_en": "WHOOSH 3",
+   "duration": 0.27,
+   "file": "035_whoosh_3.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "72.94-73.19"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.9,
+    "mean_dbfs": -16.7
+   },
+   "bytes": 5476,
+   "original_file": "035_휙_3_WHOOSH_3.mp3"
+  },
+  {
+   "id": "036",
+   "name": "어몽어스 (AMONG US)",
+   "name_ko": "어몽어스",
+   "name_en": "AMONG US",
+   "duration": 3.87,
+   "file": "036_among_us.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "73.57-77.41"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -6.7,
+    "mean_dbfs": -25.8
+   },
+   "bytes": 62736,
+   "original_file": "036_어몽어스_AMONG_US.mp3"
+  },
+  {
+   "id": "037",
+   "name": "대나무 타격 (BAMBOO HIT)",
+   "name_ko": "대나무 타격",
+   "name_en": "BAMBOO HIT",
+   "duration": 0.41,
+   "file": "037_bamboo_hit.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "77.92-78.31"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -11.6,
+    "mean_dbfs": -27.4
+   },
+   "bytes": 7566,
+   "original_file": "037_대나무_타격_BAMBOO_HIT.mp3"
+  },
+  {
+   "id": "038",
+   "name": "으아악 (AUGHHH)",
+   "name_ko": "으아악",
+   "name_en": "AUGHHH",
+   "duration": 2.34,
+   "file": "038_aughhh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "79.11-81.42"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.7,
+    "mean_dbfs": -9.7
+   },
+   "bytes": 38495,
+   "original_file": "038_으아악_AUGHHH.mp3"
+  },
+  {
+   "id": "039",
+   "name": "타코벨 (TACO BELL)",
+   "name_ko": "타코벨",
+   "name_en": "TACO BELL",
+   "duration": 1.65,
+   "file": "039_taco_bell.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "81.72-83.35"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.3,
+    "mean_dbfs": -16.4
+   },
+   "bytes": 27628,
+   "original_file": "039_타코벨_TACO_BELL.mp3"
+  },
+  {
+   "id": "040",
+   "name": "아니오 (NOPE)",
+   "name_ko": "아니오",
+   "name_en": "NOPE",
+   "duration": 0.4,
+   "file": "040_nope.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "83.61-83.98"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.6,
+    "mean_dbfs": -22.4
+   },
+   "bytes": 7566,
+   "original_file": "040_아니오_NOPE.mp3"
+  },
+  {
+   "id": "041",
+   "name": "핵심 (CORE)",
+   "name_ko": "핵심",
+   "name_en": "CORE",
+   "duration": 0.74,
+   "file": "041_core.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "84.46-85.18"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -7.2,
+    "mean_dbfs": -16.6
+   },
+   "bytes": 12999,
+   "original_file": "041_핵심_CORE.mp3"
+  },
+  {
+   "id": "042",
+   "name": "만화 전환 (CARTOON TRANSITION)",
+   "name_ko": "만화 전환",
+   "name_en": "CARTOON TRANSITION",
+   "duration": 0.81,
+   "file": "042_cartoon_transition.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "85.66-86.44"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.9,
+    "mean_dbfs": -16.9
+   },
+   "bytes": 13835,
+   "original_file": "042_만화_전환_CARTOON_TRANSITION.mp3"
+  },
+  {
+   "id": "043",
+   "name": "맙소사 (OMG...)",
+   "name_ko": "맙소사",
+   "name_en": "OMG...",
+   "duration": 1.64,
+   "file": "043_omg.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "86.81-88.42"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -15.4,
+    "mean_dbfs": -24.1
+   },
+   "bytes": 27210,
+   "original_file": "043_맙소사_OMG.mp3"
+  },
+  {
+   "id": "044",
+   "name": "실망 (DISAPPOINTED)",
+   "name_ko": "실망",
+   "name_en": "DISAPPOINTED",
+   "duration": 3.57,
+   "file": "044_disappointed.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "88.63-92.18"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.5,
+    "mean_dbfs": -15.7
+   },
+   "bytes": 58139,
+   "original_file": "044_실망_DISAPPOINTED.mp3"
+  },
+  {
+   "id": "045",
+   "name": "외계인 (ALIENS)",
+   "name_ko": "외계인",
+   "name_en": "ALIENS",
+   "duration": 7.61,
+   "file": "045_aliens.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "92.18-99.76"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.4,
+    "mean_dbfs": -18.2
+   },
+   "bytes": 122923,
+   "original_file": "045_외계인_ALIENS.mp3"
+  },
+  {
+   "id": "046",
+   "name": "무슨 버튼 (WHAT BUTTON)",
+   "name_ko": "무슨 버튼",
+   "name_en": "WHAT BUTTON",
+   "duration": 4.04,
+   "file": "046_what_button.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "99.88-103.89"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.0,
+    "mean_dbfs": -17.8
+   },
+   "bytes": 65662,
+   "original_file": "046_무슨_버튼_WHAT_BUTTON.mp3"
+  },
+  {
+   "id": "047",
+   "name": "브라 (BRUHH)",
+   "name_ko": "브라",
+   "name_en": "BRUHH",
+   "duration": 0.48,
+   "file": "047_bruhh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "104.26-104.72"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -7.4,
+    "mean_dbfs": -19.5
+   },
+   "bytes": 8820,
+   "original_file": "047_브라_BRUHH.mp3"
+  },
+  {
+   "id": "048",
+   "name": "휙_던지기 (YEET)",
+   "name_ko": "휙_던지기",
+   "name_en": "YEET",
+   "duration": 0.59,
+   "file": "048_yeet.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "105.43-105.99"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": 0.0,
+    "mean_dbfs": -6.5
+   },
+   "bytes": 10492,
+   "original_file": "048_휙_던지기_YEET.mp3"
+  },
+  {
+   "id": "049",
+   "name": "만화 먹방 (CARTOON EAT)",
+   "name_ko": "만화 먹방",
+   "name_en": "CARTOON EAT",
+   "duration": 0.39,
+   "file": "049_cartoon_eat.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "106.56-106.93"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.5,
+    "mean_dbfs": -19.1
+   },
+   "bytes": 7566,
+   "original_file": "049_만화_먹방_CARTOON_EAT.mp3"
+  },
+  {
+   "id": "050",
+   "name": "리즈 (RIZZZ)",
+   "name_ko": "리즈",
+   "name_en": "RIZZZ",
+   "duration": 1.59,
+   "file": "050_rizzz.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "107.51-109.07"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.7,
+    "mean_dbfs": -15.8
+   },
+   "bytes": 26374,
+   "original_file": "050_리즈_RIZZZ.mp3"
+  },
+  {
+   "id": "051",
+   "name": "시계 초침 (CLOCK TICKIG)",
+   "name_ko": "시계 초침",
+   "name_en": "CLOCK TICKIG",
+   "duration": 3.78,
+   "file": "051_clock_tickig.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "109.67-113.43"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.3,
+    "mean_dbfs": -15.9
+   },
+   "bytes": 61483,
+   "original_file": "051_시계_초침_CLOCK_TICKIG.mp3"
+  },
+  {
+   "id": "052",
+   "name": "딩 2 (DING 2)",
+   "name_ko": "딩 2",
+   "name_en": "DING 2",
+   "duration": 0.81,
+   "file": "052_ding_2.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "113.89-114.67"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -14.4,
+    "mean_dbfs": -38.2
+   },
+   "bytes": 13835,
+   "original_file": "052_딩_2_DING_2.mp3"
+  },
+  {
+   "id": "053",
+   "name": "딸깍 2 (CLICK 2)",
+   "name_ko": "딸깍 2",
+   "name_en": "CLICK 2",
+   "duration": 0.16,
+   "file": "053_click_2.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "115.21-115.34"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.1,
+    "mean_dbfs": -26.8
+   },
+   "bytes": 3804,
+   "original_file": "053_딸깍_2_CLICK_2.mp3"
+  },
+  {
+   "id": "054",
+   "name": "카메라 꺼짐 (CAMERA SHUT)",
+   "name_ko": "카메라 꺼짐",
+   "name_en": "CAMERA SHUT",
+   "duration": 0.99,
+   "file": "054_camera_shut.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "116.21-117.17"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.5,
+    "mean_dbfs": -23.2
+   },
+   "bytes": 16761,
+   "original_file": "054_카메라_꺼짐_CAMERA_SHUT.mp3"
+  },
+  {
+   "id": "055",
+   "name": "종 (BELL)",
+   "name_ko": "종",
+   "name_en": "BELL",
+   "duration": 1.23,
+   "file": "055_bell.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "117.48-118.68"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -8.9,
+    "mean_dbfs": -20.7
+   },
+   "bytes": 20523,
+   "original_file": "055_종_BELL.mp3"
+  },
+  {
+   "id": "056",
+   "name": "휙 4 (WOOSH 4)",
+   "name_ko": "휙 4",
+   "name_en": "WOOSH 4",
+   "duration": 1.51,
+   "file": "056_woosh_4.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "119.44-120.92"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.3,
+    "mean_dbfs": -32.3
+   },
+   "bytes": 25120,
+   "original_file": "056_휙_4_WOOSH_4.mp3"
+  },
+  {
+   "id": "057",
+   "name": "스위시 (SWISH)",
+   "name_ko": "스위시",
+   "name_en": "SWISH",
+   "duration": 0.35,
+   "file": "057_swish.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "121.39-121.72"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.0,
+    "mean_dbfs": -23.7
+   },
+   "bytes": 6730,
+   "original_file": "057_스위시_SWISH.mp3"
+  },
+  {
+   "id": "058",
+   "name": "마우스 클릭 (MOUSE CLICK)",
+   "name_ko": "마우스 클릭",
+   "name_en": "MOUSE CLICK",
+   "duration": 0.92,
+   "file": "058_mouse_click.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "122.23-123.12"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.3,
+    "mean_dbfs": -31.3
+   },
+   "bytes": 15925,
+   "original_file": "058_마우스_클릭_MOUSE_CLICK.mp3"
+  },
+  {
+   "id": "059",
+   "name": "카메라 스냅샷 (CAMERA SNAPSHOT)",
+   "name_ko": "카메라 스냅샷",
+   "name_en": "CAMERA SNAPSHOT",
+   "duration": 1.01,
+   "file": "059_camera_snapshot.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "123.58-124.57"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.6,
+    "mean_dbfs": -26.0
+   },
+   "bytes": 17179,
+   "original_file": "059_카메라_스냅샷_CAMERA_SNAPSHOT.mp3"
+  },
+  {
+   "id": "060",
+   "name": "폭발 (EXPLOSION)",
+   "name_ko": "폭발",
+   "name_en": "EXPLOSION",
+   "duration": 2.77,
+   "file": "060_explosion.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "125.22-127.97"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.4,
+    "mean_dbfs": -14.0
+   },
+   "bytes": 45182,
+   "original_file": "060_폭발_EXPLOSION.mp3"
+  },
+  {
+   "id": "061",
+   "name": "거품 (BUBBLE)",
+   "name_ko": "거품",
+   "name_en": "BUBBLE",
+   "duration": 0.26,
+   "file": "061_bubble.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "128.39-128.62"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -10.1
+   },
+   "bytes": 5058,
+   "original_file": "061_거품_BUBBLE.mp3"
+  },
+  {
+   "id": "062",
+   "name": "신비로운 (MYSTERIOUS)",
+   "name_ko": "신비로운",
+   "name_en": "MYSTERIOUS",
+   "duration": 3.52,
+   "file": "062_mysterious.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "129.22-132.71"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -7.0,
+    "mean_dbfs": -25.6
+   },
+   "bytes": 57303,
+   "original_file": "062_신비로운_MYSTERIOUS.mp3"
+  },
+  {
+   "id": "063",
+   "name": "계산대 (CASH REGISTER)",
+   "name_ko": "계산대",
+   "name_en": "CASH REGISTER",
+   "duration": 0.83,
+   "file": "063_cash_register.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "133.15-133.96"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.6,
+    "mean_dbfs": -18.4
+   },
+   "bytes": 14253,
+   "original_file": "063_계산대_CASH_REGISTER.mp3"
+  },
+  {
+   "id": "064",
+   "name": "만화 급전환 (CARTOON SUDDEN)",
+   "name_ko": "만화 급전환",
+   "name_en": "CARTOON SUDDEN",
+   "duration": 0.73,
+   "file": "064_cartoon_sudden.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "134.37-135.07"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -2.0,
+    "mean_dbfs": -17.6
+   },
+   "bytes": 12581,
+   "original_file": "064_만화_급전환_CARTOON_SUDDEN.mp3"
+  },
+  {
+   "id": "065",
+   "name": "삐 (BEEP)",
+   "name_ko": "삐",
+   "name_en": "BEEP",
+   "duration": 0.7,
+   "file": "065_beep.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "135.56-136.24"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.4,
+    "mean_dbfs": -15.8
+   },
+   "bytes": 12163,
+   "original_file": "065_삐_BEEP.mp3"
+  },
+  {
+   "id": "066",
+   "name": "어_의문 (QUESTIONING AH)",
+   "name_ko": "어_의문",
+   "name_en": "QUESTIONING AH",
+   "duration": 0.81,
+   "file": "066_questioning_ah.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "136.51-137.30"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.7,
+    "mean_dbfs": -15.8
+   },
+   "bytes": 14253,
+   "original_file": "066_어_의문_QUESTIONING_AH.mp3"
+  },
+  {
+   "id": "067",
+   "name": "종이 긁기 (PAPER SWIPE)",
+   "name_ko": "종이 긁기",
+   "name_en": "PAPER SWIPE",
+   "duration": 0.56,
+   "file": "067_paper_swipe.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "137.74-138.27"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.4,
+    "mean_dbfs": -21.1
+   },
+   "bytes": 10074,
+   "original_file": "067_종이_긁기_PAPER_SWIPE.mp3"
+  },
+  {
+   "id": "068",
+   "name": "종소리 (BELL RING)",
+   "name_ko": "종소리",
+   "name_en": "BELL RING",
+   "duration": 1.46,
+   "file": "068_bell_ring.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "138.99-140.43"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -6.8,
+    "mean_dbfs": -28.5
+   },
+   "bytes": 24284,
+   "original_file": "068_종소리_BELL_RING.mp3"
+  },
+  {
+   "id": "069",
+   "name": "귀뚜라미 (CRICKETS)",
+   "name_ko": "귀뚜라미",
+   "name_en": "CRICKETS",
+   "duration": 6.6,
+   "file": "069_crickets.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "140.73-147.31"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -6.6,
+    "mean_dbfs": -21.8
+   },
+   "bytes": 106622,
+   "original_file": "069_귀뚜라미_CRICKETS.mp3"
+  },
+  {
+   "id": "070",
+   "name": "오답 (INCORRECT)",
+   "name_ko": "오답",
+   "name_en": "INCORRECT",
+   "duration": 0.26,
+   "file": "070_incorrect.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "147.58-147.81"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.2,
+    "mean_dbfs": -14.8
+   },
+   "bytes": 5058,
+   "original_file": "070_오답_INCORRECT.mp3"
+  },
+  {
+   "id": "071",
+   "name": "정답 (CORRECT)",
+   "name_ko": "정답",
+   "name_en": "CORRECT",
+   "duration": 1.13,
+   "file": "071_correct.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "148.23-149.34"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.9,
+    "mean_dbfs": -16.3
+   },
+   "bytes": 19269,
+   "original_file": "071_정답_CORRECT.mp3"
+  },
+  {
+   "id": "072",
+   "name": "슬픈 바이올린 (SAD VIOLIN)",
+   "name_ko": "슬픈 바이올린",
+   "name_en": "SAD VIOLIN",
+   "duration": 4.48,
+   "file": "072_sad_violin.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "149.72-154.18"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.8,
+    "mean_dbfs": -14.9
+   },
+   "bytes": 72767,
+   "original_file": "072_슬픈_바이올린_SAD_VIOLIN.mp3"
+  },
+  {
+   "id": "073",
+   "name": "마인크래프트 타격 (MINECRAFT HIT)",
+   "name_ko": "마인크래프트 타격",
+   "name_en": "MINECRAFT HIT",
+   "duration": 0.16,
+   "file": "073_minecraft_hit.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "154.67-154.81"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.1,
+    "mean_dbfs": -19.7
+   },
+   "bytes": 3804,
+   "original_file": "073_마인크래프트_타격_MINECRAFT_HIT.mp3"
+  },
+  {
+   "id": "074",
+   "name": "윈도우 오류 (WINDOWS ERROR)",
+   "name_ko": "윈도우 오류",
+   "name_en": "WINDOWS ERROR",
+   "duration": 0.86,
+   "file": "074_windows_error.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "155.44-156.27"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.3,
+    "mean_dbfs": -16.2
+   },
+   "bytes": 14671,
+   "original_file": "074_윈도우_오류_WINDOWS_ERROR.mp3"
+  },
+  {
+   "id": "075",
+   "name": "움직이는 돌 (MOVING STONE)",
+   "name_ko": "움직이는 돌",
+   "name_en": "MOVING STONE",
+   "duration": 1.72,
+   "file": "075_moving_stone.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "156.57-158.27"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -10.8,
+    "mean_dbfs": -26.0
+   },
+   "bytes": 28464,
+   "original_file": "075_움직이는_돌_MOVING_STONE.mp3"
+  },
+  {
+   "id": "076",
+   "name": "덱스터 밈 (DEXTER MEME)",
+   "name_ko": "덱스터 밈",
+   "name_en": "DEXTER MEME",
+   "duration": 10.57,
+   "file": "076_dexter_meme.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "158.71-169.25"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -7.0,
+    "mean_dbfs": -21.2
+   },
+   "bytes": 170152,
+   "original_file": "076_덱스터_밈_DEXTER_MEME.mp3"
+  },
+  {
+   "id": "077",
+   "name": "돈 세는 기계 (MONEY COUNTER)",
+   "name_ko": "돈 세는 기계",
+   "name_en": "MONEY COUNTER",
+   "duration": 2.8,
+   "file": "077_money_counter.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "169.65-172.42"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -8.1,
+    "mean_dbfs": -30.8
+   },
+   "bytes": 46018,
+   "original_file": "077_돈_세는_기계_MONEY_COUNTER.mp3"
+  },
+  {
+   "id": "078",
+   "name": "애플페이 (APPLE PAY)",
+   "name_ko": "애플페이",
+   "name_en": "APPLE PAY",
+   "duration": 1.1,
+   "file": "078_apple_pay.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "172.53-173.60"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.6,
+    "mean_dbfs": -33.7
+   },
+   "bytes": 18433,
+   "original_file": "078_애플페이_APPLE_PAY.mp3"
+  },
+  {
+   "id": "079",
+   "name": "예삐 (YEPPIII)",
+   "name_ko": "예삐",
+   "name_en": "YEPPIII",
+   "duration": 1.86,
+   "file": "079_yeppiii.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "174.58-176.41"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -8.7,
+    "mean_dbfs": -25.0
+   },
+   "bytes": 30972,
+   "original_file": "079_예삐_YEPPIII.mp3"
+  },
+  {
+   "id": "080",
+   "name": "장의사 종 (UNDERTAKER BELL)",
+   "name_ko": "장의사 종",
+   "name_en": "UNDERTAKER BELL",
+   "duration": 3.63,
+   "file": "080_undertaker_bell.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "177.13-180.73"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.5,
+    "mean_dbfs": -19.5
+   },
+   "bytes": 58975,
+   "original_file": "080_장의사_종_UNDERTAKER_BELL.mp3"
+  },
+  {
+   "id": "081",
+   "name": "스파이더맨 (SPIDER MAN)",
+   "name_ko": "스파이더맨",
+   "name_en": "SPIDER MAN",
+   "duration": 12.54,
+   "file": "081_spider_man.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "180.94-193.46"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.3,
+    "mean_dbfs": -15.7
+   },
+   "bytes": 201499,
+   "original_file": "081_스파이더맨_SPIDER_MAN.mp3"
+  },
+  {
+   "id": "082",
+   "name": "윽 (OUGH)",
+   "name_ko": "윽",
+   "name_en": "OUGH",
+   "duration": 0.35,
+   "file": "082_ough.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "193.99-194.31"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -10.8,
+    "mean_dbfs": -20.0
+   },
+   "bytes": 6730,
+   "original_file": "082_윽_OUGH.mp3"
+  },
+  {
+   "id": "083",
+   "name": "아아아아 (AAAAAAAA)",
+   "name_ko": "아아아아",
+   "name_en": "AAAAAAAA",
+   "duration": 4.42,
+   "file": "083_aaaaaaaa.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "194.98-199.37"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.5,
+    "mean_dbfs": -17.4
+   },
+   "bytes": 71932,
+   "original_file": "083_아아아아_AAAAAAAA.mp3"
+  },
+  {
+   "id": "084",
+   "name": "무서운 (TERRIFYING)",
+   "name_ko": "무서운",
+   "name_en": "TERRIFYING",
+   "duration": 3.6,
+   "file": "084_terrifying.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "199.78-203.35"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.6,
+    "mean_dbfs": -14.1
+   },
+   "bytes": 58557,
+   "original_file": "084_무서운_TERRIFYING.mp3"
+  },
+  {
+   "id": "085",
+   "name": "경험_비명 (EXPERIENCE)",
+   "name_ko": "경험_비명",
+   "name_en": "EXPERIENCE",
+   "duration": 1.26,
+   "file": "085_experience.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "203.64-204.87"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.6,
+    "mean_dbfs": -24.2
+   },
+   "bytes": 21358,
+   "original_file": "085_경험_비명_EXPERIENCE.mp3"
+  },
+  {
+   "id": "086",
+   "name": "피해_데미지 (DEMAGE)",
+   "name_ko": "피해_데미지",
+   "name_en": "DEMAGE",
+   "duration": 0.38,
+   "file": "086_demage.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "205.58-205.93"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -9.6,
+    "mean_dbfs": -24.2
+   },
+   "bytes": 7148,
+   "original_file": "086_피해_데미지_DEMAGE.mp3"
+  },
+  {
+   "id": "087",
+   "name": "문 (DOOR)",
+   "name_ko": "문",
+   "name_en": "DOOR",
+   "duration": 0.52,
+   "file": "087_door.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "206.42-206.91"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.0,
+    "mean_dbfs": -26.7
+   },
+   "bytes": 9238,
+   "original_file": "087_문_DOOR.mp3"
+  },
+  {
+   "id": "088",
+   "name": "마인크래프트 먹기 (MINECRAFT EAT)",
+   "name_ko": "마인크래프트 먹기",
+   "name_en": "MINECRAFT EAT",
+   "duration": 1.44,
+   "file": "088_minecraft_eat.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "207.47-208.89"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.4,
+    "mean_dbfs": -34.6
+   },
+   "bytes": 24284,
+   "original_file": "088_마인크래프트_먹기_MINECRAFT_EAT.mp3"
+  },
+  {
+   "id": "089",
+   "name": "노니 (NONI)",
+   "name_ko": "노니",
+   "name_en": "NONI",
+   "duration": 1.08,
+   "file": "089_noni.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "209.44-210.50"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -3.3,
+    "mean_dbfs": -20.1
+   },
+   "bytes": 18433,
+   "original_file": "089_노니_NONI.mp3"
+  },
+  {
+   "id": "090",
+   "name": "히히 (HEE HEE)",
+   "name_ko": "히히",
+   "name_en": "HEE HEE",
+   "duration": 0.97,
+   "file": "090_hee_hee.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "211.28-212.22"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -8.9,
+    "mean_dbfs": -22.5
+   },
+   "bytes": 16761,
+   "original_file": "090_히히_HEE_HEE.mp3"
+  },
+  {
+   "id": "091",
+   "name": "명예 낮음 (LOW HONOR)",
+   "name_ko": "명예 낮음",
+   "name_en": "LOW HONOR",
+   "duration": 2.68,
+   "file": "091_low_honor.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "212.72-215.38"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -11.5,
+    "mean_dbfs": -32.5
+   },
+   "bytes": 43928,
+   "original_file": "091_명예_낮음_LOW_HONOR.mp3"
+  },
+  {
+   "id": "092",
+   "name": "감독_엔딩 (DIRECTED BY)",
+   "name_ko": "감독_엔딩",
+   "name_en": "DIRECTED BY",
+   "duration": 10.42,
+   "file": "092_directed_by.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "215.38-225.77"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.0,
+    "mean_dbfs": -21.8
+   },
+   "bytes": 167644,
+   "original_file": "092_감독_엔딩_DIRECTED_BY.mp3"
+  },
+  {
+   "id": "093",
+   "name": "도마뱀 엉덩이 (LIZARD BUTTOM)",
+   "name_ko": "도마뱀 엉덩이",
+   "name_en": "LIZARD BUTTOM",
+   "duration": 0.95,
+   "file": "093_lizard_buttom.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "226.07-226.99"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -5.0,
+    "mean_dbfs": -23.0
+   },
+   "bytes": 16343,
+   "original_file": "093_도마뱀_엉덩이_LIZARD_BUTTOM.mp3"
+  },
+  {
+   "id": "094",
+   "name": "헉 고양이 (HUH CAT)",
+   "name_ko": "헉 고양이",
+   "name_en": "HUH CAT",
+   "duration": 0.41,
+   "file": "094_huh_cat.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "227.44-227.82"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -12.5,
+    "mean_dbfs": -21.6
+   },
+   "bytes": 7566,
+   "original_file": "094_헉_고양이_HUH_CAT.mp3"
+  },
+  {
+   "id": "095",
+   "name": "GTA5 사망 (GTA V WASTED)",
+   "name_ko": "GTA5 사망",
+   "name_en": "GTA V WASTED",
+   "duration": 6.97,
+   "file": "095_gta_v_wasted.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "228.54-235.48"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -0.9,
+    "mean_dbfs": -21.4
+   },
+   "bytes": 112474,
+   "original_file": "095_GTA5_사망_GTA_V_WASTED.mp3"
+  },
+  {
+   "id": "096",
+   "name": "포트나이트 사망 (DEATH (FORTNITE))",
+   "name_ko": "포트나이트 사망",
+   "name_en": "DEATH (FORTNITE)",
+   "duration": 0.67,
+   "file": "096_death_fortnite.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "236.59-237.23"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -4.4,
+    "mean_dbfs": -17.0
+   },
+   "bytes": 11745,
+   "original_file": "096_포트나이트_사망_DEATH_FORTNITE.mp3"
+  },
+  {
+   "id": "097",
+   "name": "아악 (ACH)",
+   "name_ko": "아악",
+   "name_en": "ACH",
+   "duration": 5.02,
+   "file": "097_ach.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "237.43-242.42"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": 0.0,
+    "mean_dbfs": -19.6
+   },
+   "bytes": 81545,
+   "original_file": "097_아악_ACH.mp3"
+  },
+  {
+   "id": "098",
+   "name": "뼈 부러짐 (BONE CRACK)",
+   "name_ko": "뼈 부러짐",
+   "name_en": "BONE CRACK",
+   "duration": 0.84,
+   "file": "098_bone_crack.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "242.65-243.47"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.6,
+    "mean_dbfs": -23.0
+   },
+   "bytes": 14671,
+   "original_file": "098_뼈_부러짐_BONE_CRACK.mp3"
+  },
+  {
+   "id": "099",
+   "name": "으악? (AUGH?)",
+   "name_ko": "으악?",
+   "name_en": "AUGH?",
+   "duration": 0.65,
+   "file": "099_augh.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "243.82-244.44"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -1.7,
+    "mean_dbfs": -14.5
+   },
+   "bytes": 11327,
+   "original_file": "099_으악_AUGH.mp3"
+  },
+  {
+   "id": "100",
+   "name": "나무 위의 닭 (CHICKEN ON TREE)",
+   "name_ko": "나무 위의 닭",
+   "name_en": "CHICKEN ON TREE",
+   "duration": 5.49,
+   "file": "100_chicken_on_tree.mp3",
+   "source": {
+    "video": "https://youtu.be/2P6QerHOCGE",
+    "timestamp": "244.94-250.40"
+   },
+   "format": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "bitrate": "128kbps",
+    "codec": "mp3"
+   },
+   "level": {
+    "peak_dbfs": -10.7,
+    "mean_dbfs": -21.9
+   },
+   "bytes": 89068,
+   "original_file": "100_나무_위의_닭_CHICKEN_ON_TREE.mp3"
+  }
+ ],
+ "renamed": "파일명을 001_whoosh.mp3 형식(ASCII)으로 바꿨습니다. original_file이 원본 이름입니다."
+}

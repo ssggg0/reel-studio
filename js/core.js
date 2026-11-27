@@ -218,6 +218,23 @@
     { id: 'impact', name: '밑줄' }, { id: 'alert', name: '알림' }
   ];
 
+  /* 새 효과음 100종 — js/sfx-pack.js가 먼저 로드됩니다 */
+  RS.sfxPack = (window.RS_SFX_PACK && Array.isArray(window.RS_SFX_PACK.items))
+    ? window.RS_SFX_PACK : { base: 'sfx/', categories: [], items: [] };
+  RS.sfxCats = (RS.sfxPack.categories && RS.sfxPack.categories.length) ? RS.sfxPack.categories : [
+    { id: 'all', name: '전체' }, { id: 'hit', name: '타격·폭발' }, { id: 'meme', name: '웃음·밈' },
+    { id: 'ui', name: 'UI·알림' }, { id: 'trans', name: '전환' }, { id: 'etc', name: '기타' }
+  ];
+  RS.sfxItem = id => RS.sfxPack.items.find(s => s.id === id) || null;
+  RS.sfxCatName = id => (RS.sfxCats.find(c => c.id === id) || {}).name || '기타';
+  RS.sfxName = id => {
+    if (!id) return '없음';
+    const b = RS.sfxList.find(s => s.id === id);
+    if (b) return b.name;
+    const it = RS.sfxItem(id);
+    return it ? it.n : String(id);
+  };
+
   RS.newProject = function () {
     const p = RS.presetById('issuehanjan');
     return {

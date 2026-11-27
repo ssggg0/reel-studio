@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261127y">
+<link rel="stylesheet" href="css/style.css?v=20261127z">
 </head>
 <body>
 <div id="app">
@@ -47,7 +47,7 @@
     </button>
     <button class="rail-item" data-tab="music">
       <span class="ri-no">3</span>
-      <span class="ri-body"><span class="ri-txt">음원 · 보이스</span><span class="ri-sub">BGM·TTS 한 번에</span></span>
+      <span class="ri-body"><span class="ri-txt">음원 · 보이스</span><span class="ri-sub">보이스·BGM·효과음</span></span>
     </button>
     <button class="rail-item" data-tab="preview">
       <span class="ri-no">4</span>
@@ -355,13 +355,36 @@
         <div>
           <span class="eyebrow">STEP 3 / 5</span>
           <h1>음원 · 보이스</h1>
-          <p>무저작권 BGM 5종. 카드를 누르면 바로 들리면서 동시에 영상에 박힙니다.</p>
+          <p>타입캐스트에서 받은 내 보이스 · 무저작권 BGM · 새 효과음 100종. 딸깍하면 그대로 영상에 섞입니다.</p>
         </div>
         <button class="btn ghost sm" id="mStopAll">소리 끄기</button>
       </div>
 
+      <div class="card" id="voiceLibCard">
+        <div class="card-head"><h2>🎙️ 내 보이스 보관함</h2><span class="tag" id="voiceLibCount">0개</span></div>
+        <p class="hint">타입캐스트 베이직은 외부 API를 지원하지 않습니다. 받아둔 mp3를 여기 올려두고 카드를 <b>딸깍</b>하면 나레이션으로 바로 교체됩니다.</p>
+        <div class="toolbar">
+          <button class="btn primary sm" id="copyVoiceScript">📋 대본 1초 복사 + 타입캐스트 열기</button>
+          <label class="btn outline sm file-btn">
+            <input type="file" id="voiceLibInput" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/m4a,audio/*" multiple>
+            보이스 파일 올리기
+          </label>
+          <button class="btn ghost sm" id="voiceLibClear">보관함 비우기</button>
+        </div>
+        <div class="vdrop" id="voiceDrop">mp3 · wav · m4a 여러 개를 한 번에 끌어다 놓으세요</div>
+        <div class="voice-lib" id="voiceLib"></div>
+        <div class="voice-now" id="voiceNow">지금 나레이션: 없음 (보관함에서 mp3를 딸깍)</div>
+        <div class="slider-grid" style="margin-top:12px">
+          <label class="field slider"><span class="lab">배속 <b id="voiceRateVal">1.05x</b></span>
+            <input type="range" id="voiceRate" min="100" max="130" value="105"></label>
+          <label class="field slider"><span class="lab">나레이션 볼륨 <b id="voiceVolVal">100%</b></span>
+            <input type="range" id="voiceVol" min="0" max="100" value="100"></label>
+        </div>
+        <p class="hint">배속·볼륨은 미리보기와 MP4 렌더에 그대로 섞입니다. 말할 때는 BGM이 자동으로 줄어듭니다.</p>
+      </div>
+
       <div class="card">
-        <div class="card-head"><h2>BGM</h2><span class="tag" id="bgmNow">없음</span></div>
+        <div class="card-head"><h2>🎵 BGM</h2><span class="tag" id="bgmNow">없음</span></div>
         <div class="bgm-grid" id="bgmGrid"></div>
         <div class="slider-grid">
           <label class="field slider"><span class="lab">BGM 볼륨 <b id="bgmVolVal">32%</b></span>
@@ -376,65 +399,22 @@
         <p class="hint">카드를 누르면 <b>바로 들리면서 동시에 영상에 적용</b>됩니다. 우상단 ▶는 미리듣기만.</p>
       </div>
 
-      <div class="card" id="voiceLibCard">
-        <div class="card-head"><h2>내 보이스 보관함</h2><span class="tag" id="voiceLibCount">0개</span></div>
-        <p class="hint">타입캐스트 베이직은 외부 API를 지원하지 않습니다. 받아둔 mp3를 여기 올려두고 카드를 <b>딸깍</b>하면 나레이션으로 바로 교체됩니다.</p>
-        <div class="toolbar">
-          <button class="btn primary sm" id="copyVoiceScript">📋 대본 1초 복사 + 타입캐스트 열기</button>
-          <label class="btn outline sm file-btn">
-            <input type="file" id="voiceLibInput" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/m4a,audio/*" multiple>
-            보이스 파일 올리기
-          </label>
-          <button class="btn ghost sm" id="voiceLibClear">보관함 비우기</button>
+      <div class="card" id="sfxPackCard">
+        <div class="card-head">
+          <h2>🔊 새 효과음 100종</h2>
+          <span class="tag" id="sfxPackState">100종</span>
         </div>
-        <div class="vdrop" id="voiceDrop">mp3 · wav · m4a 여러 개를 한 번에 끌어다 놓으세요</div>
-        <div class="voice-lib" id="voiceLib"></div>
-        <div class="voice-now" id="voiceNow">지금 나레이션: 없음 (브라우저 TTS)</div>
-      </div>
-
-      <div class="card" id="apiTtsCard">
-        <div class="card-head"><h2>API TTS <span class="tag sm">선택</span></h2><span class="tag" id="ttsState">키 없음</span></div>
-        <p class="hint">OpenAI·ElevenLabs 키를 설정에 넣으면 목소리 샘플을 먼저 듣고, 현재 대본을 그 목소리로 바로 생성해 보관함에 담습니다.</p>
-        <div class="field-row tts-row">
-          <label class="field tts-f"><span class="lab">제공자</span>
-            <select id="ttsProvider"><option value="openai">OpenAI TTS</option><option value="eleven">ElevenLabs</option></select></label>
-          <label class="field tts-f grow"><span class="lab">목소리</span><select id="ttsVoice"></select></label>
+        <p class="hint">카드를 <b>딸깍</b>하면 고른 큐의 시작 시점에 바로 박힙니다. <b>▶</b>는 미리듣기만. 미리보기·MP4 렌더 오디오에 실제로 섞입니다.</p>
+        <div class="sfx-target">
+          <span class="sfx-target-lab">넣을 큐</span>
+          <div class="sfx-qchips" id="sfxQChips"></div>
         </div>
-        <div class="toolbar">
-          <button class="btn ghost sm" id="ttsSample">▶ 샘플</button>
-          <button class="btn primary sm" id="ttsGenerate">대본으로 생성</button>
+        <div class="sfx-tools">
+          <input id="sfxSearch" class="sfx-search" placeholder="효과음 검색 (휙 · 펀치 · 딸깍 …)" spellcheck="false" aria-label="효과음 검색">
+          <div class="sfx-cats" id="sfxCats"></div>
         </div>
-        <audio id="ttsAudio" hidden></audio>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>보이스 · TTS</h2><span class="tag">브라우저 무료</span></div>
-        <div class="field-row">
-          <label class="field grow"><span class="lab">목소리</span><select id="voiceSelect"><option value="">기본 목소리</option></select></label>
-          <button class="btn outline sm" id="voiceTest">첫 큐 듣기</button>
-        </div>
-        <div class="slider-grid">
-          <label class="field slider"><span class="lab">말 빠르기 <b id="voiceRateVal">1.05x</b></span>
-            <input type="range" id="voiceRate" min="100" max="130" value="105"></label>
-          <label class="field slider"><span class="lab">나레이션 볼륨 <b id="voiceVolVal">100%</b></span>
-            <input type="range" id="voiceVol" min="0" max="100" value="100"></label>
-        </div>
-        <label class="switch-line"><input type="checkbox" id="voiceOn" checked><span>미리보기에서 큐를 읽어주기</span></label>
-        <div class="upload-row">
-          <label class="btn outline sm file-btn">
-            <input type="file" id="voiceFile" accept="audio/*">
-            나레이션 오디오 올리기
-          </label>
-          <span class="file-name" id="voiceFileName">없음 (타입캐스트 수민 mp3 등)</span>
-          <button class="btn ghost sm" id="voiceFileClear" hidden>빼기</button>
-        </div>
-        <p class="hint">브라우저 TTS는 미리듣기용입니다. 실제 영상에 목소리를 넣으려면 타입캐스트에서 받은 mp3를 올리세요 — BGM·효과음과 함께 영상에 실제로 섞여 나갑니다.</p>
-      </div>
-
-      <div class="card">
-        <div class="card-head"><h2>효과음</h2><span class="tag">4종</span></div>
-        <div class="sfx-grid" id="sfxGrid"></div>
-        <p class="hint">큐마다 붙이는 건 아래 타임라인에서 고르면 됩니다. 여기서는 소리만 미리 들어보세요.</p>
+        <div class="sfx-grid-pack" id="sfxPack"></div>
+        <p class="hint" id="sfxPackHint">기본 효과음 4종(팝·휙·밑줄·알림)은 위에 함께 두었고, 대본 탭 큐의 <b>⚙</b>에서도 이 100종을 고를 수 있습니다.</p>
       </div>
 
       <div class="card">
@@ -662,15 +642,6 @@
           </details>
 
           <label class="field">
-            <span class="lab">OpenAI API 키 <em>API TTS 선택</em></span>
-            <input id="stOpenai" type="password" autocomplete="off" placeholder="sk-...">
-          </label>
-          <label class="field">
-            <span class="lab">ElevenLabs API 키 <em>API TTS 선택</em></span>
-            <input id="stEleven" type="password" autocomplete="off" placeholder="sk_...">
-          </label>
-
-          <label class="field">
             <span class="lab">Google OAuth Client ID <em>유튜브 업로드용</em></span>
             <input id="stOauth" type="password" autocomplete="off" placeholder="1234567890-abc.apps.googleusercontent.com">
           </label>
@@ -763,12 +734,13 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/core.js?v=20261127y"></script>
-<script src="js/audio.js?v=20261127y"></script>
-<script src="js/render.js?v=20261127y"></script>
-<script src="js/ai.js?v=20261127y"></script>
-<script src="js/tube.js?v=20261127y"></script>
-<script src="js/app.js?v=20261127y"></script>
+<script src="js/sfx-pack.js?v=20261127z"></script>
+<script src="js/core.js?v=20261127z"></script>
+<script src="js/audio.js?v=20261127z"></script>
+<script src="js/render.js?v=20261127z"></script>
+<script src="js/ai.js?v=20261127z"></script>
+<script src="js/tube.js?v=20261127z"></script>
+<script src="js/app.js?v=20261127z"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

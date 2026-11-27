@@ -1,4 +1,4 @@
-/* REEL STUDIO — audio: procedural BGM, SFX, TTS, narration */
+/* REEL STUDIO — audio: procedural BGM, SFX(합성 4종 + mp3 100종), narration */
 (function () {
   'use strict';
   const RS = window.RS;
@@ -242,9 +242,87 @@
   };
   A.setVoiceVolume = function (v) { A.voiceVol = v; if (A.voiceBus) A.voiceBus.gain.setTargetAtTime(v, ctx.currentTime, 0.05); };
 
+  /* ── 새 효과음 100종 (mp3 · 사전 디코딩 캐시) ─────────── */
+  const PACK = window.RS_SFX_PACK || { base: 'sfx/', items: [] };
+  const PACK_BY_ID = {};
+  (PACK.items || []).forEach(it => { PACK_BY_ID[it.id] = it; });
+  A.pack = PACK;
+  A.sfxBuf = {};                     // id → AudioBuffer
+  const sfxLoading = {};             // id → Promise
+  A.isPackSfx = id => !!PACK_BY_ID[id];
+
+  function packUrl(it) { return (PACK.base || 'sfx/') + encodeURIComponent(it.f); }
+
+  A.loadSfxBuffer = function (id) {
+    const it = PACK_BY_ID[id];
+    if (!it) return Promise.reject(new Error('없는 효과음: ' + id));
+    if (A.sfxBuf[id]) return Promise.resolve(A.sfxBuf[id]);
+    if (sfxLoading[id]) return sfxLoading[id];
+    ensure();
+    if (!ctx) return Promise.reject(new Error('오디오를 시작할 수 없습니다'));
+    sfxLoading[id] = fetch(packUrl(it))
+      .then(r => { if (!r.ok) throw new Error('효과음 ' + r.status); return r.arrayBuffer(); })
+      .then(ab => new Promise((res, rej) => {
+        ctx.decodeAudioData(ab, b => res(b), e => rej(e || new Error('해석 실패')));
+      }))
+      .then(buf => { A.sfxBuf[id] = buf; delete sfxLoading[id]; return buf; })
+      .catch(err => {
+        delete sfxLoading[id];
+        RS.toast('효과음을 못 불러왔습니다 · ' + it.n, 'err');
+        throw err;
+      });
+    return sfxLoading[id];
+  };
+
+  /* 여러 개를 6개씩 병렬로 미리 디코딩 (없으면 전체 100종) */
+  A.preloadSfxPack = function (ids, onProgress) {
+    const list = Array.from(new Set((ids && ids.length ? ids : Object.keys(PACK_BY_ID)).filter(id => PACK_BY_ID[id])));
+    const total = list.length;
+    if (!total) return Promise.resolve(0);
+    return new Promise(resolve => {
+      let i = 0, done = 0, active = 0, ended = false;
+      const finish = () => { if (!ended && i >= total && active === 0) { ended = true; resolve(done); } };
+      const next = () => {
+        while (active < 6 && i < total) {
+          const id = list[i++];
+          active++;
+          A.loadSfxBuffer(id).catch(() => {}).then(() => {
+            active--; done++;
+            if (onProgress) { try { onProgress(done, total); } catch (e) {} }
+            next();
+          });
+        }
+        finish();
+      };
+      next();
+    });
+  };
+  /* 큐에 걸린 효과음만 렌더 전에 준비 */
+  A.ensureSfxReady = function (cues) {
+    const ids = (cues || []).map(c => c && c.sfx).filter(id => id && PACK_BY_ID[id]);
+    return ids.length ? A.preloadSfxPack(ids) : Promise.resolve(0);
+  };
+
+  function playPackSfx(id) {
+    const it = PACK_BY_ID[id];
+    if (!it || !ctx) return;
+    const fire = buf => {
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      const g = ctx.createGain();
+      g.gain.value = it.g == null ? 1 : it.g;
+      src.connect(g); g.connect(A.sfxBus);
+      src.start(ctx.currentTime + 0.005);
+    };
+    const buf = A.sfxBuf[id];
+    if (buf) fire(buf);
+    else A.loadSfxBuffer(id).then(fire).catch(() => {});
+  }
+
   /* ── SFX ────────────────────────────────────────────── */
   A.playSfx = function (id, when) {
     if (!id || !ensure()) return;
+    if (PACK_BY_ID[id]) { playPackSfx(id); return; }
     const t = Math.max(ctx.currentTime + 0.01, when || 0);
     const bus = A.sfxBus;
     if (id === 'pop') {
@@ -306,34 +384,6 @@
     } catch (e) { /* 이미 연결됐거나 미지원 */ }
   };
 
-  /* ── TTS ────────────────────────────────────────────── */
-  const synth = window.speechSynthesis;
-  A.voices = function () {
-    if (!synth) return [];
-    let list = synth.getVoices() || [];
-    const ko = list.filter(v => /^ko/i.test(v.lang));
-    return ko.length ? ko : list;
-  };
-  A.speak = function (text, opts) {
-    if (!synth || !text) return;
-    try {
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(String(text));
-      const rate = opts && opts.rate ? opts.rate : 1.05;
-      u.rate = Math.max(0.5, Math.min(2, rate));
-      u.pitch = 1;
-      u.volume = 1;
-      const uri = opts && opts.uri;
-      const list = A.voices();
-      const v = list.find(x => x.voiceURI === uri) || list.find(x => /^ko/i.test(x.lang));
-      if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'ko-KR'; }
-      if (opts && opts.onend) u.onend = opts.onend;
-      synth.speak(u);
-      return u;
-    } catch (e) {}
-  };
-  A.stopSpeak = function () { try { synth && synth.cancel(); } catch (e) {} };
-
   /* ── recording mix ──────────────────────────────────── */
   A.recordStream = function () {
     if (!ensure()) return null;
@@ -345,7 +395,7 @@
   };
 
   A.stopAll = function () {
-    A.stopBgm(); A.stopNarration(); A.stopSpeak();
+    A.stopBgm(); A.stopNarration();
   };
 
   // iOS unlock: create context on first gesture
@@ -354,7 +404,4 @@
       if (!A.unlocked) { A.unlocked = true; A.resume(); }
     }, { passive: true });
   });
-  if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = () => { if (RS.fillVoices) RS.fillVoices(); };
-  }
 })();

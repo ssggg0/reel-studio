@@ -452,6 +452,42 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .sfx-btn:hover{border-color:var(--accent-line);background:var(--accent-t);color:var(--accent-h)}
 .sfx-btn.hit{background:var(--accent-t);border-color:var(--accent-line);color:var(--accent-h)}
 
+/* ── 새 효과음 100종 (딸깍 삽입) ────────────────────── */
+.sfx-target{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 10px}
+.sfx-target-lab{font-size:10.5px;font-weight:800;letter-spacing:.08em;color:var(--mut2);white-space:nowrap}
+.sfx-qchips{display:flex;gap:6px;flex-wrap:wrap}
+.sfx-qchip{position:relative;min-width:33px;height:33px;padding:0 9px;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-size:12px;font-weight:800;color:var(--tx2);transition:.13s}
+.sfx-qchip:hover{border-color:var(--accent-line);color:var(--accent-h)}
+.sfx-qchip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.sfx-qchip i{position:absolute;right:4px;top:4px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.sfx-qchip.on i{background:#fff}
+.sfx-none{font-size:11.5px;color:var(--mut2);font-weight:600}
+.sfx-tools{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.sfx-search{width:100%;padding:10px 13px;border:1.5px solid var(--line);border-radius:11px;background:#fff;font-size:13px;font-weight:600}
+.sfx-search:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-t)}
+.sfx-cats{display:flex;gap:6px;flex-wrap:wrap}
+.sfx-cat{padding:6px 11px;border-radius:99px;border:1.5px solid var(--line);background:#fff;font-size:11.5px;font-weight:800;color:var(--tx2);transition:.13s}
+.sfx-cat i{margin-left:5px;font-style:normal;color:var(--mut2);font-weight:700}
+.sfx-cat:hover{border-color:var(--accent-line);color:var(--accent-h)}
+.sfx-cat.on{background:var(--accent-t);border-color:var(--accent-line);color:var(--accent-h)}
+.sfx-cat.on i{color:var(--accent-h)}
+.sfx-grid-pack{max-height:440px;overflow-y:auto;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:10px;margin-top:2px;overscroll-behavior:contain}
+.sfx-group{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));gap:7px}
+.sfx-group-lab{grid-column:1/-1;font-size:10px;font-weight:800;letter-spacing:.09em;color:var(--mut2);padding:8px 2px 2px}
+.sfx-group-lab:first-child{padding-top:0}
+.sfx-card{position:relative;border:1.5px solid var(--line);border-radius:11px;background:#fff;padding:9px 10px 8px;text-align:left;transition:.13s;min-height:62px;display:flex;flex-direction:column;gap:1px}
+.sfx-card:hover{border-color:var(--accent-line);background:var(--accent-t)}
+.sfx-card.on{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-t),#fff 80%)}
+.sfx-card .sc-cat{font-size:9px;font-weight:800;letter-spacing:.03em;color:var(--accent-h);opacity:.72}
+.sfx-card .sc-n{font-size:12.5px;font-weight:800;line-height:1.25;padding-right:18px;word-break:keep-all}
+.sfx-card .sc-en{font-size:9.5px;font-weight:600;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sfx-card .sc-play{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-size:8px;color:var(--tx2);transition:.13s}
+.sfx-card .sc-play:hover{background:var(--accent);color:#fff}
+.sfx-card .sc-play.hit{background:var(--accent);color:#fff;transform:scale(.9)}
+.sfx-card.is-builtin{background:linear-gradient(180deg,#fff,var(--panel2))}
+.sfx-card.is-builtin .sc-cat{color:var(--mut2)}
+.sfx-empty{grid-column:1/-1;font-size:12px;color:var(--mut2);padding:16px 8px;text-align:center}
+
 /* ── preview column & stage ─────────────────────────── */
 .preview-col{
   grid-area:pv;border-left:1px solid var(--line);background:var(--panel);
@@ -672,6 +708,10 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .brand-name{display:none}
   .panel-head p{display:none}
   .bgm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sfx-group{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .sfx-grid-pack{max-height:360px;padding:8px}
+  .sfx-card{min-height:60px;padding:8px 9px 7px}
+  .sfx-qchip{min-width:31px;height:31px}
   .field-row{gap:8px}
   .field-row > .btn{height:40px;padding:9px 12px}
   .seg-btn{font-size:12px;padding:8px 6px}
