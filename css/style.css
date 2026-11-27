@@ -704,10 +704,10 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .pop-rail::-webkit-scrollbar{height:6px}
 .pop-rail::-webkit-scrollbar-thumb{background:#D5DDE7;border-radius:99px;border:0;background-clip:border-box}
 .pop-item{
-  flex:0 0 calc((100% - 26px)/2.4);min-width:0;scroll-snap-align:start;
+  flex:0 0 calc((100% - 14px)/2.4);min-width:0;scroll-snap-align:start;
   text-align:left;transition:transform .15s;
 }
-@media (min-width:700px){ .pop-item{flex-basis:172px} }
+@media (min-width:700px){ .pop-item{flex-basis:156px} }
 .pop-thumb{
   position:relative;aspect-ratio:9/16;border-radius:13px;overflow:hidden;
   background:linear-gradient(150deg,#334155,#0F172A);border:1px solid var(--line);box-shadow:var(--sh-sm);
