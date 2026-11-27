@@ -130,14 +130,14 @@
     const val = 4697 - Math.floor((Math.sin(t * 0.35) * 0.5 + 0.5) * 120);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = 'rgba(210,220,235,.55)';
-    ctx.font = '700 30px "Noto Sans KR",sans-serif';
+    ctx.font = '700 30px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     ctx.fillText('KOSPI', pad, top - 42);
     ctx.fillStyle = '#F2F3F5';
-    ctx.font = '900 92px "Noto Sans KR",sans-serif';
+    ctx.font = '900 92px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     ctx.fillText(val.toLocaleString('ko-KR'), pad, top - 70);
 
     const rows = ['반도체 -3.4%', '외국인 -1.2조', '개인 +8,400억'];
-    ctx.font = '700 26px "Noto Sans KR",sans-serif';
+    ctx.font = '700 26px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     rows.forEach((r, i) => {
       const y = bot + 46 + i * 40;
       ctx.fillStyle = i === 2 ? '#D8FF3E' : 'rgba(255,255,255,.42)';
@@ -238,7 +238,7 @@
   };
 
   /* ── text helpers ───────────────────────────────────── */
-  function fontOf(size, weight, family) { return weight + ' ' + Math.round(size) + 'px ' + (family || '"Noto Sans KR",sans-serif'); }
+  function fontOf(size, weight, family) { return weight + ' ' + Math.round(size) + 'px ' + (family || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'); }
 
   function richWords(segs) {
     const out = [];
@@ -316,7 +316,7 @@
     const hk = p.hook || {};
     if (!hk.on || (!hk.line1 && !hk.line2)) return;
     const size = (hk.size || 54) * k;
-    const family = hk.font || '"Noto Sans KR",sans-serif';
+    const family = hk.font || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const maxW = W * 0.86;
     const lines = [];
     const l1 = layoutLines(ctx, U.rich(hk.line1, false), maxW, size, 900, family)[0];
@@ -396,7 +396,7 @@
   function drawSub(ctx, W, H, p, cue, t, k) {
     if (!p.sub || p.sub.on === false || !cue) return;
     const size = (p.sub.fontSize || 62) * k;
-    const family = p.sub.font || '"Noto Sans KR",sans-serif';
+    const family = p.sub.font || '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const weight = p.sub.weight || 900;
     const maxW = W * 0.84;
     let fs = size;
@@ -453,7 +453,7 @@
     if (into <= 0) return;
     const ease = 1 - Math.pow(1 - into, 3);
     const fs = 30 * k;
-    const family = '"Noto Sans KR",sans-serif';
+    const family = '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const maxW = W * 0.74;
     const lines = layoutLines(ctx, U.rich(cue.comment.text, false), maxW, fs, 700, family).slice(0, 3);
     const lh = fs * 1.35;
@@ -503,7 +503,7 @@
     if (!p.tag || !p.tag.on || !p.tag.text) return;
     const size = 30 * k;
     ctx.save();
-    ctx.font = fontOf(size, 800, '"Noto Sans KR",sans-serif');
+    ctx.font = fontOf(size, 800, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif');
     ctx.fillStyle = 'rgba(255,255,255,.5)';
     ctx.translate(W * 0.035, H * 0.30);
     ctx.rotate(-Math.PI / 2);
@@ -628,7 +628,7 @@
       ctx.beginPath(); ctx.moveTo(W * 0.84, H * 0.42); ctx.lineTo(W * 0.84, H); ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = 'rgba(216,255,62,.35)';
-      ctx.font = '700 24px "Noto Sans KR",sans-serif';
+      ctx.font = '700 24px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
       ctx.fillText('유튜브 UI 회피', W * 0.06, H * 0.115);
       ctx.restore();
     }
@@ -641,10 +641,10 @@
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     const title = (p.meta.titles[p.meta.selected] || p.meta.titles[0] || p.hook.line1 || p.name || '제목을 넣으세요').trim();
-    const lines = layoutLines(ctx, U.rich(title, false), W * 0.86, 96, 900, '"Noto Sans KR",sans-serif');
+    const lines = layoutLines(ctx, U.rich(title, false), W * 0.86, 96, 900, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif');
     let fs = 96;
     let ls = lines;
-    if (ls.length > 3) { fs = 80; ls = layoutLines(ctx, U.rich(title, false), W * 0.86, fs, 900, '"Noto Sans KR",sans-serif'); }
+    if (ls.length > 3) { fs = 80; ls = layoutLines(ctx, U.rich(title, false), W * 0.86, fs, 900, '"Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif'); }
     ls = ls.slice(0, 3);
 
     // background frame
@@ -665,7 +665,7 @@
 
     // badge
     const bt = badge || (p.tag && p.tag.text) || (RS.presetById(p.presetId).tag && RS.presetById(p.presetId).tag.text) || 'REEL STUDIO';
-    ctx.font = '900 40px "Noto Sans KR",sans-serif';
+    ctx.font = '900 40px "Apple SD Gothic Neo","Malgun Gothic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const bw = ctx.measureText(bt).width + 52;
     ctx.fillStyle = '#D8FF3E';
     roundRect(ctx, 64, 96, bw, 72, 10); ctx.fill();
@@ -675,7 +675,7 @@
     // hook line small accent
     if (p.hook.line1) {
       ctx.fillStyle = 'rgba(255,255,255,.62)';
-      ctx.font = '800 44px "Noto Sans KR",sans-serif';
+      ctx.font = '800 44px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
       ctx.fillText(U.strip(p.hook.line1).slice(0, 26), 64, 250);
     }
 
@@ -689,7 +689,7 @@
     ls.forEach((l, i) => {
       let x = 64;
       const y = startY + lh / 2 + i * lh;
-      ctx.font = '900 ' + fs + 'px "Noto Sans KR",sans-serif';
+      ctx.font = '900 ' + fs + 'px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
       const sp = ctx.measureText(' ').width;
       l.items.forEach((it, j) => {
         if (j > 0) x += sp;
@@ -704,14 +704,14 @@
     ctx.fillRect(64, startY + blockH + 26, 140, 12);
 
     // bottom channel
-    ctx.font = '800 38px "Noto Sans KR",sans-serif';
+    ctx.font = '800 38px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,.72)';
     ctx.textBaseline = 'alphabetic';
     const ch = (p.tag && p.tag.text) || '@reelstudio';
     ctx.fillText(ch, 64, H - 96);
     ctx.textAlign = 'right';
     ctx.fillStyle = 'rgba(255,255,255,.42)';
-    ctx.font = '700 32px "Noto Sans KR",sans-serif';
+    ctx.font = '700 32px "Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     ctx.fillText('SHORTS', W - 64, H - 96);
     ctx.textAlign = 'left';
   };

@@ -828,11 +828,6 @@
     await new Promise(r => setTimeout(r, 120));
     if (document.fonts) {
       try {
-        await Promise.all([
-          document.fonts.load('900 62px "Noto Sans KR"'),
-          document.fonts.load('700 30px "Noto Sans KR"'),
-          document.fonts.load('900 54px "Black Han Sans"')
-        ]);
         await document.fonts.ready;
       } catch (e) {}
     }
@@ -926,11 +921,6 @@
     const c = el('thumbCanvas');
     try {
       if (document.fonts && document.fonts.load) {
-        await Promise.all([
-          document.fonts.load('900 96px "Noto Sans KR"'),
-          document.fonts.load('700 40px "Noto Sans KR"'),
-          document.fonts.load('900 40px "Black Han Sans"')
-        ]);
         await document.fonts.ready;
       }
     } catch (e) {}
