@@ -1389,9 +1389,9 @@
   /* ── discover ───────────────────────────────────────── */
   function bindDiscover() {}
   const DISCOVER_PRESETS = {
-    kr: { q: '코스피 폭락', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
-    us: { q: 'viral shorts', region: 'US', dur: 'short', min: '100000', sort: 'breakout' },
-    jp: { q: '日本のニュース', region: 'JP', dur: 'short', min: '100000', sort: 'breakout' },
+    kr: { q: '뉴스', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
+    us: { q: 'viral', region: 'US', dur: 'short', min: '100000', sort: 'breakout' },
+    jp: { q: 'ニュース', region: 'JP', dur: 'short', min: '100000', sort: 'breakout' },
     animal: { q: '동물 구조', region: '', dur: 'short', min: '100000', sort: 'breakout' },
     ai: { q: 'AI 기술', region: '', dur: 'short', min: '100000', sort: 'breakout' }
   };
