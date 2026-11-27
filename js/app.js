@@ -1152,32 +1152,32 @@
     p.cues.forEach(c => { if (hasEumSum(c.text)) { c.text = eumConvert(c.text); eum++; } });
     if (eum) notes.push('음슴체 ' + eum + '곳');
 
-    /* 긴 자막 2개로 분리 */
+    /* 긴 자막을 2줄 이하가 될 때까지 분리 */
     let split = 0;
     for (let i = 0; i < p.cues.length; i++) {
-      const c = p.cues[i];
-      const g = subGeom(p, c, 1080, 1920);
-      if (g.lines <= 2) continue;
-      const dur = c.end - c.start;
-      if (dur < 1.2) continue;
-      const words = String(c.text).trim().split(/\s+/);
-      if (words.length < 2) continue;
-      const totalLen = U.strip(c.text).length || 1;
-      let best = 1, bestDiff = 1e9, accLen = 0;
-      for (let k = 1; k < words.length; k++) {
-        accLen += U.strip(words[k - 1]).length;
-        const d = Math.abs(accLen - totalLen / 2);
-        if (d < bestDiff) { bestDiff = d; best = k; }
+      let guard = 0;
+      while (guard++ < 4) {
+        const c = p.cues[i];
+        const g = subGeom(p, c, 1080, 1920);
+        if (g.lines <= 2) break;
+        const dur = c.end - c.start;
+        if (dur < 0.9) break;
+        const words = String(c.text).trim().split(/\s+/);
+        if (words.length < 2) break;
+        const totalLen = U.strip(c.text).length || 1;
+        const fam = p.sub.font || SUB_FAMILY, weight = p.sub.weight || 900;
+        let k = Math.max(1, Math.min(words.length - 1, Math.round(words.length / 2)));
+        while (k > 1 && wrapLineCount(words.slice(0, k).join(' '), g.fs, weight, fam, 1080 * 0.84) > 2) k--;
+        const a = words.slice(0, k).join(' '), b = words.slice(k).join(' ');
+        if (!a || !b) break;
+        const ratio = Math.max(0.25, Math.min(0.75, U.strip(a).length / totalLen));
+        const mid = +(c.start + Math.max(0.5, Math.min(dur - 0.5, dur * ratio))).toFixed(1);
+        const c2 = { id: U.uid(), text: b, start: mid, end: Math.max(mid + 0.4, +c.end.toFixed(1)), sfx: '', comment: { on: false, text: '', name: '시청자' } };
+        c.text = a;
+        c.end = mid;
+        p.cues.splice(i + 1, 0, c2);
+        split++;
       }
-      const a = words.slice(0, best).join(' '), b = words.slice(best).join(' ');
-      if (!a || !b) continue;
-      const ratio = Math.max(0.3, Math.min(0.7, U.strip(a).length / totalLen));
-      const mid = +(c.start + Math.max(0.6, Math.min(dur - 0.6, dur * ratio))).toFixed(1);
-      const c2 = { id: U.uid(), text: b, start: mid, end: Math.max(mid + 0.5, +c.end.toFixed(1)), sfx: '', comment: { on: false, text: '', name: '시청자' } };
-      c.text = a;
-      c.end = mid;
-      p.cues.splice(i + 1, 0, c2);
-      i++; split++;
     }
     if (split) notes.push('긴 자막 ' + split + '개 분리');
 

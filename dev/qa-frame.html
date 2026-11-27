@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REEL STUDIO — QA 프레임</title>
+<style>
+  html,body{margin:0;padding:0;background:#E9EDF2;overflow:hidden}
+  iframe{border:0;display:block;background:#fff}
+</style>
+</head>
+<body>
+<iframe id="fr" title="reel studio qa"></iframe>
+<script>
+  const q = new URLSearchParams(location.search);
+  const w = +(q.get('w') || 1280), h = +(q.get('h') || 800);
+  const fr = document.getElementById('fr');
+  fr.style.width = w + 'px';
+  fr.style.height = h + 'px';
+  fr.src = '../index.html?' + (q.get('v') || Date.now());
+</script>
+</body>
+</html>

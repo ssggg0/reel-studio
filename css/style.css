@@ -274,7 +274,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   flex:0 0 auto;font-size:10px;font-weight:900;letter-spacing:.14em;color:#fff;
   background:var(--accent);border-radius:8px;padding:6px 9px;
 }
-.db-body{flex:1;min-width:220px}
+.db-body{flex:1 1 320px;min-width:220px}
 .db-body b{display:block;font-size:14.5px;letter-spacing:-.02em;color:var(--tx)}
 .db-body p{margin:3px 0 0;font-size:12px;color:var(--mut);line-height:1.55}
 .db-acts{display:flex;gap:8px;flex-wrap:wrap}
@@ -343,7 +343,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 }
 .style-card:hover{border-color:var(--accent-line);transform:translateY(-2px)}
 .style-card.on{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,70,229,.12)}
-.sc-preview{position:relative;display:block;aspect-ratio:9/13;overflow:hidden}
+.sc-preview{position:relative;display:block;aspect-ratio:9/12;overflow:hidden}
 .sc-hook{
   position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8% 6%;
@@ -480,7 +480,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   display:flex;justify-content:center;margin:0 auto 12px;width:fit-content;max-width:100%;
   padding:10px;box-shadow:var(--sh);
 }
-.stage-box .stage{max-height:min(60dvh,620px);width:auto;max-width:100%;border-radius:12px}
+.stage-box .stage{max-height:min(52dvh,600px);width:auto;max-width:100%;border-radius:12px}
 .stage-badge{
   position:absolute;left:22px;bottom:22px;font-size:10px;font-weight:800;letter-spacing:.03em;
   background:rgba(15,23,42,.68);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16);
@@ -639,7 +639,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .tool-btn{flex-direction:row;align-items:center;gap:9px;padding:12px 14px}
   .tool-btn b{font-size:19px}
   .tool-btn i{margin-left:auto;text-align:right}
-  .stage-box .stage{max-height:54dvh}
+  .stage-box .stage{max-height:48dvh}
   .tabbar{
     grid-area:tab;display:flex;align-items:stretch;gap:2px;
     border-top:1px solid var(--line);background:rgba(255,255,255,.96);
@@ -677,7 +677,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .field-row > .btn{height:40px;padding:9px 12px}
   .seg-btn{font-size:12px;padding:8px 6px}
   .style-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .sc-preview{aspect-ratio:1/1.35}
+  .sc-preview{aspect-ratio:1/1.3}
 }
 
 /* ── print / misc ───────────────────────────────────── */
