@@ -281,7 +281,16 @@
     { id: 'd9', title: '【衝撃】日本のコンビニが消える日', channel: 'ニュース深掘り', views: 1700000, subs: 96000, len: 36, days: 1, region: 'JP', kw: 'コンビニ' },
     { id: 'd10', title: '홈플러스 배송 중단, 매장은 어떻게 되나', channel: '유통워치', views: 430000, subs: 15000, len: 27, days: 3, region: 'KR', kw: '홈플러스' },
     { id: 'd11', title: '전세사기 당하기 전에 꼭 확인해야 할 3가지', channel: '집주인노트', views: 2900000, subs: 99000, len: 51, days: 8, region: 'KR', kw: '전세사기' },
-    { id: 'd12', title: '이 영상 하나로 AI 편집 끝내기 (무료)', channel: '편집하는사람', views: 3500000, subs: 540000, len: 62, days: 4, region: 'KR', kw: 'AI 편집' }
+    { id: 'd12', title: '이 영상 하나로 AI 편집 끝내기 (무료)', channel: '편집하는사람', views: 3500000, subs: 540000, len: 62, days: 4, region: 'KR', kw: 'AI 편집' },
+    { id: 'd13', title: '물에 빠진 아기 코끼리, 떠났던 무리가 돌아와 한 행동', channel: '야생의순간', views: 4200000, subs: 180000, len: 47, days: 2, region: 'KR', kw: '동물 구조' },
+    { id: 'd14', title: '집사가 모른 척하자 냥이가 꺼낸 마지막 수', channel: '고양이집사', views: 2900000, subs: 94000, len: 26, days: 1, region: 'KR', kw: '동물 구조' },
+    { id: 'd15', title: '경비견이 주인 대신 택한 선택, 3초 만에 벌어진 일', channel: '멍멍일기', views: 1500000, subs: 41000, len: 33, days: 4, region: 'KR', kw: '동물 구조' },
+    { id: 'd16', title: 'Gemini 3가 바꿔버린 검색의 미래', channel: 'AI읽어주는사람', views: 2100000, subs: 150000, len: 55, days: 2, region: 'KR', kw: 'AI 기술' },
+    { id: 'd17', title: '아이폰 18 루머 총정리, 진짜 바뀌는 건 딱 두 가지', channel: '테크브리핑', views: 1800000, subs: 220000, len: 42, days: 3, region: 'KR', kw: 'AI 기술' },
+    { id: 'd18', title: 'AI로 하루 만에 쇼츠 10편 만드는 법', channel: '자동화연구소', views: 980000, subs: 31000, len: 58, days: 5, region: 'KR', kw: 'AI 기술' },
+    { id: 'd19', title: 'A puppy who waited by the door for 3 days', channel: 'DailyPaws', views: 7400000, subs: 1200000, len: 38, days: 2, region: 'US', kw: 'animal rescue' },
+    { id: 'd20', title: 'AI agents just replaced this entire job', channel: 'TechDecoded', views: 5200000, subs: 2100000, len: 54, days: 1, region: 'US', kw: 'AI tech' },
+    { id: 'd21', title: '日本で話題の新型新幹線、乗る前に知るべきこと', channel: 'ニュース深掘り', views: 1300000, subs: 96000, len: 41, days: 3, region: 'JP', kw: 'コンビニ' }
   ].map(d => Object.assign({}, d, { total: d.views, ratio: +(d.views / Math.max(1, d.subs)).toFixed(1), demo: true }));
 
   /* ── storage ─────────────────────────────────────────── */

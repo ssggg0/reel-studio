@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07080B">
+<meta name="theme-color" content="#FFFFFF">
 <title>릴 스튜디오 — 성현님 전용 쇼츠 스튜디오</title>
 <meta name="description" content="소재 발굴부터 AI 대본, BGM, 미리보기, 영상 내보내기, 유튜브 업로드까지 한 화면에서. 성현님 전용 쇼츠 스튜디오.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D8FF3E'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%230B0D12'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%234F46E5'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%23FFFFFF'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261127j">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20261127k">
 </head>
 <body>
 <div id="app">
@@ -34,14 +34,36 @@
     </div>
   </header>
 
-  <!-- ── 데스크톱 좌측 레일 ──────────────────────────────── -->
-  <nav class="rail" aria-label="작업 단계">
-    <button class="rail-item is-active" data-tab="discover"><span class="ri-ico">◎</span><span class="ri-txt">발굴</span></button>
-    <button class="rail-item" data-tab="script"><span class="ri-ico">✎</span><span class="ri-txt">대본</span></button>
-    <button class="rail-item" data-tab="music"><span class="ri-ico">♪</span><span class="ri-txt">음원</span></button>
-    <button class="rail-item" data-tab="preview"><span class="ri-ico">▶</span><span class="ri-txt">미리보기</span></button>
-    <button class="rail-item" data-tab="upload"><span class="ri-ico">↑</span><span class="ri-txt">업로드</span></button>
-    <button class="rail-item rail-settings" data-go="settings"><span class="ri-ico">⚙︎</span><span class="ri-txt">설정</span></button>
+  <!-- ── 데스크톱 좌측 스텝퍼 ────────────────────────────── -->
+  <nav class="rail" aria-label="제작 단계">
+    <div class="rail-head">제작 단계</div>
+    <button class="rail-item is-active" data-tab="discover">
+      <span class="ri-no">1</span>
+      <span class="ri-body"><span class="ri-txt">소재 발굴</span><span class="ri-sub">뜬 영상 찾기</span></span>
+    </button>
+    <button class="rail-item" data-tab="script">
+      <span class="ri-no">2</span>
+      <span class="ri-body"><span class="ri-txt">원본 · 대본</span><span class="ri-sub">훅·자막·스타일</span></span>
+    </button>
+    <button class="rail-item" data-tab="music">
+      <span class="ri-no">3</span>
+      <span class="ri-body"><span class="ri-txt">음원 · 보이스</span><span class="ri-sub">BGM·TTS 한 번에</span></span>
+    </button>
+    <button class="rail-item" data-tab="preview">
+      <span class="ri-no">4</span>
+      <span class="ri-body"><span class="ri-txt">미리보기 · 내보내기</span><span class="ri-sub">렌더·0오류 점검</span></span>
+    </button>
+    <button class="rail-item" data-tab="upload">
+      <span class="ri-no">5</span>
+      <span class="ri-body"><span class="ri-txt">유튜브 업로드</span><span class="ri-sub">비공개로 먼저</span></span>
+    </button>
+    <div class="rail-foot">
+      <button class="rail-item rail-settings" data-go="settings">
+        <span class="ri-no">⚙</span>
+        <span class="ri-body"><span class="ri-txt">설정</span><span class="ri-sub">API 키·프리셋</span></span>
+      </button>
+      <div class="rail-tip">API 키가 없어도 <b>모든 단계가 데모로</b> 그대로 동작합니다.</div>
+    </div>
   </nav>
 
   <!-- ── 본문 ───────────────────────────────────────────── -->
@@ -51,16 +73,41 @@
     <section class="panel" id="tab-discover" data-panel="discover">
       <div class="panel-head">
         <div>
+          <span class="eyebrow">STEP 1 / 5</span>
           <h1>소재 발굴</h1>
-          <p>유튜브 알고리즘을 훑어 <b>구독자 대비 터진 영상</b>만 골라 옵니다. 키가 없으면 내장 샘플 데이터로 바로 시작합니다.</p>
+          <p>유튜브에서 <b>구독자보다 훨씬 터진 영상</b>만 골라 옵니다. 프리셋 하나만 누르면 카드까지 바로 나옵니다.</p>
         </div>
         <button class="btn ghost sm" id="dRefresh" title="필터로 다시 분석">다시 분석</button>
       </div>
 
+      <div class="demo-banner" id="demoBanner">
+        <span class="db-badge">DEMO</span>
+        <div class="db-body">
+          <b>API 키 없이도 지금 바로 체험할 수 있어요</b>
+          <p>샘플 떡상 데이터·데모 대본·무저작권 BGM·실제 영상 렌더까지 이 화면에서 그대로 동작합니다. 실제 유튜브 데이터가 필요할 때만 키를 넣으세요.</p>
+        </div>
+        <div class="db-acts">
+          <button class="btn primary sm" data-tab="script">데모로 시작</button>
+          <button class="btn ghost sm" data-go="settings">API 키 넣기</button>
+        </div>
+      </div>
+
       <div class="card">
-        <div class="field-row">
+        <div class="card-head">
+          <h2>오늘 뭐가 떴나</h2>
+          <span class="tag">한 번 누르면 바로 분석</span>
+        </div>
+        <div class="preset-row" id="dPresets">
+          <button class="preset-chip" data-preset="kr"><b>🔥</b>한국 떡상</button>
+          <button class="preset-chip" data-preset="us"><b>🇺🇸</b>미국 바이럴</button>
+          <button class="preset-chip" data-preset="jp"><b>🇯🇵</b>일본 떡상</button>
+          <button class="preset-chip" data-preset="animal"><b>🐾</b>동물·힐링</button>
+          <button class="preset-chip" data-preset="ai"><b>🤖</b>AI·테크</button>
+        </div>
+        <div class="divline"></div>
+        <div class="field-row" style="margin-bottom:0">
           <label class="field grow">
-            <span class="lab">키워드 · 주제</span>
+            <span class="lab">직접 검색</span>
             <input id="dKeyword" list="kwList" placeholder="예: 코스피 폭락, 수능 AI, 홈플러스" value="코스피 폭락">
             <datalist id="kwList">
               <option value="코스피 폭락"><option value="수능 AI 커닝"><option value="로또 1등">
@@ -78,25 +125,28 @@
           <button class="chip" data-kw="홈플러스 배송">홈플러스</button>
           <button class="chip" data-kw="전세사기">전세사기</button>
         </div>
-        <div class="filter-grid">
-          <label class="field"><span class="lab">지역</span>
-            <select id="dRegion"><option value="">전체</option><option value="KR">한국</option><option value="US">미국</option><option value="JP">일본</option><option value="GB">영국</option></select>
-          </label>
-          <label class="field"><span class="lab">길이</span>
-            <select id="dDur"><option value="short">쇼츠 (≤60초)</option><option value="">전체</option><option value="long">롱폼 (60초+)</option></select>
-          </label>
-          <label class="field"><span class="lab">최소 조회수</span>
-            <select id="dMin"><option value="10000">1만+</option><option value="100000" selected>10만+</option><option value="1000000">100만+</option></select>
-          </label>
-          <label class="field"><span class="lab">정렬</span>
-            <select id="dSort"><option value="breakout">떡상률순</option><option value="views">조회수순</option><option value="date">최신순</option></select>
-          </label>
-        </div>
+        <details class="filters">
+          <summary>세부 필터 <span id="filterNow">한국 · 쇼츠 · 10만+ · 떡상률순</span></summary>
+          <div class="filter-grid">
+            <label class="field"><span class="lab">지역</span>
+              <select id="dRegion"><option value="">전체</option><option value="KR">한국</option><option value="US">미국</option><option value="JP">일본</option><option value="GB">영국</option></select>
+            </label>
+            <label class="field"><span class="lab">길이</span>
+              <select id="dDur"><option value="short">쇼츠 (≤60초)</option><option value="">전체</option><option value="long">롱폼 (60초+)</option></select>
+            </label>
+            <label class="field"><span class="lab">최소 조회수</span>
+              <select id="dMin"><option value="10000">1만+</option><option value="100000" selected>10만+</option><option value="1000000">100만+</option></select>
+            </label>
+            <label class="field"><span class="lab">정렬</span>
+              <select id="dSort"><option value="breakout">떡상률순</option><option value="views">조회수순</option><option value="date">최신순</option></select>
+            </label>
+          </div>
+        </details>
       </div>
 
       <div class="result-head">
-        <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터 · 12건</span>
-        <span class="hint" id="discoverHint">카드를 누르면 대본 탭으로 가져옵니다</span>
+        <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터</span>
+        <span class="hint" id="discoverHint">카드를 누르면 훅·대본·댓글까지 자동으로 세팅됩니다</span>
       </div>
       <div class="result-grid" id="discoverResults"></div>
 
@@ -109,10 +159,20 @@
     <section class="panel" id="tab-script" data-panel="script" hidden>
       <div class="panel-head">
         <div>
+          <span class="eyebrow">STEP 2 / 5</span>
           <h1>원본 · AI 대본</h1>
-          <p>영상을 얹거나 샘플 소스를 고르고, 대본·자막 큐를 직접 고칩니다. 수정은 미리보기에 즉시 반영됩니다.</p>
+          <p>스타일 카드 하나 고르고, 원본을 얹은 뒤 대본만 손보면 끝납니다. 수정은 미리보기에 즉시 반영됩니다.</p>
         </div>
         <button class="btn ghost sm" id="sNewProject">새 프로젝트</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>편집 스타일</h2>
+          <span class="tag">누르면 한 번에 전환</span>
+        </div>
+        <div class="style-grid" id="styleGrid"></div>
+        <p class="hint">카드를 누르면 상단 띠·자막 위치·강조색·색감·말속도·댓글 카드가 한 번에 바뀝니다.</p>
       </div>
 
       <details class="card" id="secSource" open>
@@ -213,6 +273,19 @@
         </div>
       </details>
 
+      <div class="card">
+        <div class="card-head">
+          <h2>원클릭 대본 도구</h2>
+          <span class="tag">전체 큐에 한 번에</span>
+        </div>
+        <div class="tool-row">
+          <button class="tool-btn" id="toneFix"><b>✨</b><span>음슴체 제거</span><i>~함·~임 → 구어체</i></button>
+          <button class="tool-btn" id="emphFix"><b>🎯</b><span>숫자·핵심어 강조</span><i>#강조 를 자동으로</i></button>
+          <button class="tool-btn" id="tempoFix"><b>⏱️</b><span>25초 템포 맞춤</span><i>전체 길이를 25초로</i></button>
+        </div>
+        <p class="hint">누르는 즉시 모든 큐에 적용되고, 아래 타임라인에서 결과를 바로 고칠 수 있습니다.</p>
+      </div>
+
       <details class="card" id="secCues" open>
         <summary><span class="sec-t">큐 타임라인</span><span class="sec-v" id="cueSummary">9큐 · 27.4초</span></summary>
         <div class="sec-body">
@@ -222,7 +295,7 @@
             <button class="btn ghost sm" id="cueSrt">SRT 복사</button>
             <button class="btn ghost sm" id="cueCommentAll">댓글 전체 켜기</button>
           </div>
-          <p class="hint">본문에서 <code>#단어</code>는 강조색, <code>*단어*</code>는 강조+밑줄로 나옵니다.</p>
+          <p class="hint">문장을 눌러 바로 고치세요. 본문에서 <code>#단어</code>는 강조색, <code>*단어*</code>는 강조+밑줄로 나옵니다.</p>
           <div id="cueList" class="cue-list"></div>
         </div>
       </details>
@@ -247,8 +320,9 @@
     <section class="panel" id="tab-music" data-panel="music" hidden>
       <div class="panel-head">
         <div>
+          <span class="eyebrow">STEP 3 / 5</span>
           <h1>음원 · 보이스</h1>
-          <p>직접 합성한 무저작권 BGM 5종. 누르면 바로 들리고, 다시 누르면 영상에 박힙니다.</p>
+          <p>무저작권 BGM 5종. 카드를 누르면 바로 들리면서 동시에 영상에 박힙니다.</p>
         </div>
         <button class="btn ghost sm" id="mStopAll">소리 끄기</button>
       </div>
@@ -262,7 +336,11 @@
           <label class="field slider"><span class="lab">보이스 덕킹 <b id="bgmDuckVal">55%</b></span>
             <input type="range" id="bgmDuck" min="0" max="100" value="55"></label>
         </div>
-        <p class="hint">덕킹은 말소리 구간에서 BGM을 자동으로 낮추는 정도입니다. 0%면 그대로 깔립니다.</p>
+        <div class="toolbar">
+          <button class="btn primary sm" id="voiceClarity">🎙️ 목소리 또렷 (자동 덕킹)</button>
+          <span class="hint">BGM 20% · 말할 때 85% 낮춤 · 원본 50%</span>
+        </div>
+        <p class="hint">카드를 누르면 <b>바로 들리면서 동시에 영상에 적용</b>됩니다. 우상단 ▶는 미리듣기만.</p>
       </div>
 
       <div class="card">
@@ -307,8 +385,9 @@
     <section class="panel" id="tab-preview" data-panel="preview" hidden>
       <div class="panel-head">
         <div>
+          <span class="eyebrow">STEP 4 / 5</span>
           <h1>미리보기 · 내보내기</h1>
-          <p>지금 보이는 그대로 영상이 됩니다. 재생·스크럽하며 확인하고 바로 렌더하세요.</p>
+          <p>지금 보이는 그대로 영상이 됩니다. 점검으로 오류를 지우고 바로 렌더하세요.</p>
         </div>
         <span class="tag" id="pRatioTag">9:16</span>
       </div>
@@ -327,6 +406,20 @@
       </div>
       <div class="scrub" id="pScrub">
         <div class="scrub-track"><div class="scrub-fill" id="pFill"></div><div class="scrub-cues" id="pCues"></div><div class="scrub-head" id="pHead"></div></div>
+      </div>
+
+      <div class="card audit-card" id="auditCard">
+        <div class="card-head">
+          <h2>🔍 0오류 자동 점검</h2>
+          <span class="tag" id="auditBadge">아직 안 함</span>
+          <button class="btn primary sm" id="auditRun">지금 점검</button>
+        </div>
+        <p class="hint">전체 큐를 스캔합니다 — ① 하단 유튜브 UI 침범(y 1420+) ② 자막 잘림 ③ 훅 2줄 초과 ④ 음슴체 ⑤ 큐 시간 겹침·공백</p>
+        <div class="audit-list" id="auditList" hidden></div>
+        <div class="audit-actions" id="auditActions" hidden>
+          <button class="btn primary" id="auditFix">🛠 원클릭 자동 수정</button>
+          <span class="hint" id="auditSummary"></span>
+        </div>
       </div>
 
       <div class="card">
@@ -379,8 +472,9 @@
     <section class="panel" id="tab-upload" data-panel="upload" hidden>
       <div class="panel-head">
         <div>
+          <span class="eyebrow">STEP 5 / 5</span>
           <h1>유튜브 업로드</h1>
-          <p>렌더한 영상을 바로 비공개로 올리고, 확인한 뒤 공개로 바꾸는 흐름을 권합니다.</p>
+          <p>렌더한 영상을 바로 비공개로 올리고, 확인한 뒤 공개로 바꾸는 흐름이 안전합니다.</p>
         </div>
         <span class="tag" id="uAuthTag">미연결</span>
       </div>
@@ -450,12 +544,12 @@
   </aside>
 
   <!-- ── 모바일 하단 탭 ─────────────────────────────────── -->
-  <nav class="tabbar" id="tabbar" aria-label="작업 단계">
-    <button class="tb-item is-active" data-tab="discover"><span>◎</span><i>발굴</i></button>
-    <button class="tb-item" data-tab="script"><span>✎</span><i>대본</i></button>
-    <button class="tb-item" data-tab="music"><span>♪</span><i>음원</i></button>
-    <button class="tb-item" data-tab="preview"><span>▶</span><i>미리보기</i></button>
-    <button class="tb-item" data-tab="upload"><span>↑</span><i>업로드</i></button>
+  <nav class="tabbar" id="tabbar" aria-label="제작 단계">
+    <button class="tb-item is-active" data-tab="discover"><span class="tb-n">1</span><i>발굴</i></button>
+    <button class="tb-item" data-tab="script"><span class="tb-n">2</span><i>대본</i></button>
+    <button class="tb-item" data-tab="music"><span class="tb-n">3</span><i>음원</i></button>
+    <button class="tb-item" data-tab="preview"><span class="tb-n">4</span><i>미리보기</i></button>
+    <button class="tb-item" data-tab="upload"><span class="tb-n">5</span><i>업로드</i></button>
   </nav>
 
   <!-- ── 설정 모달 ──────────────────────────────────────── -->
@@ -595,12 +689,12 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/core.js?v=20261127j"></script>
-<script src="js/audio.js?v=20261127j"></script>
-<script src="js/render.js?v=20261127j"></script>
-<script src="js/ai.js?v=20261127j"></script>
-<script src="js/tube.js?v=20261127j"></script>
-<script src="js/app.js?v=20261127j"></script>
+<script src="js/core.js?v=20261127k"></script>
+<script src="js/audio.js?v=20261127k"></script>
+<script src="js/render.js?v=20261127k"></script>
+<script src="js/ai.js?v=20261127k"></script>
+<script src="js/tube.js?v=20261127k"></script>
+<script src="js/app.js?v=20261127k"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

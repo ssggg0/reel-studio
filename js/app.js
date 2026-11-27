@@ -30,6 +30,7 @@
     bindTop();
     bindSource();
     bindScript();
+    bindQuickTools();
     bindMusic();
     bindTransport();
     bindPreview();
@@ -366,6 +367,159 @@
     touch();
   }
 
+  /* ── one-click: style preset cards ──────────────────── */
+  function renderStyleCards() {
+    const box = el('styleGrid'); if (!box) return;
+    const builtin = S.presets.filter(p => p.builtin);
+    const vbg = 'background:linear-gradient(158deg,#33405A 0%,#1B2233 45%,#0B0D12 100%)';
+    box.innerHTML = builtin.map(pr => {
+      const on = S.project.presetId === pr.id;
+      const hk = pr.hook, sub = pr.sub, card = pr.card;
+      let hookCss = 'color:' + hk.color;
+      if (hk.style === 'band') hookCss += ';background:' + hk.bg;
+      else if (hk.style === 'card') hookCss += ';background:' + hk.bg + ';border-radius:5px;margin:9% 7% 0;width:86%';
+      else hookCss += ';text-shadow:0 1px 5px rgba(0,0,0,.75);margin-top:9%';
+      const subCss = 'background:' + (sub.box ? sub.boxColor : 'transparent') + ';color:#fff;' +
+        (sub.box ? '' : 'text-shadow:0 1px 5px rgba(0,0,0,.85)');
+      const cardCss = 'background:' + card.bg + ';border-radius:' + (card.style === 'bubble' ? 6 : 1) + 'px';
+      const name = pr.name.replace(/\s*스타일$/, '');
+      const short = pr.desc.split('·')[0].trim();
+      return `<button class="style-card${on ? ' on' : ''}" data-preset-id="${pr.id}">
+        <span class="sc-preview" style="${vbg}">
+          <span class="sc-hook" style="${hookCss}">훅 제목 1줄<br>두 번째 줄</span>
+          <span class="sc-cc" style="${cardCss}"><i></i><span>이거 실화냐</span></span>
+          <span class="sc-sub" style="${subCss}">자막 <em style="font-style:normal;color:${sub.accent}">강조</em> 예시</span>
+        </span>
+        <span class="sc-body"><b>${U.esc(name)}</b><i>${U.esc(short)}</i></span>
+      </button>`;
+    }).join('');
+  }
+
+  /* ── one-click: script tools ────────────────────────── */
+  const EUM_SPECIAL = [['어려움','어렵습니다'],['쉬움','쉽습니다'],['나쁨','나쁩니다'],['다름','다릅니다'],['느림','느립니다'],['빠름','빠릅니다'],['아님','아닙니다'],['모름','모릅니다']];
+  const EUM_RE = /(했음|됐음|없음|있음|많음|적음|같음|모름|아님|생김|사라짐|바뀜|늘어남|줄어듦|커짐|작아짐|빠짐|넘침|막힘|열림|닫힘|걸림|풀림|보임|들림|남음|쌓임|터짐|끝남|시작됨|계속됨|유지됨|확인됨|발표됨|공개됨|결정됨|취소됨|증가함|감소함|상승함|하락함|폭등함|폭락함|마감됨|종료됨|바꿈|늘림|줄임|높음|낮음|좋음|나쁨|어려움|쉬움|느림|빠름|다름|작음|아님)$/;
+  function lastToken(text) {
+    const t = U.strip(text).trim().replace(/[.!?~…"'”’]+$/, '');
+    if (!t) return '';
+    return t.split(/\s+/).pop();
+  }
+  function hasEumSum(text) { return EUM_RE.test(lastToken(text)); }
+  function eumConvert(text) {
+    const src = String(text);
+    const m = /([가-힣]+)(\s*[.!?~…"'”’]*)$/.exec(src);
+    if (!m) return src;
+    const word = m[1], tail = m[2];
+    if (!EUM_RE.test(word)) return src;
+    let rep = null;
+    for (const [a, b] of EUM_SPECIAL) if (word.endsWith(a)) { rep = word.slice(0, -a.length) + b; break; }
+    if (!rep) {
+      if (/함$/.test(word)) rep = word.replace(/함$/, '합니다');
+      else if (/됨$/.test(word)) rep = word.replace(/됨$/, '됩니다');
+      else if (/임$/.test(word)) rep = word.replace(/임$/, '입니다');
+      else if (/짐$/.test(word)) rep = word.replace(/짐$/, '집니다');
+      else if (/김$/.test(word)) rep = word.replace(/김$/, '깁니다');
+      else if (/뀜$/.test(word)) rep = word.replace(/뀜$/, '뀝니다');
+      else if (/침$/.test(word)) rep = word.replace(/침$/, '칩니다');
+      else if (/힘$/.test(word)) rep = word.replace(/힘$/, '힙니다');
+      else if (/림$/.test(word)) rep = word.replace(/림$/, '립니다');
+      else if (/남$/.test(word)) rep = word.replace(/남$/, '납니다');
+      else if (/음$/.test(word)) rep = word.replace(/음$/, '습니다');
+    }
+    if (!rep) return src;
+    return src.slice(0, src.length - (word + tail).length) + rep + tail;
+  }
+
+  const KEY_TERMS = ['코스피','코스닥','반도체','외국인','개미','엔비디아','젠슨황','FOMC','금리','환율','전세사기','국민연금','로또','삼성전자','수능','홈플러스','엔비디아','AI','Gemini','아이폰','유튜브','쇼츠','구독자','조회수','폭등','폭락','급등','급락','순매도','순매수'];
+  function emphasizeText(text) {
+    const p = S.project;
+    const topicKeys = String(p.topic || '').split(/[\s,·.!?~]+/).filter(w => w.length >= 2).slice(0, 8);
+    const keys = KEY_TERMS.concat(topicKeys);
+    let count = 0;
+    const out = String(text).split(/(\s+)/).map(tok => {
+      if (!tok || /^\s+$/.test(tok)) return tok;
+      if (count >= 3) return tok;
+      if (/^[#*]/.test(tok) || /[#*]/.test(tok)) return tok;
+      const core = tok.replace(/[,.!?~…"'”’]+$/, '');
+      const tail = tok.slice(core.length);
+      if (!core) return tok;
+      if (/^\d[\d,.]*(%|조|억|만|천|배|원|초|명|개|분|시간|포인트)?$/.test(core)) { count++; return '#' + core + tail; }
+      if (keys.some(k => k === core || (core.length > 1 && core === k + '는') )) { count++; return '#' + core + tail; }
+      if (/^\d[\d,.]*(%|조|억|만|천|배|원|초|명|개|분|시간)/.test(core)) { count++; return '#' + core + tail; }
+      if (keys.includes(core)) { count++; return '#' + core + tail; }
+      return tok;
+    }).join('');
+    return { text: out, added: count };
+  }
+
+  function bindQuickTools() {
+    el('styleGrid').addEventListener('click', e => {
+      const b = e.target.closest('.style-card'); if (!b) return;
+      const pr = S.presets.find(x => x.id === b.dataset.presetId);
+      if (!pr) return;
+      applyPreset(pr);
+      RS.toast(pr.name + ' 적용 — 띠·자막·강조색·배속·댓글 카드까지 한 번에 바뀌었습니다', 'ok');
+    });
+    el('toneFix').addEventListener('click', () => {
+      const p = S.project; let n = 0;
+      p.cues.forEach(c => { if (hasEumSum(c.text)) { c.text = eumConvert(c.text); n++; } });
+      renderCues(); touch(); drawStatic();
+      RS.toast(n ? '음슴체 ' + n + '곳을 구어체로 바꿨습니다' : '음슴체가 없습니다 — 이미 구어체입니다', n ? 'ok' : '');
+    });
+    el('emphFix').addEventListener('click', () => {
+      const p = S.project; let n = 0, marks = 0;
+      p.cues.forEach(c => {
+        const r = emphasizeText(c.text);
+        if (r.added) { c.text = r.text; n++; marks += r.added; }
+      });
+      renderCues(); touch(); drawStatic();
+      RS.toast(n ? n + '개 큐에 강조 ' + marks + '곳을 넣었습니다 (#단어 는 강조색)' : '이미 강조가 충분합니다', n ? 'ok' : '');
+    });
+    el('tempoFix').addEventListener('click', () => {
+      const p = S.project;
+      if (!p.cues.length) { RS.toast('큐가 없습니다', 'err'); return; }
+      const total = U.totalDur(p);
+      if (!total) { RS.toast('큐 시간이 비어 있습니다', 'err'); return; }
+      const k = 25 / total;
+      let acc = 0;
+      p.cues.sort((a, b) => a.start - b.start).forEach(c => {
+        const d = Math.max(0.4, (c.end - c.start) * k);
+        c.start = +acc.toFixed(1); acc += d; c.end = +acc.toFixed(1);
+      });
+      p.cues[p.cues.length - 1].end = 25.0;
+      seekTo(0); renderCues(); touch(); drawStatic();
+      RS.toast('전체 ' + total.toFixed(1) + '초 → 25.0초로 템포를 맞췄습니다', 'ok');
+    });
+  }
+
+  /* ── one-click: discover → script ───────────────────── */
+  const COMMENT_POOL = ['이거 실화냐', '나만 몰랐네', '이건 좀 무섭다', '바로 저장함', '조회수 실화?', '개미 또 물렸네', '이게 진짜라고?', '소름 돋았다'];
+  function oneClickImport(title) {
+    const p = S.project;
+    p.name = String(title).slice(0, 34);
+    el('aiTopic').value = title;
+    el('aiLang').value = 'ko';
+    el('aiLen').value = '28';
+    const res = RS.ai.demo(title, 'ko', 30);
+    applyScript(res, 'ko');
+    const mix = title.length;
+    [2, 5].forEach((i, k) => {
+      const c = p.cues[i]; if (!c) return;
+      c.comment = { on: true, text: COMMENT_POOL[(mix + k * 3) % COMMENT_POOL.length], name: '시청자' };
+    });
+    if (p.cues[0]) p.cues[0].sfx = 'impact';
+    const t = String(title);
+    const bgm = /(동물|고양이|강아지|코끼리|냥|멍|puppy|cat|dog)/i.test(t) ? 'emotion'
+      : /(AI|테크|아이폰|gemini|기술|로봇)/i.test(t) ? 'trendy' : 'tension';
+    if (/동물|고양이|강아지|코끼리|냥|멍/i.test(t)) applyPreset(S.presets.find(x => x.id === 'zzaljuwoseo') || S.presets[0]);
+    p.bgm = Object.assign({}, p.bgm, { id: bgm, on: true });
+    syncProjectToUI(true);
+    drawStatic();
+    setTab('script');
+    el('secAI').open = true;
+    setTimeout(() => { const s = el('secCues'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 160);
+    RS.toast('훅 2줄 · 대본 ' + p.cues.length + '큐 · 댓글 카드 2개까지 한 번에 세팅했습니다', 'ok');
+  }
+
   /* ── cues ───────────────────────────────────────────── */
   function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight) + 'px'; }
   function updateCueDuration(row, c) {
@@ -523,6 +677,24 @@
       S.project.orig.volume = +e.target.value / 100;
       el('origVolVal').textContent = e.target.value + '%';
       A.setOrigVolume(S.project.orig.on ? S.project.orig.volume : 0); touch();
+    });
+    el('voiceClarity').addEventListener('click', () => {
+      const p = S.project;
+      p.bgm.on = true;
+      if (!p.bgm.id) p.bgm.id = 'docu';
+      p.bgm.volume = 0.2; p.bgm.duck = 0.85;
+      p.voice.volume = 1; p.voice.on = true;
+      p.orig.volume = 0.5;
+      A.resume();
+      A.setBgmVolume(p.bgm.volume); A.setDuckAmount(p.bgm.duck);
+      A.setVoiceVolume(1); A.setOrigVolume(p.orig.on ? 0.5 : 0);
+      A.startBgm(p.bgm.id, 0, p.bgm.volume);
+      previewing = p.bgm.id;
+      clearTimeout(previewBgm._t);
+      previewBgm._t = setTimeout(() => { if (previewing === p.bgm.id && !S.player.playing) { A.stopBgm(); previewing = null; renderBgm(); } }, 9000);
+      syncProjectToUI();
+      touch();
+      RS.toast('목소리 또렷 — BGM 20% · 말할 때 85% 덕킹 · 원본 50%', 'ok');
     });
   }
 
@@ -787,6 +959,12 @@
   function bindPreview() {
     el('xStart').addEventListener('click', startExport);
     el('xToUpload').addEventListener('click', () => setTab('upload'));
+    el('auditRun').addEventListener('click', () => {
+      const items = runAudit();
+      const bad = items.filter(i => !i.ok).length;
+      RS.toast(bad ? '점검 완료 — 경고 ' + bad + '건' : '점검 완료 — 5/5 통과, 그대로 올려도 됩니다', bad ? '' : 'ok');
+    });
+    el('auditFix').addEventListener('click', auditFix);
     el('thumbMake').addEventListener('click', function () { makeThumb(); });
     el('thumbBgImg').addEventListener('change', e => {
       const f = e.target.files && e.target.files[0];
@@ -815,6 +993,245 @@
     el('thumbCopyTitle').addEventListener('click', async () => { RS.toast(await U.copy(S.project.meta.titles[S.project.meta.selected] || S.project.meta.titles[0] || '') ? '제목 복사' : '복사 실패', 'ok'); });
     el('thumbCopyDesc').addEventListener('click', async () => { RS.toast(await U.copy(S.project.meta.desc) ? '설명 복사' : '복사 실패', 'ok'); });
     el('thumbCopyTags').addEventListener('click', async () => { RS.toast(await U.copy(S.project.meta.tags) ? '태그 복사' : '복사 실패', 'ok'); });
+  }
+
+  /* ── 0오류 자동 점검 ───────────────────────────────── */
+  const AUDIT_SAFE_Y = 1420;
+  const SUB_FAMILY = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  let measureCanvas = null;
+  function textCtx() {
+    if (!measureCanvas) measureCanvas = document.createElement('canvas');
+    return measureCanvas.getContext('2d');
+  }
+  function wrapLineCount(text, fs, weight, family, maxW) {
+    const ctx = textCtx();
+    ctx.font = weight + ' ' + fs + 'px ' + (family || SUB_FAMILY);
+    const words = U.strip(text).split(/\s+/).filter(Boolean);
+    if (!words.length) return 0;
+    const sp = ctx.measureText(' ').width;
+    let lines = 1, cur = 0;
+    words.forEach(w => {
+      const ww = ctx.measureText(w).width;
+      if (ww > maxW) {
+        const n = Math.max(1, Math.ceil(ww / maxW));
+        if (cur > 0) { lines++; cur = 0; }
+        lines += n - 1; cur = ww - (n - 1) * maxW;
+        return;
+      }
+      if (cur === 0) { cur = ww; return; }
+      if (cur + sp + ww > maxW) { lines++; cur = ww; }
+      else cur += sp + ww;
+    });
+    return lines;
+  }
+  function subGeom(p, cue, W, H) {
+    const family = p.sub.font || SUB_FAMILY;
+    const weight = p.sub.weight || 900;
+    const maxW = W * 0.84;
+    let fs = p.sub.fontSize || 62;
+    let lines = wrapLineCount(cue.text, fs, weight, family, maxW);
+    if (lines > 3) { fs = fs * 0.86; lines = wrapLineCount(cue.text, fs, weight, family, maxW); }
+    const lh = fs * 1.24, padY = fs * 0.3;
+    const boxH = Math.min(lines, 3) * lh + padY * 2;
+    const cy = H * (p.sub.pos || 0.78);
+    return { lines, fs, boxH, top: cy - boxH / 2, bottom: cy + boxH / 2, cy };
+  }
+  function cardGeom(p, cue, W, H) {
+    if (!p.card || !p.card.on || !cue || !cue.comment || !cue.comment.on || !cue.comment.text) return null;
+    const fs = 30, lh = fs * 1.35, av = fs * 2.1, padY = fs * 0.55;
+    const lines = Math.min(3, wrapLineCount(cue.comment.text, fs, 700, SUB_FAMILY, W * 0.74));
+    const boxH = Math.max(av, lines * lh) + padY * 2;
+    const y = H * (p.card.y == null ? 0.6 : p.card.y);
+    return { top: y, bottom: y + boxH, boxH };
+  }
+
+  function auditOnce() {
+    const p = S.project, items = [];
+    const W = 1080, H = p.ratio === '16:9' ? 607.5 : 1920;
+    const vertical = p.ratio !== '16:9';
+
+    /* ① 하단 유튜브 UI 세이프존 */
+    if (!vertical) {
+      items.push({ id: 'safe', ok: true, title: '하단 유튜브 UI 세이프존', detail: '16:9 롱폼은 세로 쇼츠 UI 세이프존을 적용하지 않습니다' });
+    } else {
+      let worstSub = 0, worstCard = 0, wi = -1, ci = -1;
+      p.cues.forEach((c, i) => {
+        const g = subGeom(p, c, W, H);
+        if (g.bottom > worstSub) { worstSub = g.bottom; wi = i; }
+        const cg = cardGeom(p, c, W, H);
+        if (cg && cg.bottom > worstCard) { worstCard = cg.bottom; ci = i; }
+      });
+      const worst = Math.max(worstSub, worstCard);
+      const src = worstCard > worstSub ? '댓글 카드(' + (ci + 1) + '번 큐)' : '자막(' + (wi + 1) + '번 큐)';
+      items.push(worst <= AUDIT_SAFE_Y
+        ? { id: 'safe', ok: true, title: '하단 유튜브 UI 세이프존', detail: '자막·카드 모두 y ' + Math.round(Math.max(worst, 0)) + ' (기준 1,420) 안쪽입니다' }
+        : { id: 'safe', ok: false, title: '하단 유튜브 UI 세이프존', detail: src + '가 y ' + Math.round(worst) + '까지 내려갑니다 — 유튜브 제목·채널 영역과 겹칩니다' });
+    }
+
+    /* ② 자막 줄 수·잘림 */
+    const over = [], three = [];
+    p.cues.forEach((c, i) => {
+      const g = subGeom(p, c, W, H);
+      if (g.lines > 3) over.push(i + 1);
+      else if (g.lines === 3) three.push(i + 1);
+    });
+    if (over.length) items.push({ id: 'sub', ok: false, title: '자막 길이·잘림', detail: '큐 ' + over.join(', ') + '번이 4줄 이상이라 3줄에서 잘립니다 (뒷부분 손실)' });
+    else if (three.length) items.push({ id: 'sub', ok: false, title: '자막 길이·잘림', detail: '큐 ' + three.join(', ') + '번이 3줄입니다 — 2줄 이하가 읽기 좋습니다' });
+    else items.push({ id: 'sub', ok: true, title: '자막 길이·잘림', detail: '모든 큐가 2줄 이하로 들어갑니다' });
+
+    /* ③ 상단 훅 2줄 길이 */
+    const hk = p.hook || {};
+    if (!hk.on || (!hk.line1 && !hk.line2)) {
+      items.push({ id: 'hook', ok: true, title: '상단 훅 길이', detail: '훅을 쓰지 않았습니다' });
+    } else {
+      const fam = hk.font || SUB_FAMILY;
+      const l1 = wrapLineCount(hk.line1, hk.size || 54, 900, fam, W * 0.86);
+      const l2 = hk.line2 ? wrapLineCount(hk.line2, hk.size || 54, 900, fam, W * 0.86) : 0;
+      if (l1 > 1 || l2 > 2) items.push({ id: 'hook', ok: false, title: '상단 훅 길이', detail: '1줄이 ' + l1 + '줄, 2줄이 ' + l2 + '줄로 넘쳐 일부가 잘립니다' });
+      else items.push({ id: 'hook', ok: true, title: '상단 훅 길이', detail: '훅 2줄이 화면 폭 안에 들어갑니다' });
+    }
+
+    /* ④ 음슴체 잔여 */
+    const eum = [];
+    p.cues.forEach((c, i) => { if (hasEumSum(c.text)) eum.push((i + 1) + '번 “' + lastToken(c.text) + '”'); });
+    items.push(eum.length
+      ? { id: 'eum', ok: false, title: '내레이션 음슴체', detail: eum.slice(0, 4).join(' · ') + (eum.length > 4 ? ' 외 ' + (eum.length - 4) + '곳' : '') + ' — 구어체가 시청 유지에 유리합니다' }
+      : { id: 'eum', ok: true, title: '내레이션 음슴체', detail: '음슴체(~함·~임)가 없습니다' });
+
+    /* ⑤ 큐 시간 겹침·공백 */
+    const sorted = p.cues.slice().sort((a, b) => a.start - b.start);
+    let overlaps = 0, gaps = 0, bad = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      const c = sorted[i];
+      if (!(c.end > c.start) || c.start < 0) bad++;
+      if (i) {
+        const prev = sorted[i - 1];
+        if (c.start < prev.end - 0.06) overlaps++;
+        else if (c.start - prev.end > 0.6) gaps++;
+      }
+    }
+    const timeBad = overlaps + gaps + bad > 0;
+    items.push(timeBad
+      ? { id: 'time', ok: false, title: '큐 시간 겹침·공백', detail: '겹침 ' + overlaps + '곳 · 빈 구간 ' + gaps + '곳 · 잘못된 시간 ' + bad + '곳' }
+      : { id: 'time', ok: true, title: '큐 시간 겹침·공백', detail: p.cues.length + '개 큐가 ' + U.totalDur(p).toFixed(1) + '초로 매끄럽게 이어집니다' });
+
+    return items;
+  }
+
+  function renderAudit(items) {
+    const box = el('auditList'), badge = el('auditBadge'), acts = el('auditActions'), sum = el('auditSummary');
+    if (!box) return;
+    box.hidden = false;
+    box.innerHTML = items.map(it => `<div class="audit-item ${it.ok ? 'ok' : 'warn'}">
+      <span class="ai-ico">${it.ok ? '✓' : '!'}</span>
+      <div class="ai-body"><b>${U.esc(it.title)}</b><span>${U.esc(it.detail)}</span></div>
+    </div>`).join('');
+    const bad = items.filter(i => !i.ok).length;
+    badge.textContent = bad ? '경고 ' + bad + '건' : items.length + '/' + items.length + ' 통과';
+    badge.className = 'tag ' + (bad ? 'audit-badge-warn' : 'audit-badge-ok');
+    acts.hidden = !bad;
+    el('auditFix').textContent = '🛠 원클릭 자동 수정' + (bad ? ' (' + bad + ')' : '');
+    if (bad) sum.textContent = '경고 ' + bad + '건을 한 번에 교정합니다';
+    S.ui.auditBad = bad;
+    const card = el('auditCard');
+    if (card) { card.classList.remove('audit-fixed'); void card.offsetWidth; card.classList.add('audit-fixed'); }
+  }
+
+  function runAudit() {
+    const items = auditOnce();
+    renderAudit(items);
+    return items;
+  }
+
+  function auditFix() {
+    const p = S.project, notes = [];
+    if (!p.cues.length) { RS.toast('큐가 없습니다', 'err'); return; }
+
+    /* 음슴체 → 구어체 */
+    let eum = 0;
+    p.cues.forEach(c => { if (hasEumSum(c.text)) { c.text = eumConvert(c.text); eum++; } });
+    if (eum) notes.push('음슴체 ' + eum + '곳');
+
+    /* 긴 자막 2개로 분리 */
+    let split = 0;
+    for (let i = 0; i < p.cues.length; i++) {
+      const c = p.cues[i];
+      const g = subGeom(p, c, 1080, 1920);
+      if (g.lines <= 2) continue;
+      const dur = c.end - c.start;
+      if (dur < 1.2) continue;
+      const words = String(c.text).trim().split(/\s+/);
+      if (words.length < 2) continue;
+      const totalLen = U.strip(c.text).length || 1;
+      let best = 1, bestDiff = 1e9, accLen = 0;
+      for (let k = 1; k < words.length; k++) {
+        accLen += U.strip(words[k - 1]).length;
+        const d = Math.abs(accLen - totalLen / 2);
+        if (d < bestDiff) { bestDiff = d; best = k; }
+      }
+      const a = words.slice(0, best).join(' '), b = words.slice(best).join(' ');
+      if (!a || !b) continue;
+      const ratio = Math.max(0.3, Math.min(0.7, U.strip(a).length / totalLen));
+      const mid = +(c.start + Math.max(0.6, Math.min(dur - 0.6, dur * ratio))).toFixed(1);
+      const c2 = { id: U.uid(), text: b, start: mid, end: Math.max(mid + 0.5, +c.end.toFixed(1)), sfx: '', comment: { on: false, text: '', name: '시청자' } };
+      c.text = a;
+      c.end = mid;
+      p.cues.splice(i + 1, 0, c2);
+      i++; split++;
+    }
+    if (split) notes.push('긴 자막 ' + split + '개 분리');
+
+    /* 훅 크기 줄이기 */
+    const hk = p.hook;
+    if (hk && hk.on !== false && (hk.line1 || hk.line2)) {
+      const before = hk.size || 54;
+      let guard = 0;
+      while (guard++ < 24) {
+        const fam = hk.font || SUB_FAMILY;
+        const l1 = wrapLineCount(hk.line1, hk.size || 54, 900, fam, 1080 * 0.86);
+        const l2 = hk.line2 ? wrapLineCount(hk.line2, hk.size || 54, 900, fam, 1080 * 0.86) : 0;
+        if (l1 <= 1 && l2 <= 2) break;
+        hk.size = Math.max(32, (hk.size || 54) - 2);
+      }
+      if ((hk.size || 54) !== before) notes.push('훅 글자 ' + before + '→' + hk.size);
+    }
+
+    /* 세이프존: 자막·카드를 위로 */
+    const beforeSubPos = p.sub.pos, beforeCardY = p.card.y;
+    let guard = 0;
+    while (guard++ < 60) {
+      let subMax = 0, cardMax = 0;
+      p.cues.forEach(c => {
+        const g = subGeom(p, c, 1080, 1920);
+        if (g.bottom > subMax) subMax = g.bottom;
+        const cg = cardGeom(p, c, 1080, 1920);
+        if (cg && cg.bottom > cardMax) cardMax = cg.bottom;
+      });
+      if (subMax <= 1400 && cardMax <= 1400) break;
+      if (subMax > 1400) p.sub.pos = Math.max(0.46, +(((p.sub.pos || 0.78) - 0.01)).toFixed(2));
+      else p.card.y = Math.max(0.36, +(((p.card.y == null ? 0.6 : p.card.y) - 0.01)).toFixed(2));
+    }
+    if (p.sub.pos !== beforeSubPos || p.card.y !== beforeCardY) notes.push('세이프존 위로 이동');
+
+    /* 큐 시간 정리 */
+    const sorted = p.cues.slice().sort((a, b) => a.start - b.start);
+    let acc = 0, moved = 0;
+    sorted.forEach(c => {
+      const d = Math.max(0.4, +(c.end - c.start).toFixed(2));
+      if (Math.abs(c.start - acc) > 0.06) moved++;
+      c.start = +acc.toFixed(1);
+      acc = +(acc + d).toFixed(1);
+      c.end = acc;
+    });
+    p.cues = sorted;
+    if (moved) notes.push('시간 정리 ' + moved + '큐');
+
+    S.player.t = 0; pause();
+    syncProjectToUI(true);
+    renderCues();
+    drawStatic();
+    runAudit();
+    RS.toast(notes.length ? '자동 수정 완료 — ' + notes.join(' · ') : '이미 고칠 것이 없습니다', notes.length ? 'ok' : '');
   }
 
   function fileBase() {
@@ -958,6 +1375,30 @@
 
   /* ── discover ───────────────────────────────────────── */
   function bindDiscover() {}
+  const DISCOVER_PRESETS = {
+    kr: { q: '코스피 폭락', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
+    us: { q: 'viral shorts', region: 'US', dur: 'short', min: '100000', sort: 'breakout' },
+    jp: { q: '日本のニュース', region: 'JP', dur: 'short', min: '100000', sort: 'breakout' },
+    animal: { q: '동물 구조', region: '', dur: 'short', min: '100000', sort: 'breakout' },
+    ai: { q: 'AI 기술', region: '', dur: 'short', min: '100000', sort: 'breakout' }
+  };
+  function syncFilterLabel() {
+    const box = el('filterNow'); if (!box) return;
+    const txt = id => { const s = el(id); const o = s && s.options[s.selectedIndex]; return o ? o.text : ''; };
+    box.textContent = [txt('dRegion') || '전체', txt('dDur'), txt('dMin'), txt('dSort')].filter(Boolean).join(' · ');
+  }
+  function applyDiscoverPreset(key) {
+    const pr = DISCOVER_PRESETS[key]; if (!pr) return;
+    el('dKeyword').value = pr.q;
+    el('dRegion').value = pr.region;
+    el('dDur').value = pr.dur;
+    el('dMin').value = pr.min;
+    el('dSort').value = pr.sort;
+    $$('#dChips .chip').forEach(x => x.classList.remove('on'));
+    $$('#dPresets .preset-chip').forEach(b => b.classList.toggle('on', b.dataset.preset === key));
+    syncFilterLabel();
+    runDiscover();
+  }
   function readFilters() {
     return {
       q: el('dKeyword').value.trim(), region: el('dRegion').value,
@@ -1007,23 +1448,22 @@
         </div>
       </button>`;
     }).join('');
-    box.querySelectorAll('.rcard').forEach(card => card.addEventListener('click', () => {
-      const title = card.dataset.title;
-      el('aiTopic').value = title;
-      S.project.topic = title;
-      setTab('script');
-      el('secAI').open = true;
-      RS.toast('주제를 대본 탭으로 가져왔습니다 — [대본 생성]을 누르세요', 'ok');
-      setTimeout(() => el('aiGen').scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
-    }));
+    box.querySelectorAll('.rcard').forEach(card => card.addEventListener('click', () => oneClickImport(card.dataset.title)));
   }
   function bindDiscoverOnce() {
     el('dSearch').addEventListener('click', runDiscover);
     el('dRefresh').addEventListener('click', runDiscover);
     el('dKeyword').addEventListener('keydown', e => { if (e.key === 'Enter') runDiscover(); });
+    $$('#dPresets .preset-chip').forEach(b => b.addEventListener('click', () => applyDiscoverPreset(b.dataset.preset)));
+    ['dRegion', 'dDur', 'dMin', 'dSort'].forEach(id => el(id).addEventListener('change', () => {
+      $$('#dPresets .preset-chip').forEach(b => b.classList.remove('on'));
+      syncFilterLabel();
+    }));
+    syncFilterLabel();
     $$('#dChips .chip').forEach(c => c.addEventListener('click', () => {
       el('dKeyword').value = c.dataset.kw;
       $$('#dChips .chip').forEach(x => x.classList.toggle('on', x === c));
+      $$('#dPresets .preset-chip').forEach(b => b.classList.remove('on'));
       runDiscover();
     }));
   }
@@ -1323,6 +1763,7 @@
     syncUploadFields();
     updateAuthUI();
     fillVoices();
+    renderStyleCards();
     if (full) lastActiveCue = null;
   }
 
@@ -1344,6 +1785,10 @@
     }),
     demo: () => { S.project = RS.demoProject(); syncProjectToUI(true); },
     thumb: () => makeThumb(),
+    audit: () => runAudit(),
+    fix: () => auditFix(),
+    import: t => oneClickImport(t),
+    preset: k => applyDiscoverPreset(k),
     errors: () => window.__rsErrors.slice()
   };
 
