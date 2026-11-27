@@ -627,10 +627,8 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .card{padding:17px;border-radius:16px}
   .demo-banner{padding:16px;gap:12px}
   .db-body b{font-size:13.5px}
-  .preset-row{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin:0 -2px;
-    scrollbar-width:none;-webkit-overflow-scrolling:touch}
-  .preset-row::-webkit-scrollbar{display:none}
-  .preset-chip{flex:0 0 auto}
+  .preset-row{gap:7px}
+  .preset-chip{padding:9px 12px}
   .filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .result-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
   .rcard .rc-title{font-size:12px}
