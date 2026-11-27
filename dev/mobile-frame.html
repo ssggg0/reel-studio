@@ -7,14 +7,15 @@
 <style>
   :root{color-scheme:dark}
   body{margin:0;background:#15171c;color:#dfe3ea;font:13px/1.5 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-  header{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #2a2e36;flex-wrap:wrap}
-  h1{font-size:13px;margin:0;font-weight:800;letter-spacing:.06em}
-  select,button{background:#20242b;color:#dfe3ea;border:1px solid #333a45;border-radius:8px;padding:6px 10px;font-size:12px}
+  header{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #2a2e36;flex-wrap:wrap;height:44px;box-sizing:border-box}
+  h1{font-size:12px;margin:0;font-weight:800;letter-spacing:.08em}
+  select,button{background:#20242b;color:#dfe3ea;border:1px solid #333a45;border-radius:8px;padding:5px 9px;font-size:12px}
   button{cursor:pointer}
-  .wrap{display:flex;justify-content:center;padding:18px}
-  .frame{width:390px;height:844px;border:1px solid #39414d;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .wrap{display:flex;justify-content:center;padding:10px 0 0}
+  .frame{width:390px;height:844px;border:1px solid #39414d;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5);transform-origin:top center}
   iframe{width:390px;height:844px;border:0;display:block}
   .note{color:#8b929c;font-size:11.5px;margin-left:auto}
+  .size{color:#8b929c;font-size:11.5px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -27,19 +28,31 @@
     <option value="360x800">Android · 360×800</option>
   </select>
   <button id="reload">다시 불러오기</button>
+  <button id="fit">화면에 맞춤</button>
+  <span class="size" id="scaleNote"></span>
   <span class="note">실제 뷰포트 폭으로 앱을 띄우는 검수용 프레임입니다.</span>
 </header>
-<div class="wrap">
+<div class="wrap" id="wrap">
   <div class="frame" id="frame"><iframe id="fr" src="../index.html"></iframe></div>
 </div>
 <script>
-  const fr = document.getElementById('fr'), frame = document.getElementById('frame');
-  document.getElementById('size').onchange = e => {
-    const [w, h] = e.target.value.split('x');
+  const fr = document.getElementById('fr'), frame = document.getElementById('frame'), wrap = document.getElementById('wrap');
+  let scale = 1, fit = true;
+  function apply() {
+    const [w, h] = document.getElementById('size').value.split('x').map(Number);
     frame.style.width = w + 'px'; frame.style.height = h + 'px';
     fr.style.width = w + 'px'; fr.style.height = h + 'px';
-  };
+    const avail = window.innerHeight - 64;
+    scale = fit ? Math.min(1, avail / h) : 1;
+    frame.style.transform = 'scale(' + scale + ')';
+    wrap.style.height = (h * scale + 12) + 'px';
+    document.getElementById('scaleNote').textContent = w + '×' + h + ' · 표시 ' + Math.round(scale * 100) + '%';
+  }
+  document.getElementById('size').onchange = apply;
   document.getElementById('reload').onclick = () => { fr.src = '../index.html?t=' + Date.now(); };
+  document.getElementById('fit').onclick = () => { fit = !fit; apply(); };
+  window.addEventListener('resize', apply);
+  apply();
 </script>
 </body>
 </html>
