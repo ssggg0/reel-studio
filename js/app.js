@@ -36,6 +36,7 @@
     bindUpload();
     bindSettings();
     fillVoices();
+    renderSfx();
     syncProjectToUI(true);
     renderDiscover();
     loop();
@@ -354,6 +355,7 @@
     S.player.t = 0;
     syncProjectToUI(true);
     renderCues();
+    touch();
   }
 
   /* ── cues ───────────────────────────────────────────── */
@@ -557,8 +559,13 @@
     previewBgm._t = setTimeout(() => { if (previewing === id && !S.player.playing) { A.stopBgm(); previewing = null; renderBgm(); } }, 12000);
   }
 
-  function fillVoices() {
-    const sel = el('voiceSelect');
+  function renderSfx() {
+    const box = el('sfxGrid');
+    if (!box) return;
+    box.innerHTML = RS.sfxList.map(s => `<button class="sfx-btn" data-id="${s.id}"><span>▶</span>${U.esc(s.name)}</button>`).join('');
+  }
+
+  function fillVoices() {    const sel = el('voiceSelect');
     if (!sel) return;
     const list = A.voices();
     const cur = S.project ? S.project.voice.voiceURI : '';
@@ -791,8 +798,7 @@
   }
 
   function pickMime() {
-    const cands = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1', 'video/mp4',
-      'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    const cands = ['video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
     for (const m of cands) {
       try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m; } catch (e) {}
     }
@@ -878,6 +884,13 @@
       await stopped;
       const blob = new Blob(chunks, { type: mime.split(';')[0] });
       const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+      if (blob.size < 800) {
+        el('xProgBar').style.width = '0%'; el('xProgTxt').textContent = '0%';
+        el('xStart').disabled = false; el('xStart').textContent = '영상 렌더';
+        S.ui.exporting = false;
+        RS.toast('녹화기(“' + mime + '”)가 프레임을 만들지 못했습니다. 사파리는 mp4, 크롬은 webm으로 다시 시도해 주세요.', 'err');
+        return;
+      }
       if (S.media.exportURL) URL.revokeObjectURL(S.media.exportURL);
       S.media.exportBlob = blob;
       S.media.exportURL = URL.createObjectURL(blob);

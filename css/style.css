@@ -335,9 +335,9 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 
 .stage-box{
   position:relative;background:#000;border:1px solid var(--line);border-radius:16px;overflow:hidden;
-  display:flex;justify-content:center;margin-bottom:10px;
+  display:flex;justify-content:center;margin:0 auto 10px;width:fit-content;max-width:100%;
 }
-.stage-box .stage{max-height:min(52dvh,560px);width:auto;max-width:100%}
+.stage-box .stage{max-height:min(60dvh,620px);width:auto;max-width:100%}
 .stage-badge{
   position:absolute;left:10px;top:10px;font-size:10px;font-weight:800;letter-spacing:.03em;
   background:rgba(0,0,0,.62);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
