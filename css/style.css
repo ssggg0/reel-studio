@@ -180,6 +180,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   background:var(--lime);border:3px solid #0B0D12;box-shadow:0 0 0 1px rgba(216,255,62,.5);margin-top:-7px}
 input[type=range]::-moz-range-track{height:4px;border-radius:3px;background:rgba(255,255,255,.14)}
 input[type=range]::-moz-range-thumb{width:14px;height:14px;border:3px solid #0B0D12;border-radius:50%;background:var(--lime)}
+input[type=color]{-webkit-appearance:none;appearance:none;width:100%;height:40px;padding:3px;background:var(--bg2);border:1px solid var(--line);border-radius:10px}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
+input[type=color]::-moz-color-swatch{border:none;border-radius:7px}
+.color-f{max-width:130px}
 .slider .lab{display:flex;justify-content:space-between}
 .slider .lab b{color:var(--lime);font-weight:800;font-variant-numeric:tabular-nums}
 

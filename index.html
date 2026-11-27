@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261127f">
+<link rel="stylesheet" href="css/style.css?v=20261127g">
 </head>
 <body>
 <div id="app">
@@ -358,6 +358,11 @@
           <label class="field grow"><span class="lab">썸네일 뱃지</span><input id="thumbBadge" maxlength="18" placeholder="이슈한잔"></label>
           <button class="btn outline" id="thumbMake">썸네일 생성</button>
         </div>
+        <div class="upload-row">
+          <label class="btn ghost sm file-btn"><input type="file" id="thumbBgImg" accept="image/*">배경 이미지</label>
+          <span class="file-name" id="thumbBgName">현재 프레임 사용</span>
+          <button class="btn ghost sm" id="thumbBgClear" hidden>빼기</button>
+        </div>
         <div class="thumb-wrap" id="thumbWrap" hidden>
           <canvas id="thumbCanvas"></canvas>
           <div class="thumb-actions">
@@ -536,6 +541,22 @@
         </section>
 
         <section class="set-sec">
+          <h3>스타일 세부 조정</h3>
+          <div class="field-row">
+            <label class="field slider"><span class="lab">자막 크기 <b id="stSubSizeVal">62</b></span>
+              <input type="range" id="stSubSize" min="40" max="84" value="62"></label>
+            <label class="field color-f"><span class="lab">강조색</span><input type="color" id="stAccent" value="#D8FF3E"></label>
+          </div>
+          <div class="field-row">
+            <label class="field color-f"><span class="lab">훅 글자</span><input type="color" id="stHookColor" value="#FFFFFF"></label>
+            <label class="field color-f"><span class="lab">훅 배경</span><input type="color" id="stHookBg" value="#0B0D12"></label>
+          </div>
+          <label class="switch-line"><input type="checkbox" id="stSubBox" checked><span>자막 박스</span></label>
+          <label class="switch-line"><input type="checkbox" id="stCardOn" checked><span>댓글 카드</span></label>
+          <p class="hint">여기서 바꾼 값은 지금 프로젝트에만 적용됩니다. 마음에 들면 아래에서 프리셋으로 저장하세요.</p>
+        </section>
+
+        <section class="set-sec">
           <h3>프로젝트</h3>
           <div class="toolbar">
             <button class="btn ghost sm" id="stProjExport">프로젝트 저장(JSON)</button>
@@ -574,12 +595,12 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/core.js?v=20261127f"></script>
-<script src="js/audio.js?v=20261127f"></script>
-<script src="js/render.js?v=20261127f"></script>
-<script src="js/ai.js?v=20261127f"></script>
-<script src="js/tube.js?v=20261127f"></script>
-<script src="js/app.js?v=20261127f"></script>
+<script src="js/core.js?v=20261127g"></script>
+<script src="js/audio.js?v=20261127g"></script>
+<script src="js/render.js?v=20261127g"></script>
+<script src="js/ai.js?v=20261127g"></script>
+<script src="js/tube.js?v=20261127g"></script>
+<script src="js/app.js?v=20261127g"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

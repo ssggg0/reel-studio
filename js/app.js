@@ -787,7 +787,26 @@
   function bindPreview() {
     el('xStart').addEventListener('click', startExport);
     el('xToUpload').addEventListener('click', () => setTab('upload'));
-    el('thumbMake').addEventListener('click', makeThumb);
+    el('thumbMake').addEventListener('click', function () { makeThumb(); });
+    el('thumbBgImg').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const img = new Image();
+      img.onload = () => {
+        S.media.thumbImg = img;
+        el('thumbBgName').textContent = f.name;
+        el('thumbBgClear').hidden = false;
+        makeThumb();
+      };
+      img.onerror = () => RS.toast('이미지를 읽지 못했습니다', 'err');
+      img.src = URL.createObjectURL(f);
+      e.target.value = '';
+    });
+    el('thumbBgClear').addEventListener('click', () => {
+      S.media.thumbImg = null;
+      el('thumbBgName').textContent = '현재 프레임 사용';
+      el('thumbBgClear').hidden = true;
+    });
     el('thumbSave').addEventListener('click', () => {
       const c = el('thumbCanvas');
       c.toBlob(b => { if (b) U.download(fileBase() + '_thumb.png', b); }, 'image/png');
@@ -932,7 +951,7 @@
         await document.fonts.ready;
       }
     } catch (e) {}
-    R.thumbnail(c, S.project, S.player.t, el('thumbBadge').value.trim());
+    R.thumbnail(c, S.project, S.player.t, el('thumbBadge').value.trim(), S.media.thumbImg || null);
     el('thumbWrap').hidden = false;
     RS.toast('썸네일 생성 · 1080×1920', 'ok');
   }
@@ -1104,8 +1123,20 @@
     el('stOauth').value = S.settings.oauth || '';
     el('stYtState').textContent = '';
     el('stGemState').textContent = '';
+    const p = S.project;
+    el('stSubSize').value = p.sub.fontSize || 62;
+    el('stSubSizeVal').textContent = p.sub.fontSize || 62;
+    el('stAccent').value = normHex(p.sub.accent, '#D8FF3E');
+    el('stHookColor').value = normHex(p.hook.color, '#FFFFFF');
+    el('stHookBg').value = normHex(p.hook.bg, '#0B0D12');
+    el('stSubBox').checked = p.sub.box !== false;
+    el('stCardOn').checked = !!(p.card && p.card.on);
     renderPresetSelect();
     RS.openModal('settings');
+  }
+  function normHex(v, d) {
+    if (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) return v;
+    return d;
   }
   function renderPresetSelect() {
     const sel = el('stPresetSelect');
@@ -1115,6 +1146,17 @@
     el('stPresetDesc').textContent = cur ? cur.desc || '' : '';
   }
   function bindSettings() {
+    const restyle = () => { drawStatic(); touch(); };
+    el('stSubSize').addEventListener('input', e => {
+      S.project.sub.fontSize = +e.target.value;
+      el('stSubSizeVal').textContent = e.target.value;
+      restyle();
+    });
+    el('stAccent').addEventListener('input', e => { S.project.sub.accent = e.target.value; S.project.hook.accent = e.target.value; restyle(); });
+    el('stHookColor').addEventListener('input', e => { S.project.hook.color = e.target.value; restyle(); });
+    el('stHookBg').addEventListener('input', e => { S.project.hook.bg = e.target.value; restyle(); });
+    el('stSubBox').addEventListener('change', e => { S.project.sub.box = e.target.checked; restyle(); });
+    el('stCardOn').addEventListener('change', e => { S.project.card.on = e.target.checked; restyle(); });
     el('stSaveKeys').addEventListener('click', () => {
       S.settings.youtube = el('stYtKey').value.trim();
       S.settings.gemini = el('stGemKey').value.trim();

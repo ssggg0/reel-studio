@@ -636,7 +636,7 @@
   };
 
   /* ── thumbnail ──────────────────────────────────────── */
-  R.thumbnail = function (canvas, p, t, badge) {
+  R.thumbnail = function (canvas, p, t, badge, img) {
     const W = 1080, H = 1920;
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
@@ -654,7 +654,10 @@
 
     // background frame
     const src = p.source || {};
-    if (src.type === 'video' && RS.state.media.video && RS.state.media.video.videoWidth) {
+    if (img && img.complete && img.naturalWidth) {
+      const sc = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      ctx.drawImage(img, (W - img.naturalWidth * sc) / 2, (H - img.naturalHeight * sc) / 2, img.naturalWidth * sc, img.naturalHeight * sc);
+    } else if (src.type === 'video' && RS.state.media.video && RS.state.media.video.videoWidth) {
       const v = RS.state.media.video;
       const scale = Math.max(W / v.videoWidth, H / v.videoHeight) * (p.zoom || 1);
       ctx.drawImage(v, (W - v.videoWidth * scale) / 2, (H - v.videoHeight * scale) * (p.offset == null ? .5 : p.offset), v.videoWidth * scale, v.videoHeight * scale);
