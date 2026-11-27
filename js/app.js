@@ -826,7 +826,16 @@
     el('xProgWrap').hidden = false; el('xProgBar').style.width = '0%'; el('xProgTxt').textContent = '0%';
     pause(); seekTo(0);
     await new Promise(r => setTimeout(r, 120));
-    if (document.fonts) { try { await document.fonts.ready; } catch (e) {} }
+    if (document.fonts) {
+      try {
+        await Promise.all([
+          document.fonts.load('900 62px "Noto Sans KR"'),
+          document.fonts.load('700 30px "Noto Sans KR"'),
+          document.fonts.load('900 54px "Black Han Sans"')
+        ]);
+        await document.fonts.ready;
+      } catch (e) {}
+    }
 
     let stream;
     try {
@@ -853,7 +862,7 @@
     // audio & video start
     A.resume();
     const ctxA = A.ctx;
-    const t0 = ctxA ? ctxA.currentTime + 0.05 : performance.now() / 1000 + 0.05;
+    const wallStart = performance.now();
     if (p.bgm.on && p.bgm.id) A.startBgm(p.bgm.id, 0, p.bgm.volume);
     if (p.voice.file && A.narrationBuf) A.startNarration(0);
     if (p.source.type === 'video' && S.media.video && S.media.video.src) {
@@ -865,7 +874,7 @@
 
     const tick = () => {
       if (done) return;
-      const t = ctxA && ctxA.state === 'running' ? Math.max(0, ctxA.currentTime - t0) : (performance.now() / 1000 - t0);
+      const t = (performance.now() - wallStart) / 1000;
       try { R.draw(ctx, W, H, p, t, { guide: false }); } catch (e) { window.__rsErrors.push('export draw: ' + e.message); }
       p.cues.forEach(c => { if (c.sfx && !fired.has(c.id) && t >= c.start && t < c.end) { fired.add(c.id); A.playSfx(c.sfx); } });
       const pct = Math.min(99, Math.round((t / dur) * 100));
@@ -913,8 +922,18 @@
     setTimeout(() => { if (!done && S.ui.exporting) { RS.toast('렌더가 예상보다 오래 걸려 마무리합니다', 'err'); finish(); } }, (dur + 25) * 1000);
   }
 
-  function makeThumb() {
+  async function makeThumb() {
     const c = el('thumbCanvas');
+    try {
+      if (document.fonts && document.fonts.load) {
+        await Promise.all([
+          document.fonts.load('900 96px "Noto Sans KR"'),
+          document.fonts.load('700 40px "Noto Sans KR"'),
+          document.fonts.load('900 40px "Black Han Sans"')
+        ]);
+        await document.fonts.ready;
+      }
+    } catch (e) {}
     R.thumbnail(c, S.project, S.player.t, el('thumbBadge').value.trim());
     el('thumbWrap').hidden = false;
     RS.toast('썸네일 생성 · 1080×1920', 'ok');
@@ -957,10 +976,10 @@
       const views = U.fmtNum(v.views), subs = v.subs ? U.fmtNum(v.subs) : '—';
       const ratio = v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs) || 0).toFixed(2);
       const hot = v.ratio >= 3;
-      const hue = 60 + (i * 37) % 240;
+      const hue = 196 + (i * 29) % 90;
       return `<button class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}">
         <div class="thumb">
-          ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 45% 17%),#0b0d12 70%)">▶</div>`}
+          ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 32% 16%),#0b0d12 70%)">▶</div>`}
           <span class="ratio">${hot ? '🔥 ' : ''}${ratio}</span>
           <span class="len">${U.fmtClock(v.len)}</span>
         </div>

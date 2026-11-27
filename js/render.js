@@ -592,8 +592,12 @@
       ctx.drawImage(v, dx, dy, dw, dh);
       try { ctx.filter = 'none'; } catch (e) {}
     } else {
-      R.drawSample(ctx, W, H, src.sample || 'docu', t);
-      if (p.zoom && p.zoom !== 1) { /* sample: zoom via redraw would be costly; skip */ }
+      ctx.save();
+      const z = p.zoom || 1;
+      const off = p.offset == null ? 0.5 : p.offset;
+      if (z !== 1) { ctx.translate(W / 2, H * off); ctx.scale(z, z); ctx.translate(-W / 2, -H * off); }
+      R.drawSample(ctx, W * 1.02, H * 1.02, src.sample || 'docu', t);
+      ctx.restore();
     }
 
     // 2. grade + vignette + grain
@@ -680,6 +684,8 @@
     const blockH = ls.length * lh;
     const startY = H - 260 - blockH;
     ctx.textBaseline = 'middle';
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 26; ctx.shadowOffsetY = 8;
     ls.forEach((l, i) => {
       let x = 64;
       const y = startY + lh / 2 + i * lh;
@@ -692,9 +698,10 @@
         x += ctx.measureText(it.text).width;
       });
     });
+    ctx.restore();
     // accent bar
     ctx.fillStyle = '#D8FF3E';
-    ctx.fillRect(64, startY + blockH + 26, 120, 10);
+    ctx.fillRect(64, startY + blockH + 26, 140, 12);
 
     // bottom channel
     ctx.font = '800 38px "Noto Sans KR",sans-serif';
