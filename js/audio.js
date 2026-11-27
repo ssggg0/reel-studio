@@ -276,11 +276,14 @@
       fr.readAsArrayBuffer(file);
     });
   };
-  A.startNarration = function (fromT) {
+  A.startNarration = function (fromT, rate) {
     A.stopNarration();
     if (!A.narrationBuf || !ensure()) return;
     const src = ctx.createBufferSource();
     src.buffer = A.narrationBuf;
+    const r = Math.min(2, Math.max(0.5, Number(rate) || 1));
+    src.playbackRate.value = r;
+    if (src.preservesPitch !== undefined) src.preservesPitch = false;
     src.connect(A.voiceBus);
     const off = Math.max(0, fromT || 0);
     if (off >= A.narrationBuf.duration) return;

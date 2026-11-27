@@ -29,6 +29,7 @@
     bindTabs();
     bindTop();
     bindSource();
+    bindSourcePanel();
     bindScript();
     bindQuickTools();
     bindMusic();
@@ -38,8 +39,11 @@
     bindSettings();
     fillVoices();
     renderSfx();
+    bindVoiceLib();
     syncProjectToUI(true);
     renderDiscover();
+    loadPopularRail();
+    voiceLibInit();
     loop();
     if (!RS.store.loadProject()) {
       setTimeout(() => RS.toast('데모 프로젝트로 열었어요 · 설정에서 API 키를 넣으면 실데이터로 바뀝니다'), 700);
@@ -179,6 +183,8 @@
     A.bindVideo(v);
     syncSourceUI();
     touch();
+    const spf = el('spFileState');
+    if (spf && !el('srcPanel').hidden) { spf.hidden = false; spf.textContent = '✓ 원본 올림 · ' + f.name + ' (' + fmtMB(f.size) + ')'; }
     RS.toast('영상 올림 · ' + f.name);
     v.play().then(() => v.pause()).catch(() => {});
   }
@@ -316,7 +322,7 @@
         updateCueDuration(row, c);
         drawStatic(); touch(); renderScrubCues();
       } else if (e.target.classList.contains('cmt-text')) {
-        c.comment.text = e.target.value; touch(); drawStatic();
+        c.comment.text = e.target.value; updateCueDuration(row, c); touch(); drawStatic();
       } else if (e.target.classList.contains('cue-start')) {
         c.start = Math.max(0, +e.target.value || 0);
         updateCueDuration(row, c); touch(); renderScrubCues();
@@ -328,8 +334,8 @@
     el('cueList').addEventListener('change', e => {
       const row = e.target.closest('.cue'); if (!row) return;
       const c = S.project.cues.find(x => x.id === row.dataset.id); if (!c) return;
-      if (e.target.classList.contains('cue-sfx')) { c.sfx = e.target.value; if (c.sfx) A.playSfx(c.sfx); touch(); }
-      if (e.target.classList.contains('cue-cmt-on')) { c.comment.on = e.target.checked; touch(); drawStatic(); }
+      if (e.target.classList.contains('cue-sfx')) { c.sfx = e.target.value; if (c.sfx) A.playSfx(c.sfx); updateCueDuration(row, c); touch(); }
+      if (e.target.classList.contains('cue-cmt-on')) { c.comment.on = e.target.checked; updateCueDuration(row, c); touch(); drawStatic(); }
     });
     el('cueList').addEventListener('click', e => {
       const row = e.target.closest('.cue'); if (!row) return;
@@ -340,6 +346,20 @@
       }
       if (e.target.classList.contains('cue-play')) { pause(); seekTo(c.start); drawStatic(); A.playSfx(c.sfx || 'pop'); return; }
       if (e.target.classList.contains('cue-no')) { pause(); seekTo(c.start); drawStatic(); return; }
+      if (e.target.closest('.cue-more') || e.target.closest('.cue-meta')) {
+        const extra = row.querySelector('.cue-extra');
+        const more = row.querySelector('.cue-more');
+        const willOpen = extra.hidden;
+        extra.hidden = !willOpen;
+        row.classList.toggle('is-open', willOpen);
+        if (more) { more.classList.toggle('on', willOpen); more.setAttribute('aria-expanded', String(willOpen)); }
+        selectCue(c.id, true);
+        if (willOpen) {
+          const t = row.querySelector('.cue-start');
+          if (t && window.matchMedia('(min-width: 1001px)').matches) setTimeout(() => t.focus(), 30);
+        }
+        return;
+      }
       selectCue(c.id);
     });
     el('cueList').addEventListener('focusin', e => {
@@ -429,7 +449,7 @@
     return src.slice(0, src.length - (word + tail).length) + rep + tail;
   }
 
-  const KEY_TERMS = ['코스피','코스닥','반도체','외국인','개미','엔비디아','젠슨황','FOMC','금리','환율','전세사기','국민연금','로또','삼성전자','수능','홈플러스','엔비디아','AI','Gemini','아이폰','유튜브','쇼츠','구독자','조회수','폭등','폭락','급등','급락','순매도','순매수'];
+  const KEY_TERMS = ['강아지','고양이','동물','반전','CCTV','블랙박스','꿀팁','레시피','요리','운동','여행','자연','일본','해외','신기한','웃긴','공감','AI','Gemini','아이폰','유튜브','쇼츠','구독자','조회수','역대급','레전드','충격','소름','처음'];
   function emphasizeText(text) {
     const p = S.project;
     const topicKeys = String(p.topic || '').split(/[\s,·.!?~]+/).filter(w => w.length >= 2).slice(0, 8);
@@ -491,6 +511,383 @@
     });
   }
 
+  /* ── 인기 쇼츠 가로 레일 ─────────────────────────────── */
+  const SHORT_CFG = {
+    '동물': { preset: 'zzaljuwoseo', bgm: 'emotion', emoji: '🐾', comments: ['심장 쫄깃했다', '이건 못 참지', '몇 번을 봐도 웃김', '혹시 우리 집 애인가요'] },
+    'ASMR': { preset: 'raw', bgm: 'emotion', emoji: '🎧', comments: ['소리만 들어도 힐링', '이거 무한반복임', '귀가 녹는다'] },
+    '여행': { preset: 'hipplug', bgm: 'docu', emoji: '🌄', comments: ['여기 어디야', '저장해둠', '가고 싶다 진짜'] },
+    '해외일상': { preset: 'hipplug', bgm: 'trendy', emoji: '🗾', comments: ['이런 일상 좋다', '일본 가고 싶다', '디테일 미쳤다'] },
+    '운동': { preset: 'raw', bgm: 'trendy', emoji: '🏃', comments: ['오늘부터 한다', '100번 가능?', '무릎 조심하세요'] },
+    '요리': { preset: 'hipplug', bgm: 'humor', emoji: '🍳', comments: ['이건 저장', '해먹어야지', '재료가 뭐야'] },
+    '유머': { preset: 'raw', bgm: 'humor', emoji: '😂', comments: ['이거 실화냐', '빵 터졌다', '몇 번 봐도 웃김'] },
+    '반전': { preset: 'raw', bgm: 'tension', emoji: '🎭', comments: ['2번 봐야 이해됨', '소름 돋았다', '이게 반전이지'] },
+    '꿀팁': { preset: 'hipplug', bgm: 'trendy', emoji: '💡', comments: ['이건 진짜 유용', '바로 저장함', '오늘 해봐야지'] },
+    '자연': { preset: 'hipplug', bgm: 'docu', emoji: '🌿', comments: ['압도된다', '이게 한국이야?', '영상미 미쳤다'] },
+    'CCTV': { preset: 'issuehanjan', bgm: 'tension', emoji: '📹', comments: ['아찔하다', '전방주시 필수', '3초 만에 벌어짐'] },
+    '블랙박스': { preset: 'issuehanjan', bgm: 'tension', emoji: '🚗', comments: ['아찔하다', '저건 좀 심했다', '다들 조심하세요'] },
+    '신기한 현상': { preset: 'issuehanjan', bgm: 'tension', emoji: '✨', comments: ['이게 가능해?', '소름 돋았다', '과학적으로 설명되나'] },
+    '공감': { preset: 'raw', bgm: 'humor', emoji: '🙂', comments: ['완전 내 얘기', '이거 나잖아', '공감 100%'] }
+  };
+  const shortCfg = cat => SHORT_CFG[cat] || SHORT_CFG['유머'];
+
+  function renderPopRail(list) {
+    const box = el('popRail'); if (!box) return;
+    box.innerHTML = (list || []).map(v => {
+      const cfg = shortCfg(v.cat);
+      return `<button class="pop-item" data-id="${U.esc(v.id)}" aria-label="${U.esc(v.title)} · ${U.fmtNum(v.views)}회">
+        <div class="pop-thumb">
+          <span class="pop-ph" aria-hidden="true">${cfg.emoji}</span>
+          ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none'">` : ''}
+          <span class="pop-views">${U.fmtNum(v.views)}</span>
+          <span class="pop-cat">${U.esc(v.cat || '인기')}</span>
+        </div>
+        <div class="pop-title">${U.esc(v.title)}</div>
+      </button>`;
+    }).join('');
+    box.querySelectorAll('.pop-item').forEach(b => b.addEventListener('click', () => {
+      const item = (list || []).find(x => String(x.id) === b.dataset.id);
+      if (item) selectShort(item);
+    }));
+  }
+
+  async function loadPopularRail() {
+    renderPopRail(RS.popularShorts);
+    const tag = el('popSource'); if (tag) tag.textContent = '샘플 · 11.27 조회수';
+    if (!RS.ai.hasYouTube()) return;
+    try {
+      const list = await RS.tube.popular();
+      if (list && list.length) {
+        renderPopRail(list);
+        if (tag) { tag.textContent = 'YouTube 실시간'; tag.className = 'tag lime'; }
+      }
+    } catch (e) {
+      if (tag) tag.textContent = '샘플 · API 실패';
+      RS.toast('인기 쇼츠 실시간 조회 실패 — 샘플로 보여줍니다: ' + e.message, 'err');
+    }
+  }
+
+  function showSourcePanel(v) {
+    const box = el('srcPanel'); if (!box) return;
+    box.hidden = false;
+    const th = el('spThumb');
+    if (v.thumb) { th.hidden = false; th.src = v.thumb; } else { th.hidden = true; th.removeAttribute('src'); }
+    el('spCat').textContent = (v.cat || '인기') + ' · 인기 쇼츠';
+    el('spTitle').textContent = v.title || '';
+    el('spMeta').textContent = '조회 ' + U.fmtNum(v.views) + '회' + (v.channel ? ' · ' + v.channel : '') + ' · YouTube Shorts';
+    const open = el('spOpen');
+    if (v.url) { open.href = v.url; open.hidden = false; } else { open.hidden = true; }
+    const fs = el('spFileState'); if (fs) fs.hidden = true;
+    S.ui.picked = v;
+  }
+
+  function selectShort(v) {
+    if (!v) return;
+    const p = S.project, cfg = shortCfg(v.cat);
+    p.name = String(v.title || '인기 쇼츠').slice(0, 34);
+    p.topic = v.title || '';
+    el('aiTopic').value = p.topic;
+    el('aiLang').value = 'ko';
+    el('aiLen').value = '28';
+    applyScript(RS.ai.viral(v.title || '', v.cat || '유머'), 'ko');
+    if (p.cues[0]) p.cues[0].sfx = 'impact';
+    const seed = String(v.title || '').length;
+    [2, 5].forEach((idx, k) => {
+      const c = p.cues[idx]; if (!c) return;
+      c.comment = { on: true, text: cfg.comments[(seed + k * 2) % cfg.comments.length], name: '시청자' };
+    });
+    const pr = S.presets.find(x => x.id === cfg.preset);
+    if (pr) applyPreset(pr);
+    p.bgm = Object.assign({}, p.bgm, { id: cfg.bgm, on: true });
+    showSourcePanel(v);
+    renderCues(); syncProjectToUI(true); drawStatic(); touch();
+    setTab('script');
+    setTimeout(() => { if (!el('srcPanel').hidden) el('srcPanel').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
+    RS.toast((v.cat || '인기') + ' 쇼츠 세팅 완료 · 위 패널에서 원본 링크와 파일 올리기를 바로 쓰세요', 'ok');
+  }
+
+  function bindSourcePanel() {
+    if (!el('spClose')) return;
+    el('spClose').addEventListener('click', () => { el('srcPanel').hidden = true; });
+    el('spFile').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if (f) loadVideoFile(f);
+      e.target.value = '';
+    });
+    const drop = el('spDrop');
+    if (drop) {
+      drop.addEventListener('click', () => el('spFile').click());
+      ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('dragover'); }));
+      ['dragleave', 'dragend'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('dragover')));
+      drop.addEventListener('drop', e => {
+        e.preventDefault(); drop.classList.remove('dragover');
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) loadVideoFile(f);
+      });
+    }
+  }
+
+  /* ── 내 보이스 보관함 ───────────────────────────────── */
+  const VL = { items: [], db: null, preview: null, previewURL: null, curId: null };
+  const TTS_VOICES = {
+    openai: [['alloy', 'Alloy'], ['nova', 'Nova'], ['shimmer', 'Shimmer'], ['onyx', 'Onyx'], ['echo', 'Echo'], ['fable', 'Fable']],
+    eleven: [['21m00Tcm4TlvDq8ikWAM', 'Rachel'], ['pNInz6obpgDQGcFmaJgB', 'Adam'], ['EXAVITQu4vr4xnSDxMaL', 'Sarah'], ['TxGEqnHWrfWFTfGW9XjX', 'Josh']]
+  };
+  const fmtMB = n => n < 1048576 ? Math.max(1, Math.round(n / 1024)) + 'KB' : (n / 1048576).toFixed(1) + 'MB';
+
+  function vlOpen() {
+    return new Promise(resolve => {
+      try {
+        const r = indexedDB.open('reelstudio.voices', 1);
+        r.onupgradeneeded = () => { try { r.result.createObjectStore('voices', { keyPath: 'id' }); } catch (e) {} };
+        r.onsuccess = () => { VL.db = r.result; resolve(r.result); };
+        r.onerror = () => resolve(null);
+      } catch (e) { resolve(null); }
+    });
+  }
+  function vlStore(mode) { return VL.db.transaction('voices', mode).objectStore('voices'); }
+  function vlAll() {
+    return new Promise(resolve => {
+      if (!VL.db) return resolve([]);
+      const req = vlStore('readonly').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    });
+  }
+  function vlPut(item) { if (!VL.db) return; try { vlStore('readwrite').put(item); } catch (e) {} }
+  function vlDelete(id) { if (!VL.db) return; try { vlStore('readwrite').delete(id); } catch (e) {} }
+
+  function probeDur(blob) {
+    return new Promise(res => {
+      let u = URL.createObjectURL(blob), a = new Audio();
+      const done = v => { URL.revokeObjectURL(u); res(v); };
+      a.preload = 'metadata';
+      a.onloadedmetadata = () => done(a.duration || 0);
+      a.onerror = () => done(0);
+      a.src = u;
+    });
+  }
+
+  async function voiceLibInit() {
+    await vlOpen();
+    VL.items = await vlAll();
+    renderVoiceLib();
+    if (S.project.voice.itemId) {
+      const it = VL.items.find(x => x.id === S.project.voice.itemId);
+      if (it) applyVoice(it, true);
+    }
+  }
+
+  function renderVoiceLib() {
+    const box = el('voiceLib'); if (!box) return;
+    el('voiceLibCount').textContent = VL.items.length + '개';
+    VL.items.sort((a, b) => b.addedAt - a.addedAt);
+    if (!VL.items.length) {
+      box.innerHTML = '<div class="voice-empty">아직 담긴 보이스가 없습니다. 타입캐스트에서 받은 mp3를 올려두면 여기서 딸깍 교체됩니다.</div>';
+    } else {
+      box.innerHTML = VL.items.map(it => {
+        const on = VL.curId === it.id;
+        const src = it.source === 'openai' ? 'OpenAI' : it.source === 'eleven' ? 'ElevenLabs' : '내 파일';
+        return `<div class="vcard${on ? ' on' : ''}" data-id="${it.id}" role="button" tabindex="0" aria-label="${U.esc(it.name)} 적용">
+          <button class="vdel" data-del="${it.id}" title="삭제">✕</button>
+          <div class="vn">${U.esc(it.name)}</div>
+          <div class="vs">${src} · ${fmtMB(it.size)}${it.dur ? ' · ' + it.dur.toFixed(1) + '초' : ''}${on ? ' · <span class="von">적용됨</span>' : ''}</div>
+          <div class="vacts"><button class="vplay" data-play="${it.id}">▶ 미리듣기</button></div>
+        </div>`;
+      }).join('');
+    }
+    const name = S.project.voice.fileName;
+    el('voiceNow').textContent = name
+      ? ('지금 나레이션: ' + name + ' · ' + S.project.voice.rate.toFixed(2) + 'x · 미리보기와 MP4에 섞입니다')
+      : '지금 나레이션: 없음 (브라우저 TTS로만 읽습니다)';
+  }
+
+  function stopVoicePreview() {
+    if (VL.preview) { try { VL.preview.pause(); } catch (e) {} VL.preview = null; }
+    if (VL.previewURL) { URL.revokeObjectURL(VL.previewURL); VL.previewURL = null; }
+  }
+  function previewVoice(it) {
+    stopVoicePreview();
+    const url = URL.createObjectURL(it.blob);
+    const a = new Audio(url);
+    VL.previewURL = url; VL.preview = a;
+    a.onended = stopVoicePreview;
+    a.play().then(() => RS.toast('▶ ' + it.name)).catch(err => RS.toast('재생 실패: ' + err.message, 'err'));
+  }
+
+  async function applyVoice(it, silent) {
+    try {
+      await A.loadNarration(it.blob);
+      S.project.voice.file = it.name;
+      S.project.voice.fileName = it.name;
+      S.project.voice.itemId = it.id;
+      S.media.narrationName = it.name;
+      VL.curId = it.id;
+      el('voiceFileName').textContent = it.name;
+      el('voiceFileClear').hidden = false;
+      renderVoiceLib(); touch();
+      if (!silent) RS.toast('딸깍 교체 · ' + it.name + ' · ' + S.project.voice.rate.toFixed(2) + 'x로 바로 섞입니다', 'ok');
+    } catch (e) {
+      RS.toast('이 파일은 읽지 못했습니다: ' + e.message, 'err');
+    }
+  }
+
+  async function addVoiceFiles(files) {
+    const list = Array.from(files || []).filter(f => /^audio\//.test(f.type) || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
+    if (!list.length) { RS.toast('mp3 · wav · m4a 파일을 올려주세요', 'err'); return; }
+    let added = 0;
+    for (const f of list) {
+      const it = {
+        id: U.uid(), name: f.name.replace(/\.[^.]+$/, ''), blob: f, size: f.size,
+        type: f.type, addedAt: Date.now(), source: 'file', dur: 0
+      };
+      try { it.dur = await probeDur(f); } catch (e) {}
+      VL.items.push(it); vlPut(it); added++;
+    }
+    renderVoiceLib();
+    RS.toast(added + '개 보이스를 담았습니다 · 카드를 누르면 바로 교체됩니다', 'ok');
+  }
+
+  async function removeVoice(it) {
+    if (!(await RS.confirm('보이스 삭제', '"' + it.name + '" 을(를) 보관함에서 지울까요?'))) return;
+    vlDelete(it.id);
+    if (VL.curId === it.id) {
+      VL.curId = null;
+      A.stopNarration(); A.narrationBuf = null;
+      S.project.voice.file = null; S.project.voice.fileName = null; S.project.voice.itemId = null;
+      S.media.narrationName = null;
+      el('voiceFileName').textContent = '없음 (타입캐스트 수민 mp3 등)';
+      el('voiceFileClear').hidden = true;
+      touch();
+    }
+    VL.items = VL.items.filter(x => x.id !== it.id);
+    renderVoiceLib();
+    RS.toast('삭제했습니다');
+  }
+
+  /* ── API TTS (선택) ─────────────────────────────────── */
+  function updateTtsState() {
+    if (!el('ttsState')) return;
+    const p = el('ttsProvider').value;
+    const key = p === 'openai' ? S.settings.openai : S.settings.eleven;
+    el('ttsState').textContent = key ? '키 있음' : '키 없음';
+    el('ttsState').className = 'tag' + (key ? ' lime' : '');
+  }
+  function fillTtsVoices() {
+    const box = el('ttsVoice'); if (!box) return;
+    const p = el('ttsProvider').value;
+    box.innerHTML = TTS_VOICES[p].map(v => `<option value="${v[0]}">${v[1]}</option>`).join('');
+    updateTtsState();
+  }
+  async function ttsFetch(text) {
+    const p = el('ttsProvider').value;
+    const voice = el('ttsVoice').value;
+    if (p === 'openai') {
+      const key = S.settings.openai;
+      if (!key) throw new Error('설정에 OpenAI 키를 넣어주세요');
+      const r = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+        body: JSON.stringify({ model: 'gpt-4o-mini-tts', voice, input: text, response_format: 'mp3' })
+      });
+      if (!r.ok) throw new Error('OpenAI ' + r.status + ' · ' + (await r.text()).slice(0, 140));
+      return r.blob();
+    }
+    const key = S.settings.eleven;
+    if (!key) throw new Error('설정에 ElevenLabs 키를 넣어주세요');
+    const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + encodeURIComponent(voice), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'xi-api-key': key },
+      body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2', voice_settings: { stability: 0.5, similarity_boost: 0.75 } })
+    });
+    if (!r.ok) throw new Error('ElevenLabs ' + r.status + ' · ' + (await r.text()).slice(0, 140));
+    return r.blob();
+  }
+  function ttsPlay(blob) {
+    const a = el('ttsAudio');
+    if (a._url) URL.revokeObjectURL(a._url);
+    a._url = URL.createObjectURL(blob);
+    a.src = a._url;
+    a.play().catch(e => RS.toast('재생 실패: ' + e.message, 'err'));
+  }
+
+  function bindVoiceLib() {
+    if (!el('voiceLibInput')) return;
+    el('voiceLibInput').addEventListener('change', e => { addVoiceFiles(e.target.files); e.target.value = ''; });
+    const drop = el('voiceDrop');
+    if (drop) {
+      drop.addEventListener('click', () => el('voiceLibInput').click());
+      ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('dragover'); }));
+      ['dragleave', 'dragend'].forEach(t => drop.addEventListener(t, () => drop.classList.remove('dragover')));
+      drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('dragover'); addVoiceFiles(e.dataTransfer && e.dataTransfer.files); });
+    }
+    const box = el('voiceLib');
+    box.addEventListener('click', e => {
+      const card = e.target.closest('.vcard'); if (!card) return;
+      const it = VL.items.find(x => x.id === card.dataset.id); if (!it) return;
+      const del = e.target.closest('[data-del]');
+      const play = e.target.closest('[data-play]');
+      if (del) { e.stopPropagation(); removeVoice(it); return; }
+      if (play) { e.stopPropagation(); previewVoice(it); return; }
+      applyVoice(it);
+    });
+    box.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.vcard'); if (!card) return;
+      const it = VL.items.find(x => x.id === card.dataset.id);
+      if (it) { e.preventDefault(); applyVoice(it); }
+    });
+    el('voiceLibClear').addEventListener('click', async () => {
+      if (!VL.items.length) { RS.toast('보관함이 비어 있습니다'); return; }
+      if (!(await RS.confirm('보관함 비우기', '담긴 보이스 ' + VL.items.length + '개를 모두 지울까요? 되돌릴 수 없습니다.'))) return;
+      VL.items.forEach(it => vlDelete(it.id));
+      VL.items = [];
+      stopVoicePreview();
+      renderVoiceLib();
+      RS.toast('보관함을 비웠습니다');
+    });
+    el('copyVoiceScript').addEventListener('click', async () => {
+      const text = S.project.cues.map(c => U.strip(c.text)).filter(Boolean).join('\n');
+      if (!text) { RS.toast('먼저 대본을 만들어 주세요', 'err'); return; }
+      const ok = await U.copy(text);
+      window.open('https://typecast.ai', '_blank', 'noopener');
+      RS.toast(ok
+        ? '대본 ' + S.project.cues.length + '줄 복사 · 타입캐스트를 새 탭에서 열었습니다'
+        : '복사 실패 — 대본을 직접 선택해 복사한 뒤 타입캐스트에서 생성하세요', ok ? 'ok' : 'err');
+    });
+    el('ttsProvider').addEventListener('change', fillTtsVoices);
+    fillTtsVoices();
+    el('ttsSample').addEventListener('click', async () => {
+      const btn = el('ttsSample');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성';
+      try {
+        const blob = await ttsFetch('안녕하세요, 릴 스튜디오입니다. 이 목소리로 대본을 읽어볼게요.');
+        ttsPlay(blob);
+        RS.toast('샘플 목소리를 재생합니다', 'ok');
+      } catch (e) { RS.toast(e.message, 'err'); }
+      finally { btn.disabled = false; btn.textContent = '▶ 샘플'; }
+    });
+    el('ttsGenerate').addEventListener('click', async () => {
+      const text = S.project.cues.map(c => U.strip(c.text)).filter(Boolean).join(' ');
+      if (!text) { RS.toast('먼저 대본을 만들어 주세요', 'err'); return; }
+      const btn = el('ttsGenerate');
+      btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 생성중';
+      try {
+        const blob = await ttsFetch(text);
+        const p = el('ttsProvider').value;
+        const label = (TTS_VOICES[p].find(v => v[0] === el('ttsVoice').value) || [0, 'AI'])[1];
+        const it = {
+          id: U.uid(), name: (p === 'openai' ? 'OpenAI' : 'ElevenLabs') + ' · ' + label,
+          blob, size: blob.size, type: 'audio/mpeg', addedAt: Date.now(), source: p, dur: 0
+        };
+        try { it.dur = await probeDur(blob); } catch (e) {}
+        VL.items.push(it); vlPut(it);
+        await applyVoice(it, true);
+        RS.toast('생성 완료 · 보관함에 담고 바로 적용했습니다', 'ok');
+      } catch (e) { RS.toast(e.message, 'err'); }
+      finally { btn.disabled = false; btn.textContent = '대본으로 생성'; }
+    });
+  }
+
   /* ── one-click: discover → script ───────────────────── */
   const COMMENTS = {
     animal: ['심장 쫄깃했다', '이건 못 참지', '눈물 나네', '와 이건 좀', '혼자 보기 아깝다'],
@@ -529,9 +926,16 @@
 
   /* ── cues ───────────────────────────────────────────── */
   function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight) + 'px'; }
+  function cueMetaText(c) {
+    const sfx = c.sfx ? ((RS.sfxList.find(s => s.id === c.sfx) || {}).name || c.sfx) : '없음';
+    const cmt = c.comment && c.comment.on ? ('댓글: ' + (c.comment.text || '내용 없음')) : '댓글 없음';
+    return (+c.start).toFixed(1) + '~' + (+c.end).toFixed(1) + 's · 효과음: ' + sfx + ' · ' + cmt;
+  }
   function updateCueDuration(row, c) {
     const d = row.querySelector('.cue-dur');
     if (d) d.textContent = (c.end - c.start).toFixed(1) + '초';
+    const m = row.querySelector('.cue-meta');
+    if (m) m.textContent = cueMetaText(c);
     updateMetaLine();
   }
   function selectCue(id, noScroll) {
@@ -546,15 +950,23 @@
   function renderCues() {
     const p = S.project;
     const list = el('cueList');
+    const openIds = new Set(Array.from(list.querySelectorAll('.cue.is-open')).map(r => r.dataset.id));
     list.innerHTML = '';
     p.cues.forEach((c, i) => {
+      const open = openIds.has(c.id);
       const row = document.createElement('div');
-      row.className = 'cue' + (S.ui.selectedCue === c.id ? ' is-active' : '');
+      row.className = 'cue' + (S.ui.selectedCue === c.id ? ' is-active' : '') + (open ? ' is-open' : '');
       row.dataset.id = c.id;
       row.innerHTML = `
-        <button class="cue-no" title="이 큐로 이동">${i + 1}</button>
-        <div>
+        <div class="cue-main">
+          <button class="cue-no" title="이 큐로 이동">${i + 1}</button>
           <textarea class="cue-text" rows="1" spellcheck="false" placeholder="자막 문장">${U.esc(c.text)}</textarea>
+          <button class="cue-ic cue-play" title="이 구간 재생">▶</button>
+          <button class="cue-ic cue-more${open ? ' on' : ''}" aria-expanded="${open}" title="시작·끝·효과음·댓글">⚙</button>
+          <button class="cue-ic cue-del" title="큐 삭제">✕</button>
+        </div>
+        <button class="cue-meta" title="눌러서 세부 설정">${U.esc(cueMetaText(c))}</button>
+        <div class="cue-extra"${open ? '' : ' hidden'}>
           <div class="cue-times">
             <input class="cue-start" type="number" step="0.1" min="0" value="${(+c.start).toFixed(1)}" aria-label="시작">
             <span class="to">→</span>
@@ -568,8 +980,6 @@
             </select>
             <label class="cmt-toggle"><input type="checkbox" class="cue-cmt-on"${c.comment.on ? ' checked' : ''}> 댓글</label>
             <input class="cmt-text" placeholder="댓글 내용" value="${U.esc(c.comment.text || '')}">
-            <button class="cue-play" title="이 큐 미리듣기">▶</button>
-            <button class="cue-del" title="큐 삭제">✕</button>
           </div>
         </div>`;
       list.appendChild(row);
@@ -632,6 +1042,7 @@
     el('voiceRate').addEventListener('input', e => {
       S.project.voice.rate = +e.target.value / 100;
       el('voiceRateVal').textContent = S.project.voice.rate.toFixed(2) + 'x';
+      if (el('voiceNow')) renderVoiceLib();
       touch();
     });
     el('voiceVol').addEventListener('input', e => {
@@ -653,9 +1064,12 @@
         await A.loadNarration(f);
         S.project.voice.file = f.name;
         S.project.voice.fileName = f.name;
+        S.project.voice.itemId = null;
+        VL.curId = null;
         S.media.narrationName = f.name;
         el('voiceFileName').textContent = f.name;
         el('voiceFileClear').hidden = false;
+        renderVoiceLib();
         touch();
         RS.toast('나레이션 올림 · ' + f.name + ' (영상에 실제로 섞입니다)', 'ok');
       } catch (err) { RS.toast('오디오를 읽지 못했습니다: ' + err.message, 'err'); }
@@ -664,7 +1078,8 @@
     el('voiceFileClear').addEventListener('click', () => {
       A.stopNarration();
       A.narrationBuf = null;
-      S.project.voice.file = null; S.project.voice.fileName = null; S.media.narrationName = null;
+      S.project.voice.file = null; S.project.voice.fileName = null; S.project.voice.itemId = null; S.media.narrationName = null;
+      VL.curId = null; renderVoiceLib();
       el('voiceFileName').textContent = '없음 (타입캐스트 수민 mp3 등)';
       el('voiceFileClear').hidden = true;
       touch();
@@ -789,7 +1204,7 @@
       S.media.video.play().catch(() => {});
     }
     A.setVoiceVolume(p.voice.volume == null ? 1 : p.voice.volume);
-    if (p.voice.file && A.narrationBuf) A.startNarration(S.player.t);
+    if (p.voice.file && A.narrationBuf) A.startNarration(S.player.t, p.voice.rate);
     updatePlayBtns();
   }
 
@@ -1315,7 +1730,7 @@
     const ctxA = A.ctx;
     const wallStart = performance.now();
     if (p.bgm.on && p.bgm.id) A.startBgm(p.bgm.id, 0, p.bgm.volume);
-    if (p.voice.file && A.narrationBuf) A.startNarration(0);
+    if (p.voice.file && A.narrationBuf) A.startNarration(0, p.voice.rate);
     if (p.source.type === 'video' && S.media.video && S.media.video.src) {
       A.bindVideo(S.media.video);
       try { S.media.video.currentTime = 0; await S.media.video.play().catch(() => {}); } catch (e) {}
@@ -1444,24 +1859,30 @@
     if (!box) return;
     list = list || RS.demoDiscover;
     box.innerHTML = list.map((v, i) => {
-      const views = U.fmtNum(v.views), subs = v.subs ? U.fmtNum(v.subs) : '—';
-      const ratio = v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs) || 0).toFixed(2);
-      const hot = v.ratio >= 3;
+      const views = U.fmtNum(v.views);
+      const hasSubs = v.subs > 0;
+      const ratio = hasSubs ? (v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs)).toFixed(2)) : '';
+      const hot = hasSubs && v.ratio >= 3;
       const hue = 196 + (i * 29) % 90;
-      return `<button class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}">
+      const badge = hasSubs ? `${hot ? '🔥 ' : ''}${ratio}` : `🔥 ${views}`;
+      return `<button class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}" data-cat="${U.esc(v.cat || v.kw || '')}">
         <div class="thumb">
           ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 32% 16%),#0b0d12 70%)">▶</div>`}
-          <span class="ratio">${hot ? '🔥 ' : ''}${ratio}</span>
+          <span class="ratio">${badge}</span>
           <span class="len">${U.fmtClock(v.len)}</span>
         </div>
         <div class="rc-body">
           <div class="rc-title">${U.esc(v.title)}</div>
-          <div class="rc-meta"><span>${U.esc(v.channel)}</span><span><b>${views}</b>회</span><span>구독 ${subs}</span><span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span></div>
-          <div class="rc-cta">이 각도로 대본 만들기 →</div>
+          <div class="rc-meta"><span>${U.esc(v.channel)}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span></div>
+          <div class="rc-cta">눌러서 원본·대본 다루기 →</div>
         </div>
       </button>`;
     }).join('');
-    box.querySelectorAll('.rcard').forEach(card => card.addEventListener('click', () => oneClickImport(card.dataset.title)));
+    box.querySelectorAll('.rcard').forEach(card => card.addEventListener('click', () => {
+      const v = list.find(x => String(x.id) === card.dataset.id);
+      if (v && v.url) selectShort(v);
+      else oneClickImport(card.dataset.title);
+    }));
   }
   function bindDiscoverOnce() {
     el('dSearch').addEventListener('click', runDiscover);
@@ -1574,6 +1995,8 @@
     el('stYtKey').value = S.settings.youtube || '';
     el('stGemKey').value = S.settings.gemini || '';
     el('stOauth').value = S.settings.oauth || '';
+    el('stOpenai').value = S.settings.openai || '';
+    el('stEleven').value = S.settings.eleven || '';
     el('stYtState').textContent = '';
     el('stGemState').textContent = '';
     const p = S.project;
@@ -1614,7 +2037,10 @@
       S.settings.youtube = el('stYtKey').value.trim();
       S.settings.gemini = el('stGemKey').value.trim();
       S.settings.oauth = el('stOauth').value.trim();
+      S.settings.openai = el('stOpenai').value.trim();
+      S.settings.eleven = el('stEleven').value.trim();
       RS.store.saveSettings(S.settings);
+      updateTtsState();
       updateMode(); updateAuthUI();
       RS.toast('키를 저장했습니다 (이 브라우저에만)', 'ok');
     });
@@ -1622,6 +2048,7 @@
       if (!(await RS.confirm('키 지우기', '저장된 API 키 3개를 지웁니다. 계속할까요?'))) return;
       S.settings = {}; RS.store.saveSettings({});
       el('stYtKey').value = ''; el('stGemKey').value = ''; el('stOauth').value = '';
+      el('stOpenai').value = ''; el('stEleven').value = '';
       updateMode(); updateAuthUI(); RS.toast('키를 지웠습니다');
     });
     el('stYtTest').addEventListener('click', async () => {

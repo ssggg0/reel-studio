@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261127t">
+<link rel="stylesheet" href="css/style.css?v=20261127u">
 </head>
 <body>
 <div id="app">
@@ -108,22 +108,22 @@
         <div class="field-row" style="margin-bottom:0">
           <label class="field grow">
             <span class="lab">직접 검색</span>
-            <input id="dKeyword" list="kwList" placeholder="예: 코스피 폭락, 수능 AI, 홈플러스" value="코스피 폭락">
+            <input id="dKeyword" list="kwList" placeholder="예: 강아지, 반전, CCTV, 생활꿀팁" value="동물">
             <datalist id="kwList">
-              <option value="코스피 폭락"><option value="수능 AI 커닝"><option value="로또 1등">
-              <option value="국민연금"><option value="홈플러스"><option value="환율 1,500원">
-              <option value="전세사기"><option value="삼성전자"><option value="AI 일자리">
+              <option value="동물"><option value="반전"><option value="CCTV">
+              <option value="생활꿀팁"><option value="해외일상"><option value="신기한 현상">
+              <option value="요리"><option value="자연"><option value="유머">
             </datalist>
           </label>
           <button class="btn primary" id="dSearch">분석</button>
         </div>
         <div class="chips" id="dChips">
-          <button class="chip" data-kw="코스피 폭락">코스피</button>
-          <button class="chip" data-kw="수능 AI 커닝">수능 AI</button>
-          <button class="chip" data-kw="로또 1등">로또</button>
-          <button class="chip" data-kw="국민연금 개혁">국민연금</button>
-          <button class="chip" data-kw="홈플러스 배송">홈플러스</button>
-          <button class="chip" data-kw="전세사기">전세사기</button>
+          <button class="chip" data-kw="동물">🐾 고양이·강아지</button>
+          <button class="chip" data-kw="반전">🎭 해외밈·반전</button>
+          <button class="chip" data-kw="사고">📹 CCTV·블랙박스</button>
+          <button class="chip" data-kw="꿀팁">💡 생활꿀팁</button>
+          <button class="chip" data-kw="해외일상">🗾 일본·해외일상</button>
+          <button class="chip" data-kw="신기한">✨ 신기한 현상</button>
         </div>
         <details class="filters">
           <summary>세부 필터 <span id="filterNow">한국 · 쇼츠 · 10만+ · 떡상률순</span></summary>
@@ -143,6 +143,16 @@
           </div>
         </details>
       </div>
+
+      <!-- 인기 쇼츠 가로 레일 -->
+      <section class="card pop-wrap">
+        <div class="card-head">
+          <h2>🔥 지금 터지는 인기 쇼츠 <span class="pop-sub">· 눌러서 원본 다루기</span></h2>
+          <span class="tag" id="popSource">샘플</span>
+        </div>
+        <div class="pop-rail" id="popRail" aria-label="인기 쇼츠 가로 목록"></div>
+        <p class="hint pop-hint">카드를 누르면 그 쇼츠의 훅·대본이 깔리고, <b>원본 영상 링크</b>와 <b>내 파일 올리기</b> 칸이 함께 열립니다. 옆으로 넘겨서 더 보세요.</p>
+      </section>
 
       <div class="result-head">
         <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터</span>
@@ -164,6 +174,29 @@
           <p>스타일 카드 하나 고르고, 원본을 얹은 뒤 대본만 손보면 끝납니다. 수정은 미리보기에 즉시 반영됩니다.</p>
         </div>
         <button class="btn ghost sm" id="sNewProject">새 프로젝트</button>
+      </div>
+
+      <!-- 선택한 인기 쇼츠 원본 패널 -->
+      <div class="card src-panel" id="srcPanel" hidden>
+        <div class="sp-top">
+          <div class="sp-thumb"><img id="spThumb" alt="선택한 쇼츠 썸네일" referrerpolicy="no-referrer"></div>
+          <div class="sp-info">
+            <span class="sp-cat" id="spCat">인기 쇼츠</span>
+            <div class="sp-title" id="spTitle"></div>
+            <div class="sp-meta" id="spMeta"></div>
+            <div class="sp-acts">
+              <a class="btn primary sm" id="spOpen" href="#" target="_blank" rel="noopener">원본 영상 열기 ↗</a>
+              <label class="btn outline sm file-btn">
+                <input type="file" id="spFile" accept="video/mp4,video/quicktime,video/webm,video/*">
+                내 폰 원본 파일 올리기
+              </label>
+              <button class="btn ghost sm" id="spClose">패널 닫기</button>
+            </div>
+          </div>
+        </div>
+        <div class="sp-drop" id="spDrop" tabindex="0">여기로 원본 mp4·mov 를 끌어다 놓아도 됩니다 · 아이폰은 ‘파일’ 앱에서 선택</div>
+        <div class="sp-file" id="spFileState" hidden></div>
+        <p class="hint">유튜브 정책상 남의 쇼츠 원본을 자동으로 내려받지는 않습니다. 내려받은 파일을 올리면 이 대본·스타일 그대로 바로 편집합니다.</p>
       </div>
 
       <div class="card">
@@ -228,7 +261,7 @@
         <div class="sec-body">
           <label class="field">
             <span class="lab">주제 · 각도 <em>한 줄이면 충분합니다</em></span>
-            <textarea id="aiTopic" rows="2" placeholder="예: 젠슨황 한마디에 폭등한 코스피가 하루 만에 4,697까지 무너진 이유"></textarea>
+            <textarea id="aiTopic" rows="2" placeholder="예: 북한말로 부르면 알아듣는 강아지가 화제인 이유"></textarea>
           </label>
           <div class="field-row">
             <label class="field"><span class="lab">문체</span>
@@ -341,6 +374,35 @@
           <span class="hint">BGM 20% · 말할 때 85% 낮춤 · 원본 50%</span>
         </div>
         <p class="hint">카드를 누르면 <b>바로 들리면서 동시에 영상에 적용</b>됩니다. 우상단 ▶는 미리듣기만.</p>
+      </div>
+
+      <div class="card" id="voiceLibCard">
+        <div class="card-head"><h2>내 보이스 보관함</h2><span class="tag" id="voiceLibCount">0개</span></div>
+        <p class="hint">타입캐스트 베이직은 외부 API를 지원하지 않습니다. 받아둔 mp3를 여기 올려두고 카드를 <b>딸깍</b>하면 나레이션으로 바로 교체됩니다.</p>
+        <div class="toolbar">
+          <button class="btn primary sm" id="copyVoiceScript">📋 대본 1초 복사 + 타입캐스트 열기</button>
+          <label class="btn outline sm file-btn">
+            <input type="file" id="voiceLibInput" accept="audio/mpeg,audio/mp3,audio/wav,audio/x-wav,audio/mp4,audio/m4a,audio/*" multiple>
+            보이스 파일 올리기
+          </label>
+          <button class="btn ghost sm" id="voiceLibClear">보관함 비우기</button>
+        </div>
+        <div class="vdrop" id="voiceDrop">mp3 · wav · m4a 여러 개를 한 번에 끌어다 놓으세요</div>
+        <div class="voice-lib" id="voiceLib"></div>
+        <div class="voice-now" id="voiceNow">지금 나레이션: 없음 (브라우저 TTS)</div>
+      </div>
+
+      <div class="card" id="apiTtsCard">
+        <div class="card-head"><h2>API TTS <span class="tag sm">선택</span></h2><span class="tag" id="ttsState">키 없음</span></div>
+        <p class="hint">OpenAI·ElevenLabs 키를 설정에 넣으면 목소리 샘플을 먼저 듣고, 현재 대본을 그 목소리로 바로 생성해 보관함에 담습니다.</p>
+        <div class="field-row">
+          <label class="field"><span class="lab">제공자</span>
+            <select id="ttsProvider"><option value="openai">OpenAI TTS</option><option value="eleven">ElevenLabs</option></select></label>
+          <label class="field grow"><span class="lab">목소리</span><select id="ttsVoice"></select></label>
+          <button class="btn ghost sm" id="ttsSample">▶ 샘플</button>
+          <button class="btn primary sm" id="ttsGenerate">대본으로 생성</button>
+        </div>
+        <audio id="ttsAudio" hidden></audio>
       </div>
 
       <div class="card">
@@ -598,6 +660,15 @@
           </details>
 
           <label class="field">
+            <span class="lab">OpenAI API 키 <em>API TTS 선택</em></span>
+            <input id="stOpenai" type="password" autocomplete="off" placeholder="sk-...">
+          </label>
+          <label class="field">
+            <span class="lab">ElevenLabs API 키 <em>API TTS 선택</em></span>
+            <input id="stEleven" type="password" autocomplete="off" placeholder="sk_...">
+          </label>
+
+          <label class="field">
             <span class="lab">Google OAuth Client ID <em>유튜브 업로드용</em></span>
             <input id="stOauth" type="password" autocomplete="off" placeholder="1234567890-abc.apps.googleusercontent.com">
           </label>
@@ -690,12 +761,12 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/core.js?v=20261127t"></script>
-<script src="js/audio.js?v=20261127t"></script>
-<script src="js/render.js?v=20261127t"></script>
-<script src="js/ai.js?v=20261127t"></script>
-<script src="js/tube.js?v=20261127t"></script>
-<script src="js/app.js?v=20261127t"></script>
+<script src="js/core.js?v=20261127u"></script>
+<script src="js/audio.js?v=20261127u"></script>
+<script src="js/render.js?v=20261127u"></script>
+<script src="js/ai.js?v=20261127u"></script>
+<script src="js/tube.js?v=20261127u"></script>
+<script src="js/app.js?v=20261127u"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

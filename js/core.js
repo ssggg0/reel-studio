@@ -239,59 +239,98 @@
 
   RS.demoProject = function () {
     const p = RS.newProject();
-    p.name = '젠슨황 약발 1일 천하';
-    p.topic = '젠슨황 한마디에 폭등한 코스피가 하루 만에 4,697까지 무너진 이유';
-    p.hook.line1 = '젠슨황 한마디에 폭등한 코스피';
-    p.hook.line2 = '하루 만에 4,697… 무슨 일?';
+    p.name = '북한말로 부르면 알아듣는 강아지';
+    p.topic = '한국말로 부르면 무시하는 강아지가 북한말에는 바로 반응한 이유';
+    p.hook.line1 = '이 강아지, 한국말은 몰라요';
+    p.hook.line2 = '북한말로 부르면 바로 반응합니다';
     const cues = [
-      ['코스피가 하루 만에 #4,697 까지 무너졌습니다', 0, 3.1],
-      ['지난주 젠슨황 한마디에 폭등했던 시장이', 3.1, 6.2],
-      ['하루 만에 전부 되돌려졌습니다', 6.2, 9.0],
-      ['문제는 반도체였습니다', 9.0, 11.4, '삼전 나만 물렸냐'],
-      ['엔비디아가 #3.4% 빠지자', 11.4, 14.0],
-      ['외국인은 #1조 2천억 을 팔아치웠습니다', 14.0, 17.4],
-      ['개인은 그걸 그대로 받아냈습니다', 17.4, 20.2, '개미가 다 받았네'],
-      ['약발이 하루 만에 끝난 걸까요', 20.2, 23.2],
-      ['관전 포인트는 이번 주 #FOMC 하나입니다', 23.2, 27.4]
+      ['한국말로 부르면 고개도 안 돌리는 강아지', 0, 3.0],
+      ['그런데 #북한말 로 부르자', 3.0, 5.6],
+      ['귀가 바로 쫑긋 섰습니다', 5.6, 8.0],
+      ['처음 듣는 말인데도 반응이 똑같습니다', 8.0, 11.4, '이게 말이 되나'],
+      ['강아지는 단어보다 #억양 을 먼저 기억합니다', 11.4, 15.0],
+      ['말의 뜻이 아니라 소리의 결을 읽는 겁니다', 15.0, 18.2],
+      ['그래서 이 영상이 계속 다시 돌아갑니다', 18.2, 21.0, '몇 번을 봐도 웃김'],
+      ['결국 통하는 건 말이 아니라 #관심 입니다', 21.0, 24.6]
     ];
     p.cues = cues.map((c, i) => ({
       id: U.uid(), text: c[0], start: c[1], end: c[2], sfx: i === 0 ? 'impact' : '',
       comment: { on: !!c[3], text: c[3] || '', name: '시청자' }
     }));
     p.meta.titles = [
-      '젠슨황 약발 1일 천하… 코스피 4,697까지 무너진 이유',
-      '하루 만에 1조 2천억 판 외국인, 개미는 뭘 받았나',
-      '폭등이 하루 만에 끝? 이번 주 FOMC가 답이다'
+      '한국말은 무시, 북한말엔 바로 반응하는 강아지',
+      '이 강아지가 알아듣는 말은 딱 하나였습니다',
+      '부르는 말보다 중요한 것, 강아지가 먼저 알고 있었습니다'
     ];
-    p.meta.desc = '지난주 젠슨황 한마디에 폭등했던 코스피가 하루 만에 4,697까지 밀렸습니다.\n반도체가 흔들리자 외국인은 1조 2천억을 순매도했고, 개인이 그 물량을 받아냈습니다.\n이번 주 FOMC가 다음 방향을 가를 관전 포인트입니다.\n\n#코스피 #증시 #반도체 #외국인 #FOMC';
-    p.meta.tags = '코스피,증시,반도체,외국인,개미,엔비디아,FOMC,주식';
+    p.meta.desc = '한국말로 부르면 무시하던 강아지가 북한말에는 바로 반응했습니다.\n강아지는 단어의 뜻보다 억양과 리듬을 먼저 기억합니다.\n결국 통하는 건 말이 아니라 관심이었습니다.\n\n#강아지 #반려견 #동물 #쇼츠';
+    p.meta.tags = '강아지,반려견,동물,쇼츠,반전';
     return p;
   };
 
+  /* ── 인기 쇼츠 풀 (2026-11-27 YouTube 인기 쇼츠 조회수 기준) ──
+     API 키가 없을 때 데모 데이터로 쓰고, 있으면 실제 검색 결과로 대체합니다. */
+  RS.viralPool = [
+    { id: "eS6ZBwjHoWI", cat: "동물", views: 51570000, title: "북한말로 불러야 알아듣는 강아지" },
+    { id: "WRirWdRi5gc", cat: "ASMR", views: 48360000, title: "toast asmr🍞" },
+    { id: "t6v6a4Hog0w", cat: "ASMR", views: 42480000, title: "ASMR Tooth Fairy Eats Your Teeth Candy 🦷🍭🧚‍♀️" },
+    { id: "p3UsCxQuxeY", cat: "ASMR", views: 39220000, title: "real vs. fake nail polish cracking ASMR🍓" },
+    { id: "35yH2r2-4bI", cat: "동물", views: 32530000, title: "잊지 못하는 강아지 모음집 1" },
+    { id: "7FgpiYQVXoA", cat: "동물", views: 26490000, title: "찹츄 마스터의 손길에 순식간에 당한 강아지들" },
+    { id: "h0FVO_Zn1zY", cat: "여행", views: 25860000, title: "이런 풍경이면 무슨 노래든 명곡이 돼.." },
+    { id: "g9TXLAbc-1Q", cat: "해외일상", views: 25180000, title: "일본인 아내와 5살 아이와 걸어서만 홋카이도를 여행해봤습니다" },
+    { id: "c94GU4DEkYs", cat: "운동", views: 22510000, title: "요즘 너무 핫한 이 운동, 100번 채우기 도전" },
+    { id: "H85ojZSV9lM", cat: "해외일상", views: 20280000, title: "참지 않는 K여친" },
+    { id: "A4anjbzpUmI", cat: "요리", views: 18920000, title: "계란을 이렇게 해 보세요, 매 끼니 이걸 먹습니다" },
+    { id: "qjHFz00cZrU", cat: "유머", views: 17450000, title: "해변에 아무데나 앉으면 안되는 이유" },
+    { id: "xtnq5RinY_A", cat: "요리", views: 16390000, title: "이거 알고 감자 매일 먹어요" },
+    { id: "FYYqujTehl0", cat: "유머", views: 15470000, title: "운수 좋은 날" },
+    { id: "d6uF-zl7CB0", cat: "반전", views: 14860000, title: "누가 설계했는지 궁금한 미끄럼틀 대참사" },
+    { id: "JEqDQyTqKS8", cat: "꿀팁", views: 14350000, title: "생활꿀팁 (샤워기 자가수리 외 다수)" },
+    { id: "APHvK7_R7oc", cat: "요리", views: 12520000, title: "밥도둑 류수영 스팸순두부찌개" },
+    { id: "KiEVKDr5XlQ", cat: "반전", views: 11340000, title: "감동적인 태국 반전 광고" },
+    { id: "Qfb_fB_Gptg", cat: "자연", views: 11230000, title: "자연에게 압도당하는 풍경" },
+    { id: "AUhL6uhYi5A", cat: "꿀팁", views: 10910000, title: "평생 써먹는 생활꿀팁" },
+    { id: "xSUTtXfO8ZI", cat: "꿀팁", views: 10400000, title: "생활꿀팁 끝판왕, 이건 진짜 저장해야함" },
+    { id: "3QwQUCs31nk", cat: "여행", views: 10120000, title: "해외느낌 물씬 풍기는 이국적인 대한민국 여행지TOP 11" },
+    { id: "St20bxuLQNo", cat: "운동", views: 8790000, title: "3년 홈트의 결과 아내의 최후" },
+    { id: "bwtSrNBnXKI", cat: "유머", views: 8640000, title: "테니스가 위험한 이유" },
+    { id: "JQzKVCF-lB0", cat: "반전", views: 8500000, title: "2번 봐야 이해되는 소름돋는 레전드 영상" },
+    { id: "P22fW-GBFI4", cat: "CCTV", views: 7910000, title: "고속도로 사고 CCTV 영상! 전방주시 태만" },
+    { id: "FrVqsmkEHVQ", cat: "자연", views: 6870000, title: "역대급 비현실적 풍경 명장면 2탄" },
+    { id: "3nIElzDpWxo", cat: "운동", views: 6520000, title: "하루 딱 100번만 해보세요❤️" },
+    { id: "LySRxG68X10", cat: "해외일상", views: 5500000, title: "(공감)일본인 10명 중 8명은 다 있다는 이것!" },
+    { id: "m_M7fkPnE6E", cat: "신기한 현상", views: 5330000, title: "쾌감 쩌는 신기한 자연현상" },
+    { id: "V92ZStfB7go", cat: "여행", views: 4630000, title: "세계 비현실적인 장소 TOP5 🌎" },
+    { id: "xuIwJjjB73Q", cat: "자연", views: 3540000, title: "신비한 자연 워터파크" },
+    { id: "eYr9CAFFQ40", cat: "공감", views: 2480000, title: "오줌싸개가 되면 생기는 충격적인 일..ㄷㄷ" },
+    { id: "HGCBA__W7CQ", cat: "CCTV", views: 2410000, title: "[실제상황: 그날의 CCTV] 폭탄이 된 드럼통(쇼츠)" },
+    { id: "WAKFEb0thEM", cat: "공감", views: 2190000, title: "그 시절 집 앞에서 즐기는 천연 똥물 워터파크ㄷㄷ" },
+    { id: "pqZDcDr4MLE", cat: "공감", views: 2170000, title: "동전 모아서 공짜로 부자 되는 법" },
+    { id: "DBCY8oewnbQ", cat: "신기한 현상", views: 1950000, title: "진짜 신기한데 웃긴 순간들ㄷㄷ" },
+    { id: "wL9F8GcmyAA", cat: "블랙박스", views: 320000, title: "무지성으로 꺾어버리네, 고속도로 사고" },
+  ];
+  const POPULAR_IDS = ['eS6ZBwjHoWI','WRirWdRi5gc','35yH2r2-4bI','h0FVO_Zn1zY','g9TXLAbc-1Q','c94GU4DEkYs','A4anjbzpUmI','qjHFz00cZrU','FYYqujTehl0','d6uF-zl7CB0','JEqDQyTqKS8','Qfb_fB_Gptg','P22fW-GBFI4','m_M7fkPnE6E','pqZDcDr4MLE','wL9F8GcmyAA'];
+  RS.popularShorts = POPULAR_IDS
+    .map(id => RS.viralPool.find(v => v.id === id))
+    .filter(Boolean)
+    .map(v => Object.assign({}, v, {
+      thumb: 'https://i.ytimg.com/vi/' + v.id + '/oar2.jpg',
+      url: 'https://www.youtube.com/shorts/' + v.id
+    }));
+
   /* ── demo discovery dataset (API 키 없을 때) ─────────── */
-  RS.demoDiscover = [
-    { id: 'd1', title: '하루 만에 4,697까지… 코스피 폭락한 진짜 이유', channel: '이슈한잔', views: 812000, subs: 12400, len: 32, days: 0, region: 'KR', kw: '코스피 폭락' },
-    { id: 'd2', title: '외국인이 1조 2천억 팔았다… 개미들은 뭘 샀을까', channel: '주식읽어주는남자', views: 1560000, subs: 210000, len: 48, days: 1, region: 'KR', kw: '코스피 폭락' },
-    { id: 'd3', title: '수능 AI 커닝, 실제로 가능했던 세 가지 방법', channel: '과학하는사람', views: 2340000, subs: 410000, len: 52, days: 3, region: 'KR', kw: '수능 AI 커닝' },
-    { id: 'd4', title: 'AI가 수능 영어 1등급? 감독관은 몰랐다', channel: '교육이슈', views: 640000, subs: 38000, len: 29, days: 2, region: 'KR', kw: '수능 AI 커닝' },
-    { id: 'd5', title: '로또 1등 12명 전원 자동… 이게 가능한 일?', channel: '이슈한잔', views: 1200000, subs: 12400, len: 31, days: 6, region: 'KR', kw: '로또 1등' },
-    { id: 'd6', title: '국민연금 두 번 받는 사람들, 152만 명의 비밀', channel: '연금연구소', views: 980000, subs: 87000, len: 44, days: 4, region: 'KR', kw: '국민연금' },
-    { id: 'd7', title: 'The 3-second rule that fixes any short', channel: 'CreatorLab', views: 4200000, subs: 820000, len: 40, days: 2, region: 'US', kw: 'shorts hook' },
-    { id: 'd8', title: 'Why every phone camera lies to you', channel: 'TechDecoded', views: 6100000, subs: 2100000, len: 58, days: 5, region: 'US', kw: 'camera' },
-    { id: 'd9', title: '【衝撃】日本のコンビニが消える日', channel: 'ニュース深掘り', views: 1700000, subs: 96000, len: 36, days: 1, region: 'JP', kw: 'コンビニ' },
-    { id: 'd10', title: '홈플러스 배송 중단, 매장은 어떻게 되나', channel: '유통워치', views: 430000, subs: 15000, len: 27, days: 3, region: 'KR', kw: '홈플러스' },
-    { id: 'd11', title: '전세사기 당하기 전에 꼭 확인해야 할 3가지', channel: '집주인노트', views: 2900000, subs: 99000, len: 51, days: 8, region: 'KR', kw: '전세사기' },
-    { id: 'd12', title: '이 영상 하나로 AI 편집 끝내기 (무료)', channel: '편집하는사람', views: 3500000, subs: 540000, len: 62, days: 4, region: 'KR', kw: 'AI 편집' },
-    { id: 'd13', title: '물에 빠진 아기 코끼리, 떠났던 무리가 돌아와 한 행동', channel: '야생의순간', views: 4200000, subs: 180000, len: 47, days: 2, region: 'KR', kw: '동물 구조' },
-    { id: 'd14', title: '집사가 모른 척하자 냥이가 꺼낸 마지막 수', channel: '고양이집사', views: 2900000, subs: 94000, len: 26, days: 1, region: 'KR', kw: '동물 구조' },
-    { id: 'd15', title: '경비견이 주인 대신 택한 선택, 3초 만에 벌어진 일', channel: '멍멍일기', views: 1500000, subs: 41000, len: 33, days: 4, region: 'KR', kw: '동물 구조' },
-    { id: 'd16', title: 'Gemini 3가 바꿔버린 검색의 미래', channel: 'AI읽어주는사람', views: 2100000, subs: 150000, len: 55, days: 2, region: 'KR', kw: 'AI 기술' },
-    { id: 'd17', title: '아이폰 18 루머 총정리, 진짜 바뀌는 건 딱 두 가지', channel: '테크브리핑', views: 1800000, subs: 220000, len: 42, days: 3, region: 'KR', kw: 'AI 기술' },
-    { id: 'd18', title: 'AI로 하루 만에 쇼츠 10편 만드는 법', channel: '자동화연구소', views: 980000, subs: 31000, len: 58, days: 5, region: 'KR', kw: 'AI 기술' },
-    { id: 'd19', title: 'A puppy who waited by the door for 3 days', channel: 'DailyPaws', views: 7400000, subs: 1200000, len: 38, days: 2, region: 'US', kw: 'animal rescue' },
-    { id: 'd20', title: 'AI agents just replaced this entire job', channel: 'TechDecoded', views: 5200000, subs: 2100000, len: 54, days: 1, region: 'US', kw: 'AI tech' },
-    { id: 'd21', title: '日本で話題の新型新幹線、乗る前に知るべきこと', channel: 'ニュース深掘り', views: 1300000, subs: 96000, len: 41, days: 3, region: 'JP', kw: 'コンビニ' }
-  ].map(d => Object.assign({}, d, { total: d.views, ratio: +(d.views / Math.max(1, d.subs)).toFixed(1), demo: true }));
+  RS.demoDiscover = RS.viralPool.map((v, i) => Object.assign({}, v, {
+    channel: v.cat,
+    subs: 0,
+    len: 28 + (i * 7) % 34,
+    days: (i * 3) % 7,
+    region: 'KR',
+    kw: v.cat,
+    thumb: 'https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg',
+    url: 'https://www.youtube.com/shorts/' + v.id,
+    total: v.views,
+    demo: true
+  }));
 
   /* ── storage ─────────────────────────────────────────── */
   const K = RS.KEYS = { project: 'reelstudio.project.v1', settings: 'reelstudio.settings.v1', presets: 'reelstudio.presets.v1' };

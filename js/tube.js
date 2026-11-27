@@ -33,11 +33,12 @@
     const minViews = +q.minViews || 0;
     if (!key) return T.demoSearch(q);
     const params = new URLSearchParams({
-      part: 'snippet', q: q.q || '쇼츠', type: 'video', maxResults: '30',
+      part: 'snippet', type: 'video', maxResults: '30',
       order: q.sort === 'date' ? 'date' : 'viewCount',
       publishedAfter: new Date(Date.now() - 1000 * 3600 * 24 * 45).toISOString(),
       key
     });
+    if (q.q) params.set('q', q.q);
     if (q.region) params.set('regionCode', q.region);
     if (q.dur === 'short') params.set('videoDuration', 'short');
     if (q.dur === 'long') params.set('videoDuration', 'long');
@@ -102,6 +103,57 @@
     else if (q.sort === 'date') list.sort((a, b) => a.days - b.days);
     else list.sort((a, b) => b.views - a.views);
     return list.map(v => Object.assign({}, v, { demo: true, published: new Date(Date.now() - v.days * 86400000).toISOString() }));
+  };
+
+
+  /* ── 인기 쇼츠 레일 (키가 있을 때 실시간) ─────────────── */
+  const CAT_RULES = [
+    ['CCTV', /cctv|폐쇄회로/i], ['블랙박스', /블랙박스|블박/i],
+    ['동물', /강아지|고양이|댕댕|냥|멍|동물|puppy|cat|dog|animal/i],
+    ['ASMR', /asmr|사운드|소리/i], ['요리', /레시피|요리|먹방|간식|recipe|food/i],
+    ['운동', /홈트|운동|다이어트|스쿼트|workout|gym/i], ['여행', /여행|풍경|travel|trip/i],
+    ['해외일상', /일본|도쿄|해외|외국|브이로그|vlog|japan/i],
+    ['꿀팁', /꿀팁|생활|청소|정리|tip|hack/i], ['자연', /자연|바다|하늘|산|숲|nature/i],
+    ['신기한 현상', /신기|현상|놀라|amazing|satisfying/i],
+    ['반전', /반전|뒤집|역전|twist/i], ['공감', /공감|일상|직장|학교/i]
+  ];
+  function catOf(title) {
+    const t = String(title || '');
+    for (const [name, re] of CAT_RULES) if (re.test(t)) return name;
+    return '유머';
+  }
+  T.popular = async function () {
+    const key = RS.state.settings.youtube;
+    if (!key) return [];
+    const params = new URLSearchParams({
+      part: 'snippet', type: 'video', videoDuration: 'short', order: 'viewCount',
+      maxResults: '25', regionCode: 'KR', relevanceLanguage: 'ko',
+      publishedAfter: new Date(Date.now() - 1000 * 3600 * 24 * 21).toISOString(), key
+    });
+    const r1 = await fetch(API + '/search?' + params.toString());
+    if (!r1.ok) {
+      if (r1.status === 403) throw new Error('YouTube API 한도 초과이거나 키가 막혔습니다 (403)');
+      throw new Error('인기 쇼츠 조회 실패 (' + r1.status + ')');
+    }
+    const d1 = await r1.json();
+    const ids = (d1.items || []).filter(i => i.id && i.id.videoId).map(i => i.id.videoId).join(',');
+    if (!ids) return [];
+    const r2 = await fetch(API + '/videos?part=snippet,statistics,contentDetails&id=' + ids + '&key=' + key);
+    if (!r2.ok) throw new Error('영상 정보 조회 실패 (' + r2.status + ')');
+    const d2 = await r2.json();
+    return (d2.items || []).map(v => {
+      const st = v.statistics || {};
+      const views = +st.viewCount || 0;
+      return {
+        id: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
+        views, subs: 0, len: isoDur(v.contentDetails && v.contentDetails.duration),
+        cat: catOf(v.snippet.title),
+        thumb: 'https://i.ytimg.com/vi/' + v.id + '/oar2.jpg',
+        url: 'https://www.youtube.com/shorts/' + v.id,
+        published: v.snippet.publishedAt, demo: false
+      };
+    }).filter(v => v.views >= 100000)
+      .sort((a, b) => b.views - a.views).slice(0, 20);
   };
 
   T.testKey = async function (key) {
