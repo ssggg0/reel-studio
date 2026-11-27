@@ -385,7 +385,7 @@
       if (i === lines.length - 1) {
         ctx.shadowBlur = 0;
         ctx.fillStyle = hk.accent || '#D8FF3E';
-        ctx.fillRect((W - Math.min(l.w, W * 0.42)) / 2, ly + size * 0.72, Math.min(l.w, W * 0.42), Math.max(4, size * 0.09));
+        ctx.fillRect((W - Math.min(l.w * 0.5, W * 0.3)) / 2, ly + size * 0.66, Math.min(l.w * 0.5, W * 0.3), Math.max(4, size * 0.075));
       }
     });
     ctx.restore();
@@ -414,7 +414,8 @@
     const cy = H * (p.sub.pos || 0.78);
 
     // intro animation
-    const into = U.clamp((t - cue.start) / 0.18, 0, 1);
+    const playing = !!(RS.state && RS.state.player && RS.state.player.playing);
+    const into = playing ? U.clamp((t - cue.start) / 0.18, 0, 1) : 1;
     const ease = 1 - Math.pow(1 - into, 3);
     ctx.save();
     ctx.globalAlpha = 0.15 + 0.85 * ease;
@@ -447,7 +448,8 @@
   /* ── comment card ───────────────────────────────────── */
   function drawComment(ctx, W, H, p, cue, t, k) {
     if (!p.card || !p.card.on || !cue || !cue.comment || !cue.comment.on || !cue.comment.text) return;
-    const into = U.clamp((t - cue.start - 0.1) / 0.22, 0, 1);
+    const playing = !!(RS.state && RS.state.player && RS.state.player.playing);
+    const into = playing ? U.clamp((t - cue.start - 0.1) / 0.22, 0, 1) : 1;
     if (into <= 0) return;
     const ease = 1 - Math.pow(1 - into, 3);
     const fs = 30 * k;

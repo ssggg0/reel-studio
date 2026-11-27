@@ -55,9 +55,9 @@
   /* ── 데모 생성기 ─────────────────────────────────────── */
   const TPL = {
     ko: {
-      hook: ['{kw}, 30초로 정리했습니다', '지금 알아두면 좋은 핵심'],
+      hook: ['{kw}, 30초 정리', '핵심만 뽑았습니다'],
       cues: [
-        '{kw}, 지금부터 30초 안에 정리합니다',
+        '{kw} — 지금부터 30초로 정리합니다',
         '지난주까지 분위기는 완전히 달랐습니다',
         '그런데 하루 만에 판이 뒤집혔습니다',
         '첫 번째 원인은 #현장의 허점 이었습니다',
@@ -142,10 +142,12 @@
   };
 
   function kwOf(topic) {
-    const t = String(topic || '').replace(/[#*\n]/g, ' ').trim();
-    const words = t.split(/[\s,·]+/).filter(w => w.length > 1);
+    const t = String(topic || '').replace(/[#*\n"'“”‘’]/g, ' ').trim();
+    const words = t.split(/[\s,·]+/).filter(w => w.length > 1 && !/^[0-9,.%]+$/.test(w));
     if (!words.length) return '이 이슈';
-    return words.slice(0, 2).join(' ');
+    const clean = words.slice(0, 4).map(w => w.replace(/(에서|에게|까지|부터|으로|라고|하고|이며|이랑|와|과|은|는|이|가|을|를|의|에|도|만|로)$/, ''));
+    const pick = clean.filter(w => w.length > 1).slice(0, 2).join(' ');
+    return (pick || words[0]).slice(0, 14);
   }
 
   function fill(s, kw) { return String(s).replace(/\{kw\}/g, kw); }

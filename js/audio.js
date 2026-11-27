@@ -14,7 +14,7 @@
     if (A.ctx) { if (A.ctx.state === 'suspended') A.ctx.resume(); return A.ctx; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    const ctx = A.ctx = new AC();
+    ctx = A.ctx = new AC();
     A.master = ctx.createGain(); A.master.gain.value = 0.9;
     A.bgmBus = ctx.createGain(); A.bgmBus.gain.value = A.bgmVolume;
     A.sfxBus = ctx.createGain(); A.sfxBus.gain.value = 0.9;
