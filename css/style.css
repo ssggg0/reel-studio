@@ -344,7 +344,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 }
 .stage-box .stage{max-height:min(60dvh,620px);width:auto;max-width:100%}
 .stage-badge{
-  position:absolute;left:10px;top:10px;font-size:10px;font-weight:800;letter-spacing:.03em;
+  position:absolute;left:10px;bottom:10px;font-size:10px;font-weight:800;letter-spacing:.03em;
   background:rgba(0,0,0,.62);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.14);
   color:#DDE3EA;padding:3px 7px;border-radius:6px;pointer-events:none;
 }
@@ -454,7 +454,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .result-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
   .rcard .rc-title{font-size:12px}
-  .stage-box .stage{max-height:44dvh}
+  .stage-box .stage{max-height:54dvh}
   .tabbar{
     grid-area:tab;display:flex;align-items:stretch;gap:2px;
     border-top:1px solid var(--line);background:rgba(9,10,13,.94);backdrop-filter:blur(16px);
@@ -492,3 +492,11 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.25);border-top-color:var(--lime);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-1px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .dragover{outline:2px dashed var(--lime);outline-offset:-6px}
+
+/* mobile refinements */
+@media (max-width:1000px){
+  .result-head .hint{display:none}
+  .stage-badge{font-size:9px;padding:2px 6px;opacity:.75}
+  .thumb-wrap canvas{width:132px}
+  .modal-body{padding:14px}
+}
