@@ -280,9 +280,9 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .db-acts{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ── discover presets ───────────────────────────────── */
-.preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
 .preset-chip{
-  display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:99px;
+  display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:99px;
   border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:800;color:var(--tx2);
   transition:.15s;box-shadow:var(--sh-sm);
 }
@@ -627,7 +627,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .card{padding:17px;border-radius:16px}
   .demo-banner{padding:16px;gap:12px}
   .db-body b{font-size:13.5px}
-  .preset-row{gap:7px}
+  .preset-row{gap:6px}
   .preset-chip{padding:9px 12px}
   .filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .result-grid{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
