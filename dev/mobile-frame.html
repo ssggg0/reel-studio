@@ -42,7 +42,7 @@
     const [w, h] = document.getElementById('size').value.split('x').map(Number);
     frame.style.width = w + 'px'; frame.style.height = h + 'px';
     fr.style.width = w + 'px'; fr.style.height = h + 'px';
-    const avail = window.innerHeight - 64;
+    const avail = Math.min(window.innerHeight - 64, 700);
     scale = fit ? Math.min(1, avail / h) : 1;
     frame.style.transform = 'scale(' + scale + ')';
     wrap.style.height = (h * scale + 12) + 'px';
