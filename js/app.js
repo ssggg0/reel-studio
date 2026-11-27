@@ -965,11 +965,8 @@
   function bindPreview() {
     el('xStart').addEventListener('click', startExport);
     el('xToUpload').addEventListener('click', () => setTab('upload'));
-    el('auditRun').addEventListener('click', () => {
-      const items = runAudit();
-      const bad = items.filter(i => !i.ok).length;
-      RS.toast(bad ? '점검 완료 — 경고 ' + bad + '건' : '점검 완료 — 5/5 통과, 그대로 올려도 됩니다', bad ? '' : 'ok');
-    });
+    el('auditRun').addEventListener('click', auditClick);
+    el('auditQuick').addEventListener('click', auditClick);
     el('auditFix').addEventListener('click', auditFix);
     el('thumbMake').addEventListener('click', function () { makeThumb(); });
     el('thumbBgImg').addEventListener('change', e => {
@@ -1238,6 +1235,14 @@
     drawStatic();
     runAudit();
     RS.toast(notes.length ? '자동 수정 완료 — ' + notes.join(' · ') : '이미 고칠 것이 없습니다', notes.length ? 'ok' : '');
+  }
+
+  function auditClick() {
+    const items = runAudit();
+    const bad = items.filter(i => !i.ok).length;
+    RS.toast(bad ? '점검 완료 — 경고 ' + bad + '건' : '점검 완료 — ' + items.length + '/' + items.length + ' 통과', bad ? '' : 'ok');
+    const card = el('auditCard');
+    if (card) setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }
 
   function fileBase() {
