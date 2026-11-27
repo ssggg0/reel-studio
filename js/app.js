@@ -846,7 +846,6 @@
     canvas.width = W; canvas.height = H;
     const ctx = canvas.getContext('2d');
     const mime = pickMime();
-    if (!mime) { RS.toast('녹화 코덱을 찾지 못했습니다', 'err'); return; }
 
     S.ui.exporting = true;
     el('xStart').disabled = true; el('xStart').innerHTML = '<span class="spin"></span> 렌더중';
@@ -869,7 +868,7 @@
     const chunks = [];
     let rec;
     try {
-      rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: res >= 1080 ? 9000000 : 5000000, audioBitsPerSecond: 128000 });
+      rec = new MediaRecorder(stream, mime ? { mimeType: mime, videoBitsPerSecond: res >= 1080 ? 9000000 : 5000000, audioBitsPerSecond: 128000 } : undefined);
     } catch (e) {
       try { rec = new MediaRecorder(stream); } catch (e2) {
         S.ui.exporting = false; el('xStart').disabled = false; el('xStart').textContent = '영상 렌더';
@@ -913,13 +912,14 @@
       A.stopBgm(); A.stopNarration();
       if (S.media.video && S.media.video.src) { try { S.media.video.pause(); } catch (e) {} }
       await stopped;
-      const blob = new Blob(chunks, { type: mime.split(';')[0] });
-      const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+      const actual = (rec.mimeType || mime || 'video/mp4');
+      const blob = new Blob(chunks, { type: actual.split(';')[0] });
+      const ext = actual.includes('mp4') ? 'mp4' : 'webm';
       if (blob.size < 800) {
         el('xProgBar').style.width = '0%'; el('xProgTxt').textContent = '0%';
         el('xStart').disabled = false; el('xStart').textContent = '영상 렌더';
         S.ui.exporting = false;
-        RS.toast('녹화기(“' + mime + '”)가 프레임을 만들지 못했습니다. 사파리는 mp4, 크롬은 webm으로 다시 시도해 주세요.', 'err');
+        RS.toast('녹화기가 프레임을 만들지 못했습니다. 사파리는 mp4, 크롬은 webm으로 다시 시도해 주세요.', 'err');
         return;
       }
       if (S.media.exportURL) URL.revokeObjectURL(S.media.exportURL);
