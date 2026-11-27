@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07080B">
+<title>릴 스튜디오 — 성현님 전용 쇼츠 스튜디오</title>
+<meta name="description" content="소재 발굴부터 AI 대본, BGM, 미리보기, 영상 내보내기, 유튜브 업로드까지 한 화면에서. 성현님 전용 쇼츠 스튜디오.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23D8FF3E'/%3E%3Cpath d='M12 9l12 7-12 7z' fill='%230B0D12'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── 상단 바 ─────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">▶</span>
+      <span class="brand-name">REEL STUDIO</span>
+      <span class="brand-sub">성현 전용</span>
+    </div>
+    <div class="proj-wrap">
+      <input id="projName" class="proj-name" spellcheck="false" aria-label="프로젝트 이름" value="내 첫 쇼츠">
+      <div class="proj-meta" id="projMeta">9:16 · 0초 · 0큐</div>
+    </div>
+    <div class="top-actions">
+      <button class="status-pill" id="modePill" data-go="settings">
+        <i class="dot"></i><span id="modeText">데모 모드</span>
+      </button>
+      <button class="icon-btn" id="btnSettings" aria-label="설정" data-go="settings">⚙︎</button>
+    </div>
+  </header>
+
+  <!-- ── 데스크톱 좌측 레일 ──────────────────────────────── -->
+  <nav class="rail" aria-label="작업 단계">
+    <button class="rail-item is-active" data-tab="discover"><span class="ri-ico">◎</span><span class="ri-txt">발굴</span></button>
+    <button class="rail-item" data-tab="script"><span class="ri-ico">✎</span><span class="ri-txt">대본</span></button>
+    <button class="rail-item" data-tab="music"><span class="ri-ico">♪</span><span class="ri-txt">음원</span></button>
+    <button class="rail-item" data-tab="preview"><span class="ri-ico">▶</span><span class="ri-txt">미리보기</span></button>
+    <button class="rail-item" data-tab="upload"><span class="ri-ico">↑</span><span class="ri-txt">업로드</span></button>
+    <button class="rail-item rail-settings" data-go="settings"><span class="ri-ico">⚙︎</span><span class="ri-txt">설정</span></button>
+  </nav>
+
+  <!-- ── 본문 ───────────────────────────────────────────── -->
+  <main id="main">
+
+    <!-- ① 소재 발굴 -->
+    <section class="panel" id="tab-discover" data-panel="discover">
+      <div class="panel-head">
+        <div>
+          <h1>소재 발굴</h1>
+          <p>유튜브 알고리즘을 훑어 <b>구독자 대비 터진 영상</b>만 골라 옵니다. 키가 없으면 내장 샘플 데이터로 바로 시작합니다.</p>
+        </div>
+        <button class="btn ghost sm" id="dRefresh" title="필터로 다시 분석">다시 분석</button>
+      </div>
+
+      <div class="card">
+        <div class="field-row">
+          <label class="field grow">
+            <span class="lab">키워드 · 주제</span>
+            <input id="dKeyword" list="kwList" placeholder="예: 코스피 폭락, 수능 AI, 홈플러스" value="코스피 폭락">
+            <datalist id="kwList">
+              <option value="코스피 폭락"><option value="수능 AI 커닝"><option value="로또 1등">
+              <option value="국민연금"><option value="홈플러스"><option value="환율 1,500원">
+              <option value="전세사기"><option value="삼성전자"><option value="AI 일자리">
+            </datalist>
+          </label>
+          <button class="btn primary" id="dSearch">분석</button>
+        </div>
+        <div class="chips" id="dChips">
+          <button class="chip" data-kw="코스피 폭락">코스피</button>
+          <button class="chip" data-kw="수능 AI 커닝">수능 AI</button>
+          <button class="chip" data-kw="로또 1등">로또</button>
+          <button class="chip" data-kw="국민연금 개혁">국민연금</button>
+          <button class="chip" data-kw="홈플러스 배송">홈플러스</button>
+          <button class="chip" data-kw="전세사기">전세사기</button>
+        </div>
+        <div class="filter-grid">
+          <label class="field"><span class="lab">지역</span>
+            <select id="dRegion"><option value="">전체</option><option value="KR">한국</option><option value="US">미국</option><option value="JP">일본</option><option value="GB">영국</option></select>
+          </label>
+          <label class="field"><span class="lab">길이</span>
+            <select id="dDur"><option value="short">쇼츠 (≤60초)</option><option value="">전체</option><option value="long">롱폼 (60초+)</option></select>
+          </label>
+          <label class="field"><span class="lab">최소 조회수</span>
+            <select id="dMin"><option value="10000">1만+</option><option value="100000" selected>10만+</option><option value="1000000">100만+</option></select>
+          </label>
+          <label class="field"><span class="lab">정렬</span>
+            <select id="dSort"><option value="breakout">떡상률순</option><option value="views">조회수순</option><option value="date">최신순</option></select>
+          </label>
+        </div>
+      </div>
+
+      <div class="result-head">
+        <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터 · 12건</span>
+        <span class="hint" id="discoverHint">카드를 누르면 대본 탭으로 가져옵니다</span>
+      </div>
+      <div class="result-grid" id="discoverResults"></div>
+
+      <div class="note">
+        <b>떡상률</b>은 조회수 ÷ 구독자 수로 계산합니다. 1.0배를 넘으면 구독자보다 외부 유입이 큰 영상이라, 내 채널에도 같은 각도가 먹힐 확률이 높습니다.
+      </div>
+    </section>
+
+    <!-- ② 원본 · 대본 -->
+    <section class="panel" id="tab-script" data-panel="script" hidden>
+      <div class="panel-head">
+        <div>
+          <h1>원본 · AI 대본</h1>
+          <p>영상을 얹거나 샘플 소스를 고르고, 대본·자막 큐를 직접 고칩니다. 수정은 미리보기에 즉시 반영됩니다.</p>
+        </div>
+        <button class="btn ghost sm" id="sNewProject">새 프로젝트</button>
+      </div>
+
+      <details class="card" id="secSource" open>
+        <summary><span class="sec-t">원본 소스</span><span class="sec-v" id="sourceSummary">샘플 · 다큐 다크</span></summary>
+        <div class="sec-body">
+          <div class="seg" id="sRatio">
+            <button class="seg-btn is-on" data-ratio="9:16">9:16 쇼츠</button>
+            <button class="seg-btn" data-ratio="16:9">16:9 롱폼</button>
+          </div>
+          <div class="chips" id="sSamples">
+            <button class="chip" data-sample="docu">다큐 다크</button>
+            <button class="chip" data-sample="chart">라이브 차트</button>
+            <button class="chip" data-sample="neon">네온 스트리트</button>
+            <button class="chip" data-sample="paper">페이퍼</button>
+          </div>
+          <div class="upload-row">
+            <label class="btn outline sm file-btn">
+              <input type="file" id="sVideoFile" accept="video/mp4,video/quicktime,video/webm,video/*">
+              영상 파일 올리기
+            </label>
+            <span class="file-name" id="sVideoName">아직 파일 없음</span>
+            <button class="btn ghost sm" id="sVideoClear" hidden>빼기</button>
+          </div>
+          <p class="hint">mp4 · mov · webm. 아이폰은 파일 앱에서 ‘이리저리’ 대신 사진/파일을 그대로 고르면 됩니다. 긴 영상은 앞 90초만 사용합니다.</p>
+
+          <div class="slider-grid">
+            <label class="field slider"><span class="lab">확대 <b id="vZoomVal">100%</b></span>
+              <input type="range" id="vZoom" min="50" max="200" value="100"></label>
+            <label class="field slider"><span class="lab">세로 위치 <b id="vOffsetVal">가운데</b></span>
+              <input type="range" id="vOffset" min="0" max="100" value="50"></label>
+            <label class="field slider"><span class="lab">밝기 <b id="vBrightVal">0</b></span>
+              <input type="range" id="vBright" min="-50" max="50" value="0"></label>
+            <label class="field slider"><span class="lab">대비 <b id="vContrastVal">0</b></span>
+              <input type="range" id="vContrast" min="-50" max="50" value="0"></label>
+            <label class="field slider"><span class="lab">채도 <b id="vSatVal">0</b></span>
+              <input type="range" id="vSat" min="-50" max="50" value="0"></label>
+            <label class="field"><span class="lab">색감 프리셋</span>
+              <select id="vGrade">
+                <option value="none">원본 그대로</option>
+                <option value="cine" selected>시네마 (다큐)</option>
+                <option value="warm">따뜻하게</option>
+                <option value="cool">차갑게</option>
+                <option value="vivid">쨍하게</option>
+                <option value="mono">흑백</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </details>
+
+      <details class="card" id="secAI" open>
+        <summary><span class="sec-t">AI 대본</span><span class="sec-v" id="aiMode">데모 생성</span></summary>
+        <div class="sec-body">
+          <label class="field">
+            <span class="lab">주제 · 각도 <em>한 줄이면 충분합니다</em></span>
+            <textarea id="aiTopic" rows="2" placeholder="예: 젠슨황 한마디에 폭등한 코스피가 하루 만에 4,697까지 무너진 이유"></textarea>
+          </label>
+          <div class="field-row">
+            <label class="field"><span class="lab">문체</span>
+              <select id="aiTone">
+                <option value="news">뉴스 구어체 (음슴체 금지)</option>
+                <option value="friend">친근한 반말</option>
+                <option value="calm">차분한 정보 전달</option>
+              </select>
+            </label>
+            <label class="field"><span class="lab">길이</span>
+              <select id="aiLen"><option value="20">20초</option><option value="28" selected>28초</option><option value="38">38초</option><option value="52">52초</option></select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field grow"><span class="lab">언어</span>
+              <select id="aiLang">
+                <option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="es">Español</option><option value="vi">Tiếng Việt</option>
+              </select>
+            </label>
+            <button class="btn primary" id="aiGen">대본 생성</button>
+            <button class="btn outline" id="aiTranslate" title="현재 대본을 선택 언어로">번역</button>
+          </div>
+          <p class="hint" id="aiHint">Gemini 키가 없어도 데모 대본이 3초 만에 나옵니다. 키를 넣으면 주제에 맞춰 실제로 씁니다.</p>
+        </div>
+      </details>
+
+      <details class="card" id="secHook" open>
+        <summary><span class="sec-t">상단 훅 문구</span><span class="sec-v" id="hookSummary">2줄</span></summary>
+        <div class="sec-body">
+          <label class="field"><span class="lab">1줄</span><input id="hook1" maxlength="34" placeholder="첫 0.5초에 꽂히는 한 줄"></label>
+          <label class="field"><span class="lab">2줄</span><input id="hook2" maxlength="34" placeholder="두 번째 줄 (선택)"></label>
+          <div class="field-row">
+            <label class="field"><span class="lab">모양</span>
+              <select id="hookStyle">
+                <option value="band">상단 검은 띠</option>
+                <option value="card">흰 라운드 카드</option>
+                <option value="plain">민무늬 큰 글씨</option>
+              </select>
+            </label>
+            <label class="switch-line"><input type="checkbox" id="hookOn" checked><span>훅 표시</span></label>
+          </div>
+        </div>
+      </details>
+
+      <details class="card" id="secCues" open>
+        <summary><span class="sec-t">큐 타임라인</span><span class="sec-v" id="cueSummary">9큐 · 27.4초</span></summary>
+        <div class="sec-body">
+          <div class="toolbar">
+            <button class="btn ghost sm" id="cueAdd">+ 큐</button>
+            <button class="btn ghost sm" id="cueFit" title="문자 수에 맞춰 시작·끝을 다시 배분">시간 자동 맞춤</button>
+            <button class="btn ghost sm" id="cueSrt">SRT 복사</button>
+            <button class="btn ghost sm" id="cueCommentAll">댓글 전체 켜기</button>
+          </div>
+          <p class="hint">본문에서 <code>#단어</code>는 강조색, <code>*단어*</code>는 강조+밑줄로 나옵니다.</p>
+          <div id="cueList" class="cue-list"></div>
+        </div>
+      </details>
+
+      <details class="card" id="secMeta">
+        <summary><span class="sec-t">제목 · 설명 · 태그</span><span class="sec-v" id="metaSummary">3안</span></summary>
+        <div class="sec-body">
+          <div id="titleList" class="title-list"></div>
+          <label class="field"><span class="lab">설명</span><textarea id="metaDesc" rows="4"></textarea></label>
+          <label class="field"><span class="lab">태그 <em>콤마로 구분</em></span><input id="metaTags"></label>
+          <div class="toolbar">
+            <button class="btn ghost sm" id="metaCopyTitle">제목 복사</button>
+            <button class="btn ghost sm" id="metaCopyDesc">설명 복사</button>
+            <button class="btn ghost sm" id="metaCopyTags">태그 복사</button>
+            <button class="btn ghost sm" id="metaCopyAll">전부 복사</button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ③ 음원 · 보이스 -->
+    <section class="panel" id="tab-music" data-panel="music" hidden>
+      <div class="panel-head">
+        <div>
+          <h1>음원 · 보이스</h1>
+          <p>직접 합성한 무저작권 BGM 5종. 누르면 바로 들리고, 다시 누르면 영상에 박힙니다.</p>
+        </div>
+        <button class="btn ghost sm" id="mStopAll">소리 끄기</button>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>BGM</h2><span class="tag" id="bgmNow">없음</span></div>
+        <div class="bgm-grid" id="bgmGrid"></div>
+        <div class="slider-grid">
+          <label class="field slider"><span class="lab">BGM 볼륨 <b id="bgmVolVal">32%</b></span>
+            <input type="range" id="bgmVol" min="0" max="100" value="32"></label>
+          <label class="field slider"><span class="lab">보이스 덕킹 <b id="bgmDuckVal">55%</b></span>
+            <input type="range" id="bgmDuck" min="0" max="100" value="55"></label>
+        </div>
+        <p class="hint">덕킹은 말소리 구간에서 BGM을 자동으로 낮추는 정도입니다. 0%면 그대로 깔립니다.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>보이스 · TTS</h2><span class="tag">브라우저 무료</span></div>
+        <div class="field-row">
+          <label class="field grow"><span class="lab">목소리</span><select id="voiceSelect"><option value="">기본 목소리</option></select></label>
+          <button class="btn outline sm" id="voiceTest">첫 큐 듣기</button>
+        </div>
+        <div class="slider-grid">
+          <label class="field slider"><span class="lab">말 빠르기 <b id="voiceRateVal">1.05x</b></span>
+            <input type="range" id="voiceRate" min="100" max="130" value="105"></label>
+          <label class="field slider"><span class="lab">나레이션 볼륨 <b id="voiceVolVal">100%</b></span>
+            <input type="range" id="voiceVol" min="0" max="100" value="100"></label>
+        </div>
+        <label class="switch-line"><input type="checkbox" id="voiceOn" checked><span>미리보기에서 큐를 읽어주기</span></label>
+        <div class="upload-row">
+          <label class="btn outline sm file-btn">
+            <input type="file" id="voiceFile" accept="audio/*">
+            나레이션 오디오 올리기
+          </label>
+          <span class="file-name" id="voiceFileName">없음 (타입캐스트 수민 mp3 등)</span>
+          <button class="btn ghost sm" id="voiceFileClear" hidden>빼기</button>
+        </div>
+        <p class="hint">브라우저 TTS는 미리듣기용입니다. 실제 영상에 목소리를 넣으려면 타입캐스트에서 받은 mp3를 올리세요 — BGM·효과음과 함께 영상에 실제로 섞여 나갑니다.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>효과음</h2><span class="tag">4종</span></div>
+        <div class="sfx-grid" id="sfxGrid"></div>
+        <p class="hint">큐마다 붙이는 건 아래 타임라인에서 고르면 됩니다. 여기서는 소리만 미리 들어보세요.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>원본 소리</h2></div>
+        <label class="switch-line"><input type="checkbox" id="origOn" checked><span>원본 영상 소리 섞기</span></label>
+        <label class="field slider"><span class="lab">원본 볼륨 <b id="origVolVal">100%</b></span>
+          <input type="range" id="origVol" min="0" max="100" value="100"></label>
+      </div>
+    </section>
+
+    <!-- ④ 미리보기 · 내보내기 -->
+    <section class="panel" id="tab-preview" data-panel="preview" hidden>
+      <div class="panel-head">
+        <div>
+          <h1>미리보기 · 내보내기</h1>
+          <p>지금 보이는 그대로 영상이 됩니다. 재생·스크럽하며 확인하고 바로 렌더하세요.</p>
+        </div>
+        <span class="tag" id="pRatioTag">9:16</span>
+      </div>
+
+      <div class="stage-box">
+        <canvas id="stageMain" class="stage"></canvas>
+        <div class="stage-badge" id="stageBadge">데모 소스</div>
+      </div>
+
+      <div class="transport">
+        <button class="tbtn" id="pPrev" aria-label="이전 큐">⏮</button>
+        <button class="tbtn play" id="pPlay" aria-label="재생">▶</button>
+        <button class="tbtn" id="pNext" aria-label="다음 큐">⏭</button>
+        <div class="time"><span id="pCur">0:00.0</span><span class="sep">/</span><span id="pDur">0:00.0</span></div>
+        <button class="tbtn sm" id="pGuide" title="유튜브 UI 안전영역">가이드</button>
+      </div>
+      <div class="scrub" id="pScrub">
+        <div class="scrub-track"><div class="scrub-fill" id="pFill"></div><div class="scrub-cues" id="pCues"></div><div class="scrub-head" id="pHead"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>완성 영상 내보내기</h2><span class="tag">Canvas · MediaRecorder</span></div>
+        <div class="field-row">
+          <label class="field"><span class="lab">화질</span>
+            <select id="xRes"><option value="720">720p (빠름)</option><option value="1080" selected>1080p</option></select>
+          </label>
+          <label class="field"><span class="lab">프레임</span>
+            <select id="xFps"><option value="30" selected>30fps</option><option value="60">60fps</option></select>
+          </label>
+          <button class="btn primary" id="xStart">영상 렌더</button>
+        </div>
+        <div class="progress" id="xProgWrap" hidden><div class="progress-bar"><i id="xProgBar"></i></div><span id="xProgTxt">0%</span></div>
+        <div class="export-out" id="xOut" hidden>
+          <video id="xVideo" controls playsinline></video>
+          <div class="export-actions">
+            <a class="btn primary sm" id="xDownload" download>파일 저장</a>
+            <button class="btn ghost sm" id="xToUpload">업로드 탭으로</button>
+            <span class="hint" id="xInfo"></span>
+          </div>
+        </div>
+        <p class="hint">아이폰 Safari는 mp4, 크롬은 webm으로 저장됩니다. 렌더 중에는 화면을 끄지 마세요. 길이는 큐 전체(약 <b id="xLen">0</b>초)입니다.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>썸네일 · 제목</h2><span class="tag">1080×1920</span></div>
+        <div class="field-row">
+          <label class="field grow"><span class="lab">썸네일 뱃지</span><input id="thumbBadge" maxlength="18" placeholder="이슈한잔"></label>
+          <button class="btn outline" id="thumbMake">썸네일 생성</button>
+        </div>
+        <div class="thumb-wrap" id="thumbWrap" hidden>
+          <canvas id="thumbCanvas"></canvas>
+          <div class="thumb-actions">
+            <button class="btn primary sm" id="thumbSave">PNG 저장</button>
+            <button class="btn ghost sm" id="thumbCopyTitle">제목 복사</button>
+            <button class="btn ghost sm" id="thumbCopyDesc">설명 복사</button>
+            <button class="btn ghost sm" id="thumbCopyTags">태그 복사</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⑤ 유튜브 업로드 -->
+    <section class="panel" id="tab-upload" data-panel="upload" hidden>
+      <div class="panel-head">
+        <div>
+          <h1>유튜브 업로드</h1>
+          <p>렌더한 영상을 바로 비공개로 올리고, 확인한 뒤 공개로 바꾸는 흐름을 권합니다.</p>
+        </div>
+        <span class="tag" id="uAuthTag">미연결</span>
+      </div>
+
+      <div class="card" id="uConnectCard">
+        <div class="card-head"><h2>계정 연결</h2><span class="hint">Google OAuth</span></div>
+        <div class="conn-row">
+          <div class="conn-state" id="uConnState">OAuth Client ID가 없습니다</div>
+          <button class="btn primary sm" id="uConnect">Google 연결</button>
+        </div>
+        <p class="hint" id="uConnHint">설정 → API 키에서 OAuth Client ID를 넣으면 연결됩니다. 1분이면 됩니다.</p>
+        <details class="mini-help">
+          <summary>연결이 안 될 때 (3단계)</summary>
+          <ol>
+            <li>Google Cloud 콘솔 → <b>YouTube Data API v3</b> 사용 설정</li>
+            <li>OAuth 클라이언트 ID(웹) → 승인된 JavaScript 원본에 <code>https://ssggg0.github.io</code></li>
+            <li>OAuth 동의화면 → 테스트 사용자에 본인 구글 계정 추가</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>영상 정보</h2><span class="hint" id="uFileState">렌더 파일 없음</span></div>
+        <label class="field"><span class="lab">제목 <em id="uTitleCount">0/100</em></span><input id="uTitle" maxlength="100"></label>
+        <label class="field"><span class="lab">설명</span><textarea id="uDesc" rows="4"></textarea></label>
+        <label class="field"><span class="lab">태그 <em>콤마</em></span><input id="uTags"></label>
+        <div class="field-row">
+          <label class="field"><span class="lab">공개 상태</span>
+            <select id="uPrivacy"><option value="private" selected>비공개 (추천)</option><option value="unlisted">일부공개</option><option value="public">공개</option></select>
+          </label>
+          <label class="field"><span class="lab">시청자</span>
+            <select id="uKids"><option value="false" selected>아동용 아님</option><option value="true">아동용</option></select>
+          </label>
+        </div>
+        <div class="toolbar">
+          <label class="btn outline sm file-btn"><input type="file" id="uFile" accept="video/*">다른 파일 고르기</label>
+          <button class="btn primary" id="uStart">업로드</button>
+        </div>
+        <div class="progress" id="uProgWrap" hidden><div class="progress-bar"><i id="uProgBar"></i></div><span id="uProgTxt">0%</span></div>
+        <div class="upload-out" id="uOut" hidden></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>올리기 전 30초 점검</h2></div>
+        <ul class="checklist">
+          <li>세로 9:16 · 60초 이하 — 쇼츠 피드에 그대로 걸립니다.</li>
+          <li>비속어·욕설은 0.1초 삐 처리 — 게시 직후 18세 제한이 붙는 걸 막습니다.</li>
+          <li>타 채널 영상 재업로드·번역만 붙인 영상은 재사용 판정 위험이 있습니다.</li>
+          <li>제목·썸네일에 욕설·장애 비하 표현 금지.</li>
+          <li>첫 3초에 훅, 마지막은 결론 대신 기대감으로.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── 데스크톱 우측 상시 미리보기 ────────────────────── -->
+  <aside class="preview-col" id="previewCol">
+    <div class="pv-head"><span>실시간 미리보기</span><span class="tag sm" id="aRatioTag">9:16</span></div>
+    <div class="pv-stage"><canvas id="stageAside" class="stage"></canvas></div>
+    <div class="mini-transport">
+      <button class="tbtn play" id="aPlay" aria-label="재생">▶</button>
+      <span class="mini-time" id="aTime">0:00.0 / 0:00.0</span>
+      <button class="tbtn sm" id="aGuide" title="안전영역">가이드</button>
+    </div>
+    <div class="pv-queue" id="aQueue"></div>
+    <div class="pv-foot">지금 큐 <b id="aCueNum">–</b> · <span id="aPreset">이슈한잔 스타일</span></div>
+  </aside>
+
+  <!-- ── 모바일 하단 탭 ─────────────────────────────────── -->
+  <nav class="tabbar" id="tabbar" aria-label="작업 단계">
+    <button class="tb-item is-active" data-tab="discover"><span>◎</span><i>발굴</i></button>
+    <button class="tb-item" data-tab="script"><span>✎</span><i>대본</i></button>
+    <button class="tb-item" data-tab="music"><span>♪</span><i>음원</i></button>
+    <button class="tb-item" data-tab="preview"><span>▶</span><i>미리보기</i></button>
+    <button class="tb-item" data-tab="upload"><span>↑</span><i>업로드</i></button>
+  </nav>
+
+  <!-- ── 설정 모달 ──────────────────────────────────────── -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-back" data-close="settings"></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>설정</h2>
+        <button class="icon-btn" data-close="settings" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body">
+
+        <section class="set-sec">
+          <h3>API 키 <span class="tag sm">내 브라우저에만 저장</span></h3>
+          <p class="hint">키는 이 기기의 localStorage에만 남고 어디로도 전송되지 않습니다. 피클 크레딧은 쓰지 않습니다.</p>
+          <label class="field">
+            <span class="lab">YouTube Data API v3 키 <em>무료 · 일 10,000유닛</em></span>
+            <input id="stYtKey" type="password" autocomplete="off" placeholder="AIza...">
+          </label>
+          <div class="toolbar">
+            <button class="btn ghost sm" id="stYtTest">연결 테스트</button>
+            <span class="hint" id="stYtState"></span>
+          </div>
+          <details class="mini-help"><summary>키 발급 3분</summary>
+            <ol>
+              <li><a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">Google Cloud 콘솔</a>에서 프로젝트 만들기</li>
+              <li>YouTube Data API v3 → <b>사용</b></li>
+              <li>사용자 인증 정보 → <b>API 키</b> 만들기 → 붙여넣기</li>
+            </ol>
+          </details>
+
+          <label class="field">
+            <span class="lab">Gemini API 키 <em>무료 티어</em></span>
+            <input id="stGemKey" type="password" autocomplete="off" placeholder="AIza...">
+          </label>
+          <div class="toolbar">
+            <button class="btn ghost sm" id="stGemTest">연결 테스트</button>
+            <span class="hint" id="stGemState"></span>
+          </div>
+          <details class="mini-help"><summary>키 발급 1분</summary>
+            <ol>
+              <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> 접속</li>
+              <li><b>API 키 만들기</b> → 복사 → 붙여넣기</li>
+            </ol>
+          </details>
+
+          <label class="field">
+            <span class="lab">Google OAuth Client ID <em>유튜브 업로드용</em></span>
+            <input id="stOauth" type="password" autocomplete="off" placeholder="1234567890-abc.apps.googleusercontent.com">
+          </label>
+          <details class="mini-help"><summary>클라이언트 ID 발급 3분</summary>
+            <ol>
+              <li>Google Cloud 콘솔 → API 및 서비스 → <b>OAuth 동의 화면</b> (외부, 테스트 사용자에 본인 계정)</li>
+              <li>사용자 인증 정보 → <b>OAuth 클라이언트 ID</b> → 웹 애플리케이션</li>
+              <li>승인된 JavaScript 원본: <code>https://ssggg0.github.io</code></li>
+              <li>승인된 리디렉션 URI는 비워둬도 됩니다 (팝업 방식)</li>
+              <li>YouTube Data API v3 사용 설정 필수</li>
+            </ol>
+          </details>
+
+          <div class="toolbar">
+            <button class="btn primary sm" id="stSaveKeys">저장</button>
+            <button class="btn ghost sm" id="stClearKeys">키 지우기</button>
+          </div>
+        </section>
+
+        <section class="set-sec">
+          <h3>채널 스타일 프리셋</h3>
+          <div class="field-row">
+            <label class="field grow"><span class="lab">프리셋</span><select id="stPresetSelect"></select></label>
+            <button class="btn outline sm" id="stPresetApply">적용</button>
+          </div>
+          <div class="preset-desc hint" id="stPresetDesc"></div>
+          <div class="field-row">
+            <label class="field grow"><span class="lab">현재 스타일을 프리셋으로 저장</span><input id="stPresetName" placeholder="예: 이슈한잔 11월 결"></label>
+            <button class="btn primary sm" id="stPresetSave">저장</button>
+          </div>
+          <div class="toolbar">
+            <button class="btn ghost sm" id="stPresetExport">프리셋 내보내기</button>
+            <label class="btn ghost sm file-btn"><input type="file" id="stPresetImport" accept="application/json">가져오기</label>
+            <button class="btn ghost sm danger" id="stPresetDelete">선택 삭제</button>
+          </div>
+        </section>
+
+        <section class="set-sec">
+          <h3>프로젝트</h3>
+          <div class="toolbar">
+            <button class="btn ghost sm" id="stProjExport">프로젝트 저장(JSON)</button>
+            <label class="btn ghost sm file-btn"><input type="file" id="stProjImport" accept="application/json">불러오기</label>
+            <button class="btn ghost sm danger" id="stReset">전체 초기화</button>
+          </div>
+          <p class="hint">자동 저장됩니다. 브라우저를 바꾸면 프로젝트 JSON으로 옮기세요.</p>
+        </section>
+
+        <section class="set-sec">
+          <h3>이 스튜디오</h3>
+          <p class="hint">결제·크레딧·로그인 없음. 모든 렌더는 이 기기에서 돌아갑니다.</p>
+          <div class="toolbar">
+            <a class="btn ghost sm" href="https://ssggg0.github.io/reel-studio/" target="_blank" rel="noopener">배포 주소</a>
+            <a class="btn ghost sm" href="https://github.com/ssggg0/reel-studio" target="_blank" rel="noopener">GitHub</a>
+            <a class="btn ghost sm" href="https://ssggg0.github.io/shorts-editor/" target="_blank" rel="noopener">자막 편집기</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 확인 모달 ──────────────────────────────────────── -->
+  <div class="modal" id="confirmModal" hidden>
+    <div class="modal-back" data-close="confirm"></div>
+    <div class="modal-card narrow">
+      <div class="modal-head"><h2 id="cfTitle">확인</h2><button class="icon-btn" data-close="confirm">✕</button></div>
+      <div class="modal-body"><p id="cfBody"></p>
+        <div class="toolbar right"><button class="btn ghost" data-close="confirm">취소</button><button class="btn primary" id="cfOk">확인</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <input type="file" id="hiddenFile" hidden>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/tube.js"></script>
+<script src="js/app.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REEL STUDIO — 모바일 프레임 검수</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#15171c;color:#dfe3ea;font:13px/1.5 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #2a2e36;flex-wrap:wrap}
+  h1{font-size:13px;margin:0;font-weight:800;letter-spacing:.06em}
+  select,button{background:#20242b;color:#dfe3ea;border:1px solid #333a45;border-radius:8px;padding:6px 10px;font-size:12px}
+  button{cursor:pointer}
+  .wrap{display:flex;justify-content:center;padding:18px}
+  .frame{width:390px;height:844px;border:1px solid #39414d;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  iframe{width:390px;height:844px;border:0;display:block}
+  .note{color:#8b929c;font-size:11.5px;margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>MOBILE FRAME</h1>
+  <select id="size">
+    <option value="390x844">iPhone 14/15 · 390×844</option>
+    <option value="430x932">iPhone Pro Max · 430×932</option>
+    <option value="375x812">iPhone X/11 · 375×812</option>
+    <option value="360x800">Android · 360×800</option>
+  </select>
+  <button id="reload">다시 불러오기</button>
+  <span class="note">실제 뷰포트 폭으로 앱을 띄우는 검수용 프레임입니다.</span>
+</header>
+<div class="wrap">
+  <div class="frame" id="frame"><iframe id="fr" src="../index.html"></iframe></div>
+</div>
+<script>
+  const fr = document.getElementById('fr'), frame = document.getElementById('frame');
+  document.getElementById('size').onchange = e => {
+    const [w, h] = e.target.value.split('x');
+    frame.style.width = w + 'px'; frame.style.height = h + 'px';
+    fr.style.width = w + 'px'; fr.style.height = h + 'px';
+  };
+  document.getElementById('reload').onclick = () => { fr.src = '../index.html?t=' + Date.now(); };
+</script>
+</body>
+</html>
