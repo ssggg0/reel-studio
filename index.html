@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261127z">
+<link rel="stylesheet" href="css/style.css?v=20261128a">
 </head>
 <body>
 <div id="app">
@@ -202,10 +202,10 @@
       <div class="card">
         <div class="card-head">
           <h2>편집 스타일</h2>
-          <span class="tag">누르면 한 번에 전환</span>
+          <span class="tag">옆으로 넘겨 8종</span>
         </div>
-        <div class="style-grid" id="styleGrid"></div>
-        <p class="hint">카드를 누르면 상단 띠·자막 위치·강조색·색감·말속도·댓글 카드가 한 번에 바뀝니다.</p>
+        <div class="style-rail" id="styleGrid" role="list" aria-label="편집 스타일 8종 가로 목록"></div>
+        <p class="hint">인기 쇼츠에서 검증된 편집 스타일 8종 · 카드를 누르면 상단 띠·자막 위치·강조색·색감·말속도·댓글 카드가 한 번에 바뀝니다.</p>
       </div>
 
       <details class="card" id="secSource" open>
@@ -493,7 +493,7 @@
       <div class="card">
         <div class="card-head"><h2>썸네일 · 제목</h2><span class="tag">1080×1920</span></div>
         <div class="field-row">
-          <label class="field grow"><span class="lab">썸네일 뱃지</span><input id="thumbBadge" maxlength="18" placeholder="이슈한잔"></label>
+          <label class="field grow"><span class="lab">썸네일 뱃지</span><input id="thumbBadge" maxlength="18" placeholder="채널 배지"></label>
           <button class="btn outline" id="thumbMake">썸네일 생성</button>
         </div>
         <div class="upload-row">
@@ -585,7 +585,7 @@
       <button class="tbtn sm" id="aGuide" title="안전영역">가이드</button>
     </div>
     <div class="pv-queue" id="aQueue"></div>
-    <div class="pv-foot">지금 큐 <b id="aCueNum">–</b> · <span id="aPreset">이슈한잔 스타일</span></div>
+    <div class="pv-foot">지금 큐 <b id="aCueNum">–</b> · <span id="aPreset">🔥 도파민 2줄 띠</span></div>
   </aside>
 
   <!-- ── 모바일 하단 탭 ─────────────────────────────────── -->
@@ -669,7 +669,7 @@
           </div>
           <div class="preset-desc hint" id="stPresetDesc"></div>
           <div class="field-row">
-            <label class="field grow"><span class="lab">현재 스타일을 프리셋으로 저장</span><input id="stPresetName" placeholder="예: 이슈한잔 11월 결"></label>
+            <label class="field grow"><span class="lab">현재 스타일을 프리셋으로 저장</span><input id="stPresetName" placeholder="예: 내 11월 결"></label>
             <button class="btn primary sm" id="stPresetSave">저장</button>
           </div>
           <div class="toolbar">
@@ -734,13 +734,13 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/sfx-pack.js?v=20261127z"></script>
-<script src="js/core.js?v=20261127z"></script>
-<script src="js/audio.js?v=20261127z"></script>
-<script src="js/render.js?v=20261127z"></script>
-<script src="js/ai.js?v=20261127z"></script>
-<script src="js/tube.js?v=20261127z"></script>
-<script src="js/app.js?v=20261127z"></script>
+<script src="js/sfx-pack.js?v=20261128a"></script>
+<script src="js/core.js?v=20261128a"></script>
+<script src="js/audio.js?v=20261128a"></script>
+<script src="js/render.js?v=20261128a"></script>
+<script src="js/ai.js?v=20261128a"></script>
+<script src="js/tube.js?v=20261128a"></script>
+<script src="js/app.js?v=20261128a"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

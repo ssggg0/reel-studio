@@ -148,56 +148,121 @@
     });
   };
 
-  /* ── presets ─────────────────────────────────────────── */
+  /* ── presets: 실제 인기 쇼츠에서 검증된 편집 스타일 8종 ── */
+  const SDG = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  const BLACK = '"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
   const P = RS.presets = [
     {
-      id: 'issuehanjan', name: '이슈한잔 스타일', builtin: true,
-      desc: '다크 다큐(#0B0D12) · 정중앙 정렬 · 라임 키워드 강조 · 댓글 카드',
-      ratio: '9:16',
-      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#D8FF3E', bg: '#0B0D12', size: 54, font: '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', band: 0.17 },
-      sub: { fontSize: 62, weight: 900, accent: '#D8FF3E', box: true, boxColor: 'rgba(8,10,14,.72)', radius: 0, pos: 0.78, font: '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', stroke: 0, autoNumber: true },
-      card: { style: 'square', bg: 'rgba(15,17,22,.9)', radius: 2, name: '시청자', handle: '@viewer', x: 0.06, y: 0.60 },
-      tag: { on: false, text: '@issuehanjan' },
-      grade: 'cine', zoom: 1, offset: 0.5,
-      bgm: { id: 'docu', volume: 0.3, duck: 0.55 }, voiceRate: 1.13
+      id: 'dopa-band', name: '🔥 도파민 2줄 띠', builtin: true,
+      short: '상단 검정 띠 · 흰/노랑 훅',
+      desc: '상단 풀블랙 띠(약 180px)에 흰색·노랑 2줄 훅, 하단 직각 베댓 카드, 쨍한 색감 · 말속도 1.15x',
+      ratio: '9:16', sample: 'neon',
+      hook: { on: true, style: 'band', color: '#FFFFFF', accent: '#FFD93D', bg: '#000000', size: 48, font: BLACK, band: 0.0813, pad: 0.04, lh: 1.1 },
+      sub: { fontSize: 56, weight: 900, accent: '#FFD93D', box: true, boxColor: 'rgba(0,0,0,.88)', radius: 0, pos: 0.665, font: SDG, stroke: 0, autoNumber: true },
+      card: { on: true, style: 'square', bg: 'rgba(0,0,0,.92)', radius: 0, name: '시청자', handle: '@viewer', x: 0.07, y: 0.395 },
+      tag: { on: false, text: '' },
+      grade: 'vivid', bright: 0, contrast: 6, sat: 8, zoom: 1.04, offset: 0.5, letterbox: 0,
+      bgm: { id: 'trendy', volume: 0.24, duck: 0.45 }, voiceRate: 1.15
     },
     {
-      id: 'hipplug', name: '힙플러그 스타일', builtin: true,
-      desc: '흰 라운드 제목 카드 · 검정 직각 자막 박스 · 좌측 세로 핸들 · 쨍한 색감',
-      ratio: '9:16',
-      hook: { on: true, style: 'card', color: '#0A0A0A', accent: '#0A0A0A', bg: '#FFFFFF', size: 50, font: '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', band: 0.14 },
-      sub: { fontSize: 60, weight: 900, accent: '#FFE45C', box: true, boxColor: '#000000', radius: 0, pos: 0.705, font: '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', stroke: 0, autoNumber: false },
-      card: { style: 'square', bg: 'rgba(0,0,0,.88)', radius: 0, name: '시청자', handle: '@viewer', x: 0.06, y: 0.56 },
-      tag: { on: true, text: '@hipplug' },
-      grade: 'vivid', zoom: 1.06, offset: 0.5,
-      bgm: { id: 'trendy', volume: 0.22, duck: 0.4 }, voiceRate: 1.0
+      id: 'docu-hook', name: '🎬 3초 훅 다큐', builtin: true,
+      short: '다크 비네팅 · 라임 강조',
+      desc: '어두운 시네마 톤 + 비네팅, 라임(#D9FF4A) 핵심어 강조, 하단 반투명 바 · 말속도 1.13x',
+      ratio: '9:16', sample: 'docu',
+      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#D9FF4A', bg: '#0B0D12', size: 58, font: SDG, band: 0.185 },
+      sub: { fontSize: 58, weight: 900, accent: '#D9FF4A', box: true, boxColor: 'rgba(9,12,17,.68)', radius: 12, pos: 0.80, font: SDG, stroke: 0, autoNumber: true },
+      card: { on: false, style: 'square', bg: 'rgba(0,0,0,.6)', radius: 10, name: '시청자', handle: '@viewer', x: 0.07, y: 0.40 },
+      tag: { on: false, text: '' },
+      grade: 'cine', bright: 0, contrast: 6, sat: -4, zoom: 1.0, offset: 0.5, letterbox: 0,
+      bgm: { id: 'docu', volume: 0.30, duck: 0.55 }, voiceRate: 1.13
     },
     {
-      id: 'zzaljuwoseo', name: '짤주웠어 스타일', builtin: true,
-      desc: '상단 검은 띠 제목(156px) · 자막 아래 직각 댓글 카드 · 무난한 색감',
-      ratio: '9:16',
-      hook: { on: true, style: 'band', color: '#FFFFFF', accent: '#FFFFFF', bg: '#000000', size: 52, font: '"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', band: 0.081 },
-      sub: { fontSize: 54, weight: 900, accent: '#D8FF3E', box: true, boxColor: 'rgba(0,0,0,.78)', radius: 0, pos: 0.635, font: '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', stroke: 0, autoNumber: false },
-      card: { style: 'square', bg: 'rgba(15,15,18,.75)', radius: 0, name: '시청자', handle: '@viewer', x: 0.085, y: 0.755 },
-      tag: { on: false, text: '@zzaljuwoseo' },
-      grade: 'none', zoom: 1, offset: 0.5,
-      bgm: { id: 'humor', volume: 0.26, duck: 0.5 }, voiceRate: 1.16
+      id: 'white-meme', name: '🤍 화이트 밈 카드', builtin: true,
+      short: '흰 제목 카드 · 검정 자막',
+      desc: '상단 흰 라운드 제목 카드 + 검정 자막 박스, 깔끔한 밈 톤 · 말속도 1.15x',
+      ratio: '9:16', sample: 'chart',
+      hook: { on: true, style: 'card', color: '#0A0A0A', accent: '#0A0A0A', bg: '#FFFFFF', size: 48, font: SDG, band: 0.14 },
+      sub: { fontSize: 58, weight: 900, accent: '#FFD84D', box: true, boxColor: '#000000', radius: 2, pos: 0.705, font: SDG, stroke: 0, autoNumber: false },
+      card: { on: true, style: 'square', bg: 'rgba(0,0,0,.9)', radius: 0, name: '시청자', handle: '@viewer', x: 0.075, y: 0.545 },
+      tag: { on: false, text: '' },
+      grade: 'none', bright: 4, contrast: 4, sat: 0, zoom: 1.05, offset: 0.5, letterbox: 0,
+      bgm: { id: 'humor', volume: 0.24, duck: 0.5 }, voiceRate: 1.15
     },
     {
-      id: 'raw', name: '날것 도파민', builtin: true,
-      desc: '카드 없이 큰 자막만 · 강한 대비 · 빠른 템포',
-      ratio: '9:16',
-      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#FFE45C', bg: '#000000', size: 60, font: '"Gothic A1","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', band: 0.2 },
-      sub: { fontSize: 70, weight: 900, accent: '#FFE45C', box: false, boxColor: 'rgba(0,0,0,.6)', radius: 0, pos: 0.72, font: '"Gothic A1","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif', stroke: 3, autoNumber: true },
-      card: { style: 'bubble', bg: 'rgba(255,255,255,.1)', radius: 14, name: '시청자', handle: '@viewer', x: 0.05, y: 0.55 },
-      tag: { on: false, text: '@reelstudio' },
-      grade: 'vivid', zoom: 1.1, offset: 0.5,
-      bgm: { id: 'tension', volume: 0.34, duck: 0.45 }, voiceRate: 1.2
+      id: 'punch-cut', name: '⚡ 1초 컷 펀치', builtin: true,
+      short: '레드 강조 · 큰 타격 자막',
+      desc: '선명한 레드/오렌지 강조와 큰 1줄 타격 자막, 카드 없이 속도로 밀어붙임 · 말속도 1.22x',
+      ratio: '9:16', sample: 'neon',
+      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#FF3B2F', bg: '#000000', size: 64, font: BLACK, band: 0.16 },
+      sub: { fontSize: 78, weight: 900, accent: '#FF3B2F', box: false, boxColor: 'rgba(0,0,0,.5)', radius: 0, pos: 0.70, font: BLACK, stroke: 6, autoNumber: false },
+      card: { on: false, style: 'bubble', bg: 'rgba(255,255,255,.12)', radius: 14, name: '시청자', handle: '@viewer', x: 0.05, y: 0.46 },
+      tag: { on: false, text: '' },
+      grade: 'vivid', bright: 0, contrast: 14, sat: 12, zoom: 1.08, offset: 0.5, letterbox: 0,
+      bgm: { id: 'tension', volume: 0.30, duck: 0.45 }, voiceRate: 1.22
+    },
+    {
+      id: 'comment-flood', name: '💬 댓글 폭주형', builtin: true,
+      short: '굵은 베댓 카드 · 거품 효과음',
+      desc: '상단 짧은 훅 + 굵은 베댓 카드를 화면 위쪽에 크게, 베댓 큐에 거품 효과음 자동 매칭 · 말속도 1.15x',
+      ratio: '9:16', sample: 'chart', sfx: 'p061',
+      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#FFE45C', bg: '#000000', size: 46, font: SDG, band: 0.115 },
+      sub: { fontSize: 54, weight: 900, accent: '#FFE45C', box: true, boxColor: 'rgba(14,16,22,.86)', radius: 4, pos: 0.755, font: SDG, stroke: 0, autoNumber: false },
+      card: { on: true, style: 'square', bg: 'rgba(16,18,24,.94)', radius: 14, scale: 1.18, name: '시청자', handle: '@viewer', x: 0.06, y: 0.315 },
+      tag: { on: false, text: '' },
+      grade: 'vivid', bright: 0, contrast: 8, sat: 4, zoom: 1.03, offset: 0.5, letterbox: 0,
+      bgm: { id: 'trendy', volume: 0.26, duck: 0.45 }, voiceRate: 1.15
+    },
+    {
+      id: 'breaking-news', name: '📰 속보 브리핑', builtin: true,
+      short: '네이비 뱃지 · 고대비 자막',
+      desc: '네이비 뱃지 띠에 레드 포인트, 고대비 흰 자막 바, 차분한 뉴스 톤 · 말속도 1.12x',
+      ratio: '9:16', sample: 'docu',
+      hook: { on: true, style: 'pill', color: '#FFFFFF', accent: '#FF6B5E', bg: '#101B36', size: 50, font: SDG, band: 0.13 },
+      sub: { fontSize: 56, weight: 900, accent: '#FFD429', box: true, boxColor: 'rgba(7,11,22,.90)', radius: 6, pos: 0.775, font: SDG, stroke: 0, autoNumber: true },
+      card: { on: true, style: 'square', bg: 'rgba(9,14,28,.92)', radius: 4, name: '시청자', handle: '@viewer', x: 0.06, y: 0.42 },
+      tag: { on: false, text: '' },
+      grade: 'cool', bright: 0, contrast: 10, sat: 4, zoom: 1.02, offset: 0.5, letterbox: 0,
+      bgm: { id: 'docu', volume: 0.26, duck: 0.55 }, voiceRate: 1.12
+    },
+    {
+      id: 'healing-vlog', name: '🐾 힐링·브이로그', builtin: true,
+      short: '따뜻한 톤 · 둥근 자막',
+      desc: '따뜻한 색온도와 둥근 소프트 자막 박스, 느린 호흡 · 말속도 1.05x',
+      ratio: '9:16', sample: 'docu',
+      hook: { on: true, style: 'plain', color: '#FFFFFF', accent: '#FFD9A6', bg: '#000000', size: 46, font: SDG, band: 0.135 },
+      sub: { fontSize: 50, weight: 700, accent: '#FFC978', box: true, boxColor: 'rgba(32,22,14,.55)', radius: 24, pos: 0.82, font: SDG, stroke: 0, autoNumber: false },
+      card: { on: true, style: 'bubble', bg: 'rgba(255,255,255,.18)', radius: 18, name: '시청자', handle: '@viewer', x: 0.08, y: 0.46 },
+      tag: { on: false, text: '' },
+      grade: 'warm', bright: 10, contrast: 2, sat: 6, zoom: 1.0, offset: 0.5, letterbox: 0,
+      bgm: { id: 'emotion', volume: 0.26, duck: 0.5 }, voiceRate: 1.05
+    },
+    {
+      id: 'cinema-cut', name: '🎞️ 시네마틱 컷', builtin: true,
+      short: '상하 여백 · 금색 자막',
+      desc: '상하 레터박스 여백에 깔끔한 흰/금색 자막, 담백한 시네마 톤 · 말속도 1.08x',
+      ratio: '9:16', sample: 'docu',
+      hook: { on: true, style: 'plain', color: '#F6F6F6', accent: '#E7C778', bg: '#000000', size: 44, font: SDG, band: 0.175 },
+      sub: { fontSize: 52, weight: 600, accent: '#E7C778', box: false, boxColor: 'rgba(0,0,0,.40)', radius: 0, pos: 0.855, font: SDG, stroke: 0, autoNumber: false },
+      card: { on: true, style: 'bubble', bg: 'rgba(0,0,0,.45)', radius: 8, name: '시청자', handle: '@viewer', x: 0.09, y: 0.46 },
+      tag: { on: false, text: '' },
+      grade: 'cine', bright: 0, contrast: 4, sat: -8, zoom: 1.02, offset: 0.5, letterbox: 0.055,
+      bgm: { id: 'emotion', volume: 0.28, duck: 0.5 }, voiceRate: 1.08
     }
   ];
 
   RS.presetById = id => P.find(p => p.id === id) || P[0];
-  RS.hookStyles = { band: '상단 검은 띠', card: '흰 라운드 카드', plain: '민무늬 큰 글씨' };
+  RS.hookStyles = { band: '상단 검은 띠', card: '흰 라운드 카드', pill: '뱃지 알약 띠', plain: '민무늬 큰 글씨' };
+
+  /* ── 옛 프리셋 id → 새 스타일 id (저장된 프로젝트·프리셋 이관) ── */
+  RS.legacyPresetMap = { issuehanjan: 'docu-hook', hipplug: 'white-meme', zzaljuwoseo: 'dopa-band', raw: 'punch-cut' };
+  RS.legacyNameMap = { '이슈한잔': '다큐', '힙플러그': '밈 카드', '짤주웠어': '도파민', '날것 도파민': '펀치', 'issuehanjan': '', 'hipplug': '', 'zzaljuwoseo': '', 'reelstudio': '' };
+  RS.sanitizeLegacyText = function (s) {
+    s = String(s == null ? '' : s);
+    Object.keys(RS.legacyNameMap).forEach(k => {
+      s = s.split(k).join(RS.legacyNameMap[k]);
+    });
+    return s.replace(/\s{2,}/g, ' ').replace(/^\s*[·,]\s*/, '').trim();
+  };
 
   /* ── defaults ────────────────────────────────────────── */
   RS.sampleSources = [
@@ -236,15 +301,16 @@
   };
 
   RS.newProject = function () {
-    const p = RS.presetById('issuehanjan');
+    const p = RS.presetById('dopa-band');
     return {
-      id: U.uid(), name: '새 쇼츠', ratio: '9:16', topic: '', lang: 'ko', presetId: 'issuehanjan',
+      id: U.uid(), name: '새 쇼츠', ratio: '9:16', topic: '', lang: 'ko', presetId: p.id,
       source: { type: 'sample', sample: 'docu', name: '다큐 다크' },
-      hook: { on: true, line1: '', line2: '', style: p.hook.style, color: p.hook.color, accent: p.hook.accent, bg: p.hook.bg, size: p.hook.size, font: p.hook.font },
+      hook: { on: true, line1: '', line2: '', style: p.hook.style, color: p.hook.color, accent: p.hook.accent, bg: p.hook.bg, size: p.hook.size, font: p.hook.font, band: p.hook.band, pad: p.hook.pad },
       sub: JSON.parse(JSON.stringify(p.sub)),
-      card: JSON.parse(JSON.stringify({ on: true, style: p.card.style, bg: p.card.bg, radius: p.card.radius, name: p.card.name, handle: p.card.handle, x: p.card.x, y: p.card.y })),
+      card: JSON.parse(JSON.stringify({ on: p.card.on !== false, style: p.card.style, bg: p.card.bg, radius: p.card.radius, scale: p.card.scale, name: p.card.name, handle: p.card.handle, x: p.card.x, y: p.card.y })),
       tag: JSON.parse(JSON.stringify(p.tag)),
-      grade: p.grade, bright: 0, contrast: 0, sat: 0, zoom: p.zoom, offset: p.offset,
+      grade: p.grade, bright: p.bright || 0, contrast: p.contrast || 0, sat: p.sat || 0,
+      zoom: p.zoom, offset: p.offset, letterbox: p.letterbox || 0,
       bgm: JSON.parse(JSON.stringify({ id: p.bgm.id, on: true, volume: p.bgm.volume, duck: p.bgm.duck })),
       voice: { rate: p.voiceRate, voiceURI: '', on: true, volume: 1, file: null, fileName: null },
       orig: { on: true, volume: 1 },
@@ -350,7 +416,7 @@
   }));
 
   /* ── storage ─────────────────────────────────────────── */
-  const K = RS.KEYS = { project: 'reelstudio.project.v1', settings: 'reelstudio.settings.v1', presets: 'reelstudio.presets.v1' };
+  const K = RS.KEYS = { project: 'reelstudio.project.v1', settings: 'reelstudio.settings.v1', presets: 'reelstudio.presets.v1', migrated: 'reelstudio.migrated.v2' };
   const S = RS.store = {
     safeGet(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
     safeSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { RS.toast('저장 공간이 부족합니다', 'err'); return false; } },
@@ -358,7 +424,7 @@
     loadProject() { return S.safeGet(K.project); },
     saveSettings(s) { S.safeSet(K.settings, s); },
     loadSettings() { return S.safeGet(K.settings) || {}; },
-    savePresets(list) { S.safeSet(K.presets, list.map(p => ({ id: p.id, name: p.name, desc: p.desc, ratio: p.ratio, hook: p.hook, sub: p.sub, card: p.card, tag: p.tag, grade: p.grade, zoom: p.zoom, offset: p.offset, bgm: p.bgm, voiceRate: p.voiceRate, builtin: !!p.builtin }))); },
+    savePresets(list) { S.safeSet(K.presets, list.map(p => ({ id: p.id, name: p.name, short: p.short || '', desc: p.desc, ratio: p.ratio, sample: p.sample, sfx: p.sfx, hook: p.hook, sub: p.sub, card: p.card, tag: p.tag, grade: p.grade, bright: p.bright, contrast: p.contrast, sat: p.sat, zoom: p.zoom, offset: p.offset, letterbox: p.letterbox, bgm: p.bgm, voiceRate: p.voiceRate, builtin: !!p.builtin }))); },
     loadPresets() { const v = S.safeGet(K.presets); return Array.isArray(v) ? v : []; }
   };
 
@@ -374,9 +440,45 @@
   RS.bootState = function () {
     const st = RS.state;
     st.settings = S.loadSettings();
-    st.presets = RS.presets.concat(S.loadPresets().filter(p => !RS.presets.some(b => b.id === p.id)));
+    /* 저장된 내 프리셋에서 옛 기본 프리셋 사본·채널 이름을 걷어냅니다 */
+    const stored = S.loadPresets();
+    const cleaned = stored
+      .filter(p => p && !RS.legacyPresetMap[p.id])
+      .map(p => {
+        const o = Object.assign({}, p);
+        o.name = RS.sanitizeLegacyText(o.name) || '내 프리셋';
+        o.desc = RS.sanitizeLegacyText(o.desc);
+        o.short = RS.sanitizeLegacyText(o.short);
+        if (o.tag) {
+          const t = RS.sanitizeLegacyText(o.tag.text);
+          o.tag = Object.assign({}, o.tag, { text: t, on: !!t && !!o.tag.on });
+        }
+        return o;
+      });
+    if (cleaned.length !== stored.length) { try { S.savePresets(cleaned); } catch (e) {} }
+    st.presets = RS.presets.concat(cleaned.filter(p => !RS.presets.some(b => b.id === p.id)));
     st.project = S.loadProject() || RS.demoProject();
     if (!st.project.cues) st.project = RS.demoProject();
+
+    /* 옛 스타일 id를 새 표준 스타일로 옮기고, 태그에 남은 옛 채널 이름을 비웁니다 */
+    const p = st.project;
+    if (p.tag && p.tag.text) {
+      const t = RS.sanitizeLegacyText(p.tag.text);
+      p.tag.text = t;
+      if (!t) p.tag.on = false;
+    }
+    const mapped = RS.legacyPresetMap[p.presetId];
+    const done = S.safeGet(RS.KEYS.migrated);
+    if (mapped) p.presetId = mapped;
+    if (!done) {
+      if (mapped) {
+        const pr = RS.presetById(mapped);
+        ['hook', 'sub', 'card', 'tag', 'bgm'].forEach(k => { if (pr[k]) p[k] = Object.assign({}, p[k], U.clone(pr[k])); });
+        ['grade', 'bright', 'contrast', 'sat', 'zoom', 'offset', 'letterbox'].forEach(k => { if (pr[k] != null) p[k] = pr[k]; });
+        if (p.voice) p.voice.rate = pr.voiceRate;
+      }
+      S.safeSet(RS.KEYS.migrated, 1);
+    }
     return st;
   };
 })();

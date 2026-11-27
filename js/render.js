@@ -283,11 +283,16 @@
     return lines;
   }
 
-  function drawRichLine(ctx, line, x, y, size, weight, family, color, accent, spaceW) {
+  function drawRichLine(ctx, line, x, y, size, weight, family, color, accent, spaceW, stroke) {
     ctx.font = fontOf(size, weight, family);
     let cx = x;
     line.items.forEach((it, i) => {
       if (i > 0) cx += spaceW;
+      if (stroke) {
+        ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+        ctx.lineWidth = stroke; ctx.strokeStyle = 'rgba(0,0,0,.92)';
+        ctx.strokeText(it.text, cx, y);
+      }
       ctx.fillStyle = it.em ? accent : color;
       ctx.fillText(it.text, cx, y);
       const w = ctx.measureText(it.text).width;
@@ -324,12 +329,13 @@
     if (hk.line2) layoutLines(ctx, U.rich(hk.line2, false), maxW, size, 900, family).slice(0, 2).forEach(l => lines.push(l));
     if (!lines.length) return;
 
-    const lh = size * 1.26;
+    const lh = size * (hk.lh || 1.26);
     const textH = lines.length * lh;
     const style = hk.style || 'band';
 
     if (style === 'band') {
-      const bandH = Math.max(H * 0.081, textH + H * 0.028);
+      const padH = (hk.pad == null ? 0.028 : hk.pad) * H;
+      const bandH = Math.max(H * 0.081, textH + padH);
       ctx.fillStyle = hk.bg || '#000';
       ctx.fillRect(0, 0, W, bandH);
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -347,6 +353,34 @@
         });
       });
       ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      return;
+    }
+
+    if (style === 'pill') {
+      const padX = W * 0.05, padY = H * 0.014;
+      const stripe = Math.max(9, W * 0.017);
+      const boxW = Math.min(W * 0.9, Math.max(...lines.map(l => l.w)) + padX * 2 + stripe);
+      const boxH = textH + padY * 2;
+      const x = (W - boxW) / 2, y = H * 0.048;
+      const rad = Math.min(boxH / 2, 34 * k);
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 26 * k; ctx.shadowOffsetY = 8 * k;
+      ctx.fillStyle = hk.bg || '#101B36';
+      roundRect(ctx, x, y, boxW, boxH, rad); ctx.fill();
+      ctx.restore();
+      ctx.save();
+      roundRect(ctx, x, y, boxW, boxH, rad); ctx.clip();
+      ctx.fillStyle = hk.accent || '#FF4B3E';
+      ctx.fillRect(x, y, stripe, boxH);
+      ctx.restore();
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.font = fontOf(size, 900, family);
+      const sp = ctx.measureText(' ').width;
+      lines.forEach((l, i) => {
+        const ly = y + padY + lh / 2 + i * lh;
+        drawRichLine(ctx, l, x + stripe + padX * 0.55, ly, size * (i === 0 ? 1 : 0.92), 900, family, hk.color || '#fff', hk.accent || '#FF6B5E', sp);
+      });
+      ctx.textBaseline = 'alphabetic';
       return;
     }
 
@@ -421,6 +455,7 @@
     ctx.globalAlpha = 0.15 + 0.85 * ease;
     const yy = cy + (1 - ease) * fs * 0.35;
 
+    const stroke = (!p.sub.box && p.sub.stroke) ? p.sub.stroke * k : 0;
     if (p.sub.box) {
       ctx.fillStyle = p.sub.boxColor || 'rgba(0,0,0,.7)';
       roundRect(ctx, cx - boxW / 2, yy - boxH / 2, boxW, boxH, p.sub.radius || 0);
@@ -433,10 +468,14 @@
       const ly = yy - boxH / 2 + padY + lh / 2 + i * lh;
       let lx = cx - l.w / 2;
       if (!p.sub.box) {
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 3;
-        drawRichLine(ctx, l, lx, ly, fs, weight, family, '#FFFFFF', p.sub.accent || '#D8FF3E', sp);
-        ctx.restore();
+        if (stroke) {
+          drawRichLine(ctx, l, lx, ly, fs, weight, family, '#FFFFFF', p.sub.accent || '#D8FF3E', sp, stroke);
+        } else {
+          ctx.save();
+          ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 3;
+          drawRichLine(ctx, l, lx, ly, fs, weight, family, '#FFFFFF', p.sub.accent || '#D8FF3E', sp);
+          ctx.restore();
+        }
       } else {
         drawRichLine(ctx, l, lx, ly, fs, weight, family, '#FFFFFF', p.sub.accent || '#D8FF3E', sp);
       }
@@ -452,7 +491,7 @@
     const into = playing ? U.clamp((t - cue.start - 0.1) / 0.22, 0, 1) : 1;
     if (into <= 0) return;
     const ease = 1 - Math.pow(1 - into, 3);
-    const fs = 30 * k;
+    const fs = 30 * k * (p.card.scale || 1);
     const family = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const maxW = W * 0.74;
     const lines = layoutLines(ctx, U.rich(cue.comment.text, false), maxW, fs, 700, family).slice(0, 3);
@@ -610,6 +649,15 @@
       for (let x = -160; x < W + 160; x += 160) for (let y = -160; y < H + 160; y += 160) ctx.drawImage(gt, x + ox, y + oy);
       ctx.restore();
     } catch (e) {}
+
+    // 2.5 letterbox (시네마 상하 여백)
+    if (p.letterbox) {
+      const bh = Math.round(H * p.letterbox);
+      ctx.save(); ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, bh);
+      ctx.fillRect(0, H - bh, W, bh);
+      ctx.restore();
+    }
 
     // 3. tag / hook / comment / subtitle
     drawTag(ctx, W, H, p, k);

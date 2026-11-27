@@ -388,32 +388,54 @@
     touch();
   }
 
-  /* ── one-click: style preset cards ──────────────────── */
+  /* ── one-click: style preset rail ───────────────────── */
+  function previewProject(pr) {
+    const pill = pr.hook && pr.hook.style === 'pill';
+    return {
+      ratio: '9:16', presetId: pr.id,
+      hook: Object.assign({ on: true, line1: pill ? '속보' : '이거 실화냐', line2: pill ? '방금 확정됐다' : '3초 만에 벌어졌다', style: 'plain', color: '#FFFFFF', accent: '#FFFFFF', bg: '#000000', size: 54, band: 0.17 }, U.clone(pr.hook)),
+      sub: Object.assign({ fontSize: 56, weight: 900, accent: '#FFFFFF', box: true, boxColor: 'rgba(0,0,0,.72)', radius: 0, pos: 0.78, autoNumber: true }, U.clone(pr.sub)),
+      card: Object.assign({ on: true, style: 'square', bg: 'rgba(0,0,0,.85)', radius: 0, x: 0.07, y: 0.42, name: '베댓' }, U.clone(pr.card)),
+      tag: Object.assign({ on: false, text: '' }, U.clone(pr.tag)),
+      grade: pr.grade || 'none', bright: pr.bright || 0, contrast: pr.contrast || 0, sat: pr.sat || 0,
+      zoom: pr.zoom || 1, offset: pr.offset == null ? 0.5 : pr.offset, letterbox: pr.letterbox || 0,
+      grain: 1, source: { type: 'sample', sample: pr.sample || 'docu' },
+      cues: [{ id: 'pv', text: '핵심 #한마디', start: 0, end: 4, sfx: '', comment: { on: true, text: '이건 못 참지', name: '베댓' } }]
+    };
+  }
+
+  function paintStylePreview(canvas, pr) {
+    try {
+      const ctx = canvas.getContext('2d');
+      if (!ctx || !RS.render || !RS.render.draw) return;
+      RS.render.draw(ctx, canvas.width, canvas.height, previewProject(pr), 1.7, {});
+    } catch (e) {}
+  }
+  /* 검수용: 카드 미리보기와 같은 프로젝트를 다른 크기로도 그려볼 수 있게 */
+  RS.stylePreviewProject = previewProject;
+  RS.paintStylePreview = paintStylePreview;
+
   function renderStyleCards() {
     const box = el('styleGrid'); if (!box) return;
     const builtin = S.presets.filter(p => p.builtin);
-    const vbg = 'background:linear-gradient(158deg,#33405A 0%,#1B2233 45%,#0B0D12 100%)';
     box.innerHTML = builtin.map(pr => {
       const on = S.project.presetId === pr.id;
-      const hk = pr.hook, sub = pr.sub, card = pr.card;
-      let hookCss = 'color:' + hk.color;
-      if (hk.style === 'band') hookCss += ';background:' + hk.bg;
-      else if (hk.style === 'card') hookCss += ';background:' + hk.bg + ';border-radius:5px;margin:9% 7% 0;width:86%';
-      else hookCss += ';text-shadow:0 1px 5px rgba(0,0,0,.75);margin-top:9%';
-      const subCss = 'background:' + (sub.box ? sub.boxColor : 'transparent') + ';color:#fff;' +
-        (sub.box ? '' : 'text-shadow:0 1px 5px rgba(0,0,0,.85)');
-      const cardCss = 'background:' + card.bg + ';border-radius:' + (card.style === 'bubble' ? 6 : 1) + 'px';
-      const name = pr.name.replace(/\s*스타일$/, '');
-      const short = pr.desc.split('·')[0].trim();
-      return `<button class="style-card${on ? ' on' : ''}" data-preset-id="${pr.id}">
-        <span class="sc-preview" style="${vbg}">
-          <span class="sc-hook" style="${hookCss}">훅 제목 1줄<br>두 번째 줄</span>
-          <span class="sc-cc" style="${cardCss}"><i></i><span>이거 실화냐</span></span>
-          <span class="sc-sub" style="${subCss}">자막 <em style="font-style:normal;color:${sub.accent}">강조</em> 예시</span>
+      const rate = (pr.voiceRate || 1).toFixed(2).replace(/0$/, '').replace(/\.$/, '');
+      return `<button class="style-card${on ? ' on' : ''}" data-preset-id="${U.esc(pr.id)}" aria-pressed="${on}" aria-label="${U.esc(pr.name)} 적용">
+        <span class="sc-preview">
+          <canvas class="sc-canvas" width="216" height="384" data-preset-id="${U.esc(pr.id)}" aria-hidden="true"></canvas>
+          <span class="sc-speed">${rate}x</span>
+          ${on ? '<span class="sc-check">✓</span>' : ''}
         </span>
-        <span class="sc-body"><b>${U.esc(name)}</b><i>${U.esc(short)}</i></span>
+        <span class="sc-body"><b>${U.esc(pr.name)}</b><i>${U.esc(pr.short || pr.desc || '')}</i></span>
       </button>`;
     }).join('');
+    const paint = () => $$('#styleGrid canvas.sc-canvas').forEach(cv => {
+      const pr = S.presets.find(x => x.id === cv.dataset.presetId);
+      if (pr) paintStylePreview(cv, pr);
+    });
+    paint();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(paint);
   }
 
   /* ── one-click: script tools ────────────────────────── */
@@ -514,20 +536,20 @@
 
   /* ── 인기 쇼츠 가로 레일 ─────────────────────────────── */
   const SHORT_CFG = {
-    '동물': { preset: 'zzaljuwoseo', bgm: 'emotion', emoji: '🐾', comments: ['심장 쫄깃했다', '이건 못 참지', '몇 번을 봐도 웃김', '혹시 우리 집 애인가요'] },
-    'ASMR': { preset: 'raw', bgm: 'emotion', emoji: '🎧', comments: ['소리만 들어도 힐링', '이거 무한반복임', '귀가 녹는다'] },
-    '여행': { preset: 'hipplug', bgm: 'docu', emoji: '🌄', comments: ['여기 어디야', '저장해둠', '가고 싶다 진짜'] },
-    '해외일상': { preset: 'hipplug', bgm: 'trendy', emoji: '🗾', comments: ['이런 일상 좋다', '일본 가고 싶다', '디테일 미쳤다'] },
-    '운동': { preset: 'raw', bgm: 'trendy', emoji: '🏃', comments: ['오늘부터 한다', '100번 가능?', '무릎 조심하세요'] },
-    '요리': { preset: 'hipplug', bgm: 'humor', emoji: '🍳', comments: ['이건 저장', '해먹어야지', '재료가 뭐야'] },
-    '유머': { preset: 'raw', bgm: 'humor', emoji: '😂', comments: ['이거 실화냐', '빵 터졌다', '몇 번 봐도 웃김'] },
-    '반전': { preset: 'raw', bgm: 'tension', emoji: '🎭', comments: ['2번 봐야 이해됨', '소름 돋았다', '이게 반전이지'] },
-    '꿀팁': { preset: 'hipplug', bgm: 'trendy', emoji: '💡', comments: ['이건 진짜 유용', '바로 저장함', '오늘 해봐야지'] },
-    '자연': { preset: 'hipplug', bgm: 'docu', emoji: '🌿', comments: ['압도된다', '이게 한국이야?', '영상미 미쳤다'] },
-    'CCTV': { preset: 'issuehanjan', bgm: 'tension', emoji: '📹', comments: ['아찔하다', '전방주시 필수', '3초 만에 벌어짐'] },
-    '블랙박스': { preset: 'issuehanjan', bgm: 'tension', emoji: '🚗', comments: ['아찔하다', '저건 좀 심했다', '다들 조심하세요'] },
-    '신기한 현상': { preset: 'issuehanjan', bgm: 'tension', emoji: '✨', comments: ['이게 가능해?', '소름 돋았다', '과학적으로 설명되나'] },
-    '공감': { preset: 'raw', bgm: 'humor', emoji: '🙂', comments: ['완전 내 얘기', '이거 나잖아', '공감 100%'] }
+    '동물': { preset: 'healing-vlog', bgm: 'emotion', emoji: '🐾', comments: ['심장 쫄깃했다', '이건 못 참지', '몇 번을 봐도 웃김', '혹시 우리 집 애인가요'] },
+    'ASMR': { preset: 'healing-vlog', bgm: 'emotion', emoji: '🎧', comments: ['소리만 들어도 힐링', '이거 무한반복임', '귀가 녹는다'] },
+    '여행': { preset: 'cinema-cut', bgm: 'docu', emoji: '🌄', comments: ['여기 어디야', '저장해둠', '가고 싶다 진짜'] },
+    '해외일상': { preset: 'white-meme', bgm: 'trendy', emoji: '🗾', comments: ['이런 일상 좋다', '일본 가고 싶다', '디테일 미쳤다'] },
+    '운동': { preset: 'punch-cut', bgm: 'trendy', emoji: '🏃', comments: ['오늘부터 한다', '100번 가능?', '무릎 조심하세요'] },
+    '요리': { preset: 'white-meme', bgm: 'humor', emoji: '🍳', comments: ['이건 저장', '해먹어야지', '재료가 뭐야'] },
+    '유머': { preset: 'comment-flood', bgm: 'humor', emoji: '😂', comments: ['이거 실화냐', '빵 터졌다', '몇 번 봐도 웃김'] },
+    '반전': { preset: 'punch-cut', bgm: 'tension', emoji: '🎭', comments: ['2번 봐야 이해됨', '소름 돋았다', '이게 반전이지'] },
+    '꿀팁': { preset: 'white-meme', bgm: 'trendy', emoji: '💡', comments: ['이건 진짜 유용', '바로 저장함', '오늘 해봐야지'] },
+    '자연': { preset: 'cinema-cut', bgm: 'docu', emoji: '🌿', comments: ['압도된다', '이게 한국이야?', '영상미 미쳤다'] },
+    'CCTV': { preset: 'breaking-news', bgm: 'tension', emoji: '📹', comments: ['아찔하다', '전방주시 필수', '3초 만에 벌어짐'] },
+    '블랙박스': { preset: 'breaking-news', bgm: 'tension', emoji: '🚗', comments: ['아찔하다', '저건 좀 심했다', '다들 조심하세요'] },
+    '신기한 현상': { preset: 'docu-hook', bgm: 'tension', emoji: '✨', comments: ['이게 가능해?', '소름 돋았다', '과학적으로 설명되나'] },
+    '공감': { preset: 'comment-flood', bgm: 'humor', emoji: '🙂', comments: ['완전 내 얘기', '이거 나잖아', '공감 100%'] }
   };
   const shortCfg = cat => SHORT_CFG[cat] || SHORT_CFG['유머'];
 
@@ -995,7 +1017,7 @@
     });
     if (p.cues[0]) p.cues[0].sfx = 'impact';
     const bgm = animalish ? 'emotion' : techish ? 'trendy' : 'tension';
-    if (animalish) applyPreset(S.presets.find(x => x.id === 'zzaljuwoseo') || S.presets[0]);
+    if (animalish) applyPreset(S.presets.find(x => x.id === 'healing-vlog') || S.presets[0]);
     p.bgm = Object.assign({}, p.bgm, { id: bgm, on: true });
     syncProjectToUI(true);
     drawStatic();
@@ -2040,7 +2062,7 @@
   function renderPresetSelect() {
     const sel = el('stPresetSelect');
     sel.innerHTML = S.presets.map(p => `<option value="${p.id}">${U.esc(p.name)}${p.builtin ? '' : ' (내 프리셋)'}</option>`).join('');
-    sel.value = S.project.presetId || 'issuehanjan';
+    sel.value = S.project.presetId || 'dopa-band';
     const cur = S.presets.find(p => p.id === sel.value) || S.presets[0];
     el('stPresetDesc').textContent = cur ? cur.desc || '' : '';
   }
@@ -2165,6 +2187,9 @@
     ['hook', 'sub', 'card', 'tag', 'bgm'].forEach(k => { if (p[k]) pr[k] = Object.assign({}, pr[k], U.clone(p[k])); });
     if (p.ratio) pr.ratio = p.ratio;
     if (p.grade) pr.grade = p.grade;
+    ['bright', 'contrast', 'sat', 'letterbox'].forEach(k => { if (p[k] != null) pr[k] = p[k]; });
+    // 스타일이 지정한 효과음은 베댓이 붙은 큐에만, 비어 있을 때 채웁니다
+    if (p.sfx && pr.cues) pr.cues.forEach(c => { if (c.comment && c.comment.on && !c.sfx) c.sfx = p.sfx; });
     if (p.zoom) pr.zoom = p.zoom;
     if (p.offset != null) pr.offset = p.offset;
     if (p.voiceRate) pr.voice.rate = p.voiceRate;
@@ -2174,6 +2199,7 @@
     resizeStage();
     syncProjectToUI(true);
     drawStatic();
+    renderStyleCards();
     touch();
     el('stPresetDesc').textContent = p.desc || '';
   }
@@ -2203,7 +2229,7 @@
     el('origOn').checked = p.orig.on !== false;
     el('origVol').value = Math.round((p.orig.volume == null ? 1 : p.orig.volume) * 100);
     el('origVolVal').textContent = el('origVol').value + '%';
-    el('thumbBadge').value = (p.tag && p.tag.on) ? p.tag.text.replace(/^@/, '') : (p.presetId === 'issuehanjan' ? '이슈한잔' : '');
+    el('thumbBadge').value = (p.tag && p.tag.on) ? p.tag.text.replace(/^@/, '') : '';
     A.setBgmVolume(p.bgm.volume);
     A.setDuckAmount(p.bgm.duck);
     A.setOrigVolume(p.orig.on === false ? 0 : p.orig.volume);
