@@ -691,7 +691,7 @@
           <button class="vdel" data-del="${it.id}" title="삭제">✕</button>
           <div class="vn">${U.esc(it.name)}</div>
           <div class="vs">${src} · ${fmtMB(it.size)}${it.dur ? ' · ' + it.dur.toFixed(1) + '초' : ''}${on ? ' · <span class="von">적용됨</span>' : ''}</div>
-          <div class="vacts"><button class="vplay" data-play="${it.id}">▶ 미리듣기</button></div>
+          <div class="vacts"><button class="vplay" data-play="${it.id}">▶ 미리듣기</button><button class="vplay" data-edit="${it.id}">✎ 이름</button></div>
         </div>`;
       }).join('');
     }
@@ -745,6 +745,25 @@
     }
     renderVoiceLib();
     RS.toast(added + '개 보이스를 담았습니다 · 카드를 누르면 바로 교체됩니다', 'ok');
+  }
+
+  function renameVoice(it) {
+    const next = window.prompt('보이스 이름', it.name);
+    if (next == null) return;
+    const name = String(next).trim().slice(0, 60);
+    if (!name || name === it.name) return;
+    const wasApplied = VL.curId === it.id;
+    it.name = name;
+    vlPut(it);
+    if (wasApplied) {
+      S.project.voice.file = name;
+      S.project.voice.fileName = name;
+      S.media.narrationName = name;
+      el('voiceFileName').textContent = name;
+      touch();
+    }
+    renderVoiceLib();
+    RS.toast('이름을 바꿨습니다 · ' + name, 'ok');
   }
 
   async function removeVoice(it) {
@@ -826,8 +845,10 @@
       const it = VL.items.find(x => x.id === card.dataset.id); if (!it) return;
       const del = e.target.closest('[data-del]');
       const play = e.target.closest('[data-play]');
+      const edit = e.target.closest('[data-edit]');
       if (del) { e.stopPropagation(); removeVoice(it); return; }
       if (play) { e.stopPropagation(); previewVoice(it); return; }
+      if (edit) { e.stopPropagation(); renameVoice(it); return; }
       applyVoice(it);
     });
     box.addEventListener('keydown', e => {
@@ -846,7 +867,8 @@
       RS.toast('보관함을 비웠습니다');
     });
     el('copyVoiceScript').addEventListener('click', async () => {
-      const text = S.project.cues.map(c => U.strip(c.text)).filter(Boolean).join('\n');
+      const lines = S.project.cues.map(c => U.strip(c.text).replace(/\s+/g, ' ').trim()).filter(Boolean);
+      const text = lines.join('\n');
       if (!text) { RS.toast('먼저 대본을 만들어 주세요', 'err'); return; }
       const ok = await U.copy(text);
       window.open('https://typecast.ai', '_blank', 'noopener');
