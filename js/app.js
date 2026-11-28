@@ -41,8 +41,10 @@
     renderSfxPack();
     bindVoiceLib();
     syncProjectToUI(true);
-    renderDiscover(RS.demoDiscover.slice(0, 12), { mode: 'demo' });
-    if (el('discoverStatus')) el('discoverStatus').innerHTML = '<i class="dot"></i>샘플 떡상 데이터 · 12건 (검색하면 키워드로 다시 찾습니다)';
+    bindSafeBadge();
+    const demoList = safeList(RS.demoDiscover).slice(0, 12);
+    renderDiscover(demoList, { mode: 'demo' });
+    if (el('discoverStatus')) el('discoverStatus').innerHTML = '<i class="dot"></i>샘플 떡상 데이터 · ' + demoList.length + '건 (검색하면 키워드로 다시 찾습니다)';
     loadPopularRail();
     voiceLibInit();
     loop();
@@ -574,9 +576,27 @@
     }));
   }
 
+  /* 받아둔 실시간 목록이 있으면 재조회 없이 지금 설정으로 다시 그림 */
+  function refreshPopular() {
+    const raw = RS.tube.lastPopularRaw;
+    if (raw && raw.length) {
+      renderPopRail(RS.safeFilter.filter(raw).list);
+      RS.tube.lastPopularSafe = Object.assign({}, RS.tube.lastPopularSafe,
+        { active: safeOn(), removed: RS.safeFilter.filter(raw).removed.length });
+      return true;
+    }
+    const sample = safeList(RS.popularShorts);
+    renderPopRail(sample);
+    return false;
+  }
   async function loadPopularRail() {
-    renderPopRail(RS.popularShorts);
+    if (refreshPopular()) {
+      const t = el('popSource'); if (t) { t.textContent = 'YouTube 실시간'; t.className = 'tag lime'; }
+      refreshPopSafeChip();
+      return;
+    }
     const tag = el('popSource'); if (tag) tag.textContent = '샘플 · 11.27 조회수';
+    refreshPopSafeChip();
     if (!RS.ai.hasYouTube()) return;
     try {
       const list = await RS.tube.popular();
@@ -584,6 +604,7 @@
         renderPopRail(list);
         if (tag) { tag.textContent = 'YouTube 실시간'; tag.className = 'tag lime'; }
       }
+      refreshPopSafeChip();
     } catch (e) {
       if (tag) tag.textContent = '샘플 · API 실패';
       RS.toast('인기 쇼츠 실시간 조회 실패 — 샘플로 보여줍니다: ' + e.message, 'err');
@@ -1870,7 +1891,7 @@
   /* ── discover ───────────────────────────────────────── */
   function bindDiscover() {}
   const DISCOVER_PRESETS = {
-    kr: { q: '뉴스', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
+    kr: { q: '일상', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
     us: { q: 'viral', region: 'US', dur: 'short', min: '100000', sort: 'breakout' },
     jp: { q: 'ニュース', region: 'JP', dur: 'short', min: '100000', sort: 'breakout' },
     animal: { q: '동물', region: '', dur: 'short', min: '100000', sort: 'breakout' },
@@ -1950,6 +1971,83 @@
     box.innerHTML = new Array(n || 12).fill(SKELETON).join('');
   }
 
+  /* ── 🛡️ 수익화 위험 영상 자동 제외 (방송·아이돌·영화·랭킹 모음집) ── */
+  function safeOn() { return !!(RS.safeFilter && RS.safeFilter.enabled()); }
+  function safeList(list) { return RS.safeFilter ? RS.safeFilter.filter(list).list : (list || []); }
+  function safeRemoved() { return (RS.tube.lastSafe && RS.tube.lastSafe.removed) || 0; }
+  function syncSafeBadge() {
+    const b = el('safeToggle'); if (!b) return;
+    const on = safeOn();
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    b.title = on
+      ? '방송·아이돌·영화·랭킹 모음집을 자동으로 뺍니다 — 누르면 끕니다'
+      : '자동 제외가 꺼져 있습니다 — 누르면 방송·아이돌·랭킹 영상도 함께 봅니다';
+    const st = el('safeState'); if (st) st.textContent = on ? 'ON' : 'OFF';
+  }
+  function refreshPopSafeChip() {
+    const chip = el('popSafe'); if (!chip) return;
+    const n = (RS.tube.lastPopularSafe && RS.tube.lastPopularSafe.removed) || 0;
+    if (!safeOn() || !n) { chip.hidden = true; return; }
+    chip.hidden = false;
+    chip.textContent = '🛡️ 위험 ' + n + '건 제외';
+  }
+  function applySafeToggle() {
+    const on = RS.safeFilter.toggle();
+    syncSafeBadge();
+    RS.toast(on
+      ? '🛡️ 방송·아이돌·랭킹 자동 제외 켜짐 — 안전한 소재만 보여드립니다'
+      : '자동 제외 꺼짐 — 방송·아이돌·랭킹 영상도 함께 나옵니다', on ? 'ok' : 'err');
+    if (!rerenderFromCache()) runDiscover();   // 받아둔 결과가 있으면 재검색 없이 다시 그림
+    refreshPopular();
+    refreshPopSafeChip();
+  }
+  function bindSafeBadge() {
+    syncSafeBadge();
+    const b = el('safeToggle');
+    if (b && !b.dataset.bound) { b.dataset.bound = '1'; b.addEventListener('click', applySafeToggle); }
+  }
+  /* 받아둔 원본 결과(자동 제외 전)를 지금 설정으로 다시 그립니다 — API 재호출 없음 */
+  function rerenderFromCache() {
+    const raw = RS.tube.lastRaw || [];
+    const f = RS.tube.lastFilters || readFilters();
+    if (!raw.length) return false;
+    const removedNow = RS.safeFilter.filter(raw).removed.length;
+    const safe = RS.safeFilter.filter(raw).list;
+    const min = +f.minViews || 0;
+    let shown = safe.filter(v => v.views >= min);
+    if (!shown.length) shown = safe.slice();
+    if (!RS.ai.hasYouTube()) shown = shown.slice(0, 12);   // 데모는 처음 화면과 같은 12건
+    renderDiscover(shown, { mode: RS.ai.hasYouTube() ? 'live' : 'demo', q: f.q, removed: removedNow });
+    setDiscoverStatus(RS.ai.hasYouTube() ? 'live' : 'demo', f.q, shown.length, { meta: null, relaxed: false, removed: removedNow });
+    return true;
+  }
+  function setDiscoverStatus(mode, q, count, opts) {
+    const st = el('discoverStatus'); if (!st) return;
+    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
+    st.classList.toggle('off', mode !== 'live');
+    const meta = opts && opts.meta;
+    let note = '';
+    if (meta) {
+      const bits = [];
+      if (meta.direct) bits.push('일치 ' + meta.direct);
+      if (meta.related) bits.push('비슷한 결 ' + meta.related);
+      if (meta.fresh) bits.push('추천 ' + meta.fresh);
+      note = bits.length ? ' · ' + bits.join(' · ') : (q ? ' · 연관 0건 → 인기순' : '');
+    }
+    if (opts && opts.relaxed && !meta) note += ' · 필터 완화';
+    const removed = (opts && typeof opts.removed === 'number') ? opts.removed : safeRemoved();
+    /* 검색어 자체가 방송·아이돌·랭킹 위험 키워드면 그 사실을 짚어 줍니다
+       (샘플 모드에서는 걸러질 원본이 없어 제외 0건으로 보이기 때문) */
+    const qHit = (safeOn() && !removed && q && RS.safeFilter) ? RS.safeFilter.check({ title: q }) : null;
+    const shield = (safeOn() && removed)
+      ? '<b class="safe-note">🛡️ 방송·아이돌·랭킹 등 위험 ' + removed + '건 자동 제외</b>'
+      : qHit
+        ? '<b class="safe-note">🛡️ ' + U.esc(q) + '은 ' + U.esc(qHit.kindLabel) + ' 위험 키워드 — 안전한 소재만</b>'
+        : (safeOn() ? '' : '<b class="safe-note">🛡️ 자동 제외 꺼짐</b>');
+    st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(q) + "' " + count + '건' + note + shield;
+  }
+
   let discoverSeq = 0;
   async function runDiscover() {
     const btn = el('dSearch');
@@ -1975,21 +2073,8 @@
       RS.toast('유튜브 실시간 실패 — 샘플 ' + list.length + '건으로 대신합니다', 'err');
     }
     if (seq !== discoverSeq) return;           // 늦게 도착한 이전 요청은 버림
-    renderDiscover(list, { mode, q: filters.q, meta, err });
-    if (st) {
-      const label = mode === 'live' ? 'YouTube 실시간' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
-      st.classList.toggle('off', mode !== 'live');
-      let note = '';
-      if (meta) {
-        const bits = [];
-        if (meta.direct) bits.push('일치 ' + meta.direct);
-        if (meta.related) bits.push('비슷한 결 ' + meta.related);
-        if (meta.fresh) bits.push('추천 ' + meta.fresh);
-        note = bits.length ? ' · ' + bits.join(' · ') : (filters.q ? ' · 연관 0건 → 인기순' : '');
-      }
-      if (relaxed && !meta) note += ' · 필터 완화';
-      st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(filters.q) + "' " + list.length + '건' + note;
-    }
+    renderDiscover(list, { mode, q: filters.q, meta, err, removed: safeRemoved() });
+    setDiscoverStatus(mode, filters.q, list.length, { meta, relaxed });
     if (btn) { btn.disabled = false; btn.textContent = '분석'; }
     focusResults(true);
   }
@@ -1999,13 +2084,20 @@
     if (!box) return;
     list = list || RS.demoDiscover;
     if (!list.length) {
-      box.innerHTML = `<div class="note rcard-empty">조건에 맞는 영상이 없습니다. 필터를 풀면 바로 다시 찾아봅니다.
-        <button class="btn primary sm" id="dRelax">필터 풀고 다시</button></div>`;
+      const rem = (info && info.removed) || 0;
+      box.innerHTML = rem
+        ? `<div class="note rcard-empty">🛡️ 방송·아이돌·영화·랭킹 영상 <b>${rem}건이 전부 자동 제외</b>되어 남은 게 없습니다.<br>단일 장면 키워드(동물·일상·꿀팁·해외밈)로 다시 찾아보세요.
+            <button class="btn primary sm" id="dRelax">필터 풀고 다시</button>
+            <button class="btn outline sm" id="dSafeOff">🛡️ 자동 제외 끄고 보기</button></div>`
+        : `<div class="note rcard-empty">조건에 맞는 영상이 없습니다. 필터를 풀면 바로 다시 찾아봅니다.
+            <button class="btn primary sm" id="dRelax">필터 풀고 다시</button></div>`;
       const rb = el('dRelax');
       if (rb) rb.addEventListener('click', () => {
         el('dMin').value = '10000'; el('dDur').value = 'short'; el('dRegion').value = '';
         syncFilterLabel(); runDiscover();
       });
+      const sb = el('dSafeOff');
+      if (sb) sb.addEventListener('click', applySafeToggle);
       return;
     }
     box.innerHTML = list.map((v, i) => {

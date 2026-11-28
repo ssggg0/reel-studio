@@ -350,49 +350,89 @@
     return p;
   };
 
+  /* ── 🌍 해외 밈·글로벌 클립 우선 노출 (기본 75%) ──────────
+     해외 바이럴을 한국어로 재가공하는 게 성현님 주력이라, 발굴 기본 추천·
+     인기 레일·검색 결과에서 해외 밈/글로벌 동물 클립을 앞쪽 70~80%로 올립니다. */
+  const OVERSEAS_HINT = /해외|외국|글로벌|미국|영국|일본|호주|유럽|태국|베트남|인도|meme|memes|viral|funny|asmr|satisfying|cats?|dogs?|puppy|kitten|animal|toast|cctv|blackbox|fail|try not to laugh/i;
+  RS.rank = {
+    isGlobal(v) {
+      if (!v) return false;
+      if (v.gl === 1 || v.gl === true) return true;
+      const t = String(v.title || '');
+      if (!t) return false;
+      if (!/[가-힣]/.test(t)) return true;                       // 제목이 전부 외국어
+      if (OVERSEAS_HINT.test(t)) return true;
+      const side = String(v.channel || '') + ' ' + String(v.cat || '');
+      if (OVERSEAS_HINT.test(side)) return true;
+      return false;
+    },
+    /* list의 상대 순서는 지키면서, 4칸 중 3칸(기본 75%)을 해외·글로벌로 채웁니다 */
+    mix(list, pct) {
+      const arr = (list || []).slice();
+      const g = [], l = [];
+      arr.forEach(v => { (RS.rank.isGlobal(v) ? g : l).push(v); });
+      if (!g.length || !l.length) return arr;
+      const p = typeof pct === 'number' ? pct : 0.75;
+      const step = Math.max(2, Math.round(1 / Math.max(0.05, 1 - p)));
+      const out = [];
+      let gi = 0, li = 0, i = 0;
+      while (out.length < arr.length) {
+        const wantGlobal = ((i + 1) % step !== 0) || li >= l.length;
+        if (wantGlobal && gi < g.length) out.push(g[gi++]);
+        else if (li < l.length) out.push(l[li++]);
+        else if (gi < g.length) out.push(g[gi++]);
+        else break;
+        i++;
+      }
+      return out;
+    },
+    stats(list) {
+      const arr = list || [];
+      const g = arr.filter(v => RS.rank.isGlobal(v)).length;
+      return { global: g, local: arr.length - g, pct: arr.length ? Math.round(g / arr.length * 100) : 0 };
+    }
+  };
+
   /* ── 인기 쇼츠 풀 (2026-11-27 YouTube 인기 쇼츠 조회수 기준) ──
-     API 키가 없을 때 데모 데이터로 쓰고, 있으면 실제 검색 결과로 대체합니다. */
+     API 키가 없을 때 데모 데이터로 쓰고, 있으면 실제 검색 결과로 대체합니다.
+     🛡️ 방송·예능·아이돌·영화·랭킹/모음집 항목은 넣지 않습니다 — 단일 장면·단일 원본만. */
   RS.viralPool = [
     { id: "eS6ZBwjHoWI", cat: "동물", views: 51570000, title: "북한말로 불러야 알아듣는 강아지" },
-    { id: "WRirWdRi5gc", cat: "ASMR", views: 48360000, title: "toast asmr🍞" },
-    { id: "t6v6a4Hog0w", cat: "ASMR", views: 42480000, title: "ASMR Tooth Fairy Eats Your Teeth Candy 🦷🍭🧚‍♀️" },
-    { id: "p3UsCxQuxeY", cat: "ASMR", views: 39220000, title: "real vs. fake nail polish cracking ASMR🍓" },
-    { id: "35yH2r2-4bI", cat: "동물", views: 32530000, title: "잊지 못하는 강아지 모음집 1" },
+    { id: "WRirWdRi5gc", cat: "ASMR", views: 48360000, title: "toast asmr🍞", gl: 1 },
+    { id: "t6v6a4Hog0w", cat: "ASMR", views: 42480000, title: "ASMR Tooth Fairy Eats Your Teeth Candy 🦷🍭🧚‍♀️", gl: 1 },
+    { id: "p3UsCxQuxeY", cat: "ASMR", views: 39220000, title: "real vs. fake nail polish cracking ASMR🍓", gl: 1 },
     { id: "7FgpiYQVXoA", cat: "동물", views: 26490000, title: "찹츄 마스터의 손길에 순식간에 당한 강아지들" },
     { id: "h0FVO_Zn1zY", cat: "여행", views: 25860000, title: "이런 풍경이면 무슨 노래든 명곡이 돼.." },
-    { id: "g9TXLAbc-1Q", cat: "해외일상", views: 25180000, title: "일본인 아내와 5살 아이와 걸어서만 홋카이도를 여행해봤습니다" },
+    { id: "g9TXLAbc-1Q", cat: "해외일상", views: 25180000, title: "일본인 아내와 5살 아이와 걸어서만 홋카이도를 여행해봤습니다", gl: 1 },
     { id: "c94GU4DEkYs", cat: "운동", views: 22510000, title: "요즘 너무 핫한 이 운동, 100번 채우기 도전" },
-    { id: "H85ojZSV9lM", cat: "해외일상", views: 20280000, title: "참지 않는 K여친" },
+    { id: "H85ojZSV9lM", cat: "해외일상", views: 20280000, title: "참지 않는 K여친", gl: 1 },
     { id: "A4anjbzpUmI", cat: "요리", views: 18920000, title: "계란을 이렇게 해 보세요, 매 끼니 이걸 먹습니다" },
-    { id: "qjHFz00cZrU", cat: "유머", views: 17450000, title: "해변에 아무데나 앉으면 안되는 이유" },
+    { id: "qjHFz00cZrU", cat: "유머", views: 17450000, title: "해변에 아무데나 앉으면 안되는 이유", gl: 1 },
     { id: "xtnq5RinY_A", cat: "요리", views: 16390000, title: "이거 알고 감자 매일 먹어요" },
-    { id: "FYYqujTehl0", cat: "유머", views: 15470000, title: "운수 좋은 날" },
-    { id: "d6uF-zl7CB0", cat: "반전", views: 14860000, title: "누가 설계했는지 궁금한 미끄럼틀 대참사" },
-    { id: "JEqDQyTqKS8", cat: "꿀팁", views: 14350000, title: "생활꿀팁 (샤워기 자가수리 외 다수)" },
-    { id: "APHvK7_R7oc", cat: "요리", views: 12520000, title: "밥도둑 류수영 스팸순두부찌개" },
-    { id: "KiEVKDr5XlQ", cat: "반전", views: 11340000, title: "감동적인 태국 반전 광고" },
-    { id: "Qfb_fB_Gptg", cat: "자연", views: 11230000, title: "자연에게 압도당하는 풍경" },
+    { id: "FYYqujTehl0", cat: "유머", views: 15470000, title: "운수 좋은 날", gl: 1 },
+    { id: "d6uF-zl7CB0", cat: "반전", views: 14860000, title: "누가 설계했는지 궁금한 미끄럼틀 대참사", gl: 1 },
+    { id: "KiEVKDr5XlQ", cat: "반전", views: 11340000, title: "감동적인 태국 반전 광고", gl: 1 },
+    { id: "Qfb_fB_Gptg", cat: "자연", views: 11230000, title: "자연에게 압도당하는 풍경", gl: 1 },
     { id: "AUhL6uhYi5A", cat: "꿀팁", views: 10910000, title: "평생 써먹는 생활꿀팁" },
     { id: "xSUTtXfO8ZI", cat: "꿀팁", views: 10400000, title: "생활꿀팁 끝판왕, 이건 진짜 저장해야함" },
-    { id: "3QwQUCs31nk", cat: "여행", views: 10120000, title: "해외느낌 물씬 풍기는 이국적인 대한민국 여행지TOP 11" },
     { id: "St20bxuLQNo", cat: "운동", views: 8790000, title: "3년 홈트의 결과 아내의 최후" },
-    { id: "bwtSrNBnXKI", cat: "유머", views: 8640000, title: "테니스가 위험한 이유" },
-    { id: "JQzKVCF-lB0", cat: "반전", views: 8500000, title: "2번 봐야 이해되는 소름돋는 레전드 영상" },
+    { id: "bwtSrNBnXKI", cat: "유머", views: 8640000, title: "테니스가 위험한 이유", gl: 1 },
+    { id: "JQzKVCF-lB0", cat: "반전", views: 8500000, title: "2번 봐야 이해되는 소름돋는 레전드 영상", gl: 1 },
     { id: "P22fW-GBFI4", cat: "CCTV", views: 7910000, title: "고속도로 사고 CCTV 영상! 전방주시 태만" },
-    { id: "FrVqsmkEHVQ", cat: "자연", views: 6870000, title: "역대급 비현실적 풍경 명장면 2탄" },
     { id: "3nIElzDpWxo", cat: "운동", views: 6520000, title: "하루 딱 100번만 해보세요❤️" },
-    { id: "LySRxG68X10", cat: "해외일상", views: 5500000, title: "(공감)일본인 10명 중 8명은 다 있다는 이것!" },
-    { id: "m_M7fkPnE6E", cat: "신기한 현상", views: 5330000, title: "쾌감 쩌는 신기한 자연현상" },
-    { id: "V92ZStfB7go", cat: "여행", views: 4630000, title: "세계 비현실적인 장소 TOP5 🌎" },
+    { id: "LySRxG68X10", cat: "해외일상", views: 5500000, title: "(공감)일본인 10명 중 8명은 다 있다는 이것!", gl: 1 },
+    { id: "m_M7fkPnE6E", cat: "신기한 현상", views: 5330000, title: "쾌감 쩌는 신기한 자연현상", gl: 1 },
     { id: "xuIwJjjB73Q", cat: "자연", views: 3540000, title: "신비한 자연 워터파크" },
     { id: "eYr9CAFFQ40", cat: "공감", views: 2480000, title: "오줌싸개가 되면 생기는 충격적인 일..ㄷㄷ" },
-    { id: "HGCBA__W7CQ", cat: "CCTV", views: 2410000, title: "[실제상황: 그날의 CCTV] 폭탄이 된 드럼통(쇼츠)" },
     { id: "WAKFEb0thEM", cat: "공감", views: 2190000, title: "그 시절 집 앞에서 즐기는 천연 똥물 워터파크ㄷㄷ" },
     { id: "pqZDcDr4MLE", cat: "공감", views: 2170000, title: "동전 모아서 공짜로 부자 되는 법" },
-    { id: "DBCY8oewnbQ", cat: "신기한 현상", views: 1950000, title: "진짜 신기한데 웃긴 순간들ㄷㄷ" },
+    { id: "DBCY8oewnbQ", cat: "신기한 현상", views: 1950000, title: "진짜 신기한데 웃긴 순간들ㄷㄷ", gl: 1 },
     { id: "wL9F8GcmyAA", cat: "블랙박스", views: 320000, title: "무지성으로 꺾어버리네, 고속도로 사고" },
   ];
-  const POPULAR_IDS = ['eS6ZBwjHoWI','WRirWdRi5gc','35yH2r2-4bI','h0FVO_Zn1zY','g9TXLAbc-1Q','c94GU4DEkYs','A4anjbzpUmI','qjHFz00cZrU','FYYqujTehl0','d6uF-zl7CB0','JEqDQyTqKS8','Qfb_fB_Gptg','P22fW-GBFI4','m_M7fkPnE6E','pqZDcDr4MLE','wL9F8GcmyAA'];
+  /* 🛡️ 위험 항목(모음집·랭킹·방송)이 다시 섞여 들어와도 화면에는 안전한 것만 */
+  const poolSafe = () => (RS.safeFilter ? RS.safeFilter.filter(RS.viralPool).list : RS.viralPool.slice());
+  /* 해외 밈·글로벌 동물 클립 12 + 한국 단일 장면 4 = 75% 해외 */
+  const POPULAR_IDS = ['WRirWdRi5gc','t6v6a4Hog0w','H85ojZSV9lM','eS6ZBwjHoWI','p3UsCxQuxeY','g9TXLAbc-1Q','d6uF-zl7CB0','7FgpiYQVXoA','KiEVKDr5XlQ','bwtSrNBnXKI','FYYqujTehl0','A4anjbzpUmI','JQzKVCF-lB0','LySRxG68X10','m_M7fkPnE6E','P22fW-GBFI4'];
   RS.popularShorts = POPULAR_IDS
     .map(id => RS.viralPool.find(v => v.id === id))
     .filter(Boolean)
@@ -400,9 +440,11 @@
       thumb: 'https://i.ytimg.com/vi/' + v.id + '/oar2.jpg',
       url: 'https://www.youtube.com/shorts/' + v.id
     }));
+  if (RS.safeFilter) RS.popularShorts = RS.safeFilter.filter(RS.popularShorts).list;
+  RS.popularShorts = RS.rank.mix(RS.popularShorts);
 
   /* ── demo discovery dataset (API 키 없을 때) ─────────── */
-  RS.demoDiscover = RS.viralPool.map((v, i) => Object.assign({}, v, {
+  RS.demoDiscover = poolSafe().map((v, i) => Object.assign({}, v, {
     channel: v.cat,
     subs: 0,
     len: 28 + (i * 7) % 34,
@@ -414,6 +456,8 @@
     total: v.views,
     demo: true
   }));
+  /* 발굴 기본 추천도 해외 밈·글로벌 클립이 앞에 오도록 */
+  RS.demoDiscover = RS.rank.mix(RS.demoDiscover);
 
   /* ── storage ─────────────────────────────────────────── */
   const K = RS.KEYS = { project: 'reelstudio.project.v1', settings: 'reelstudio.settings.v1', presets: 'reelstudio.presets.v1', migrated: 'reelstudio.migrated.v2' };

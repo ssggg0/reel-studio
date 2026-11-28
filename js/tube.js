@@ -28,30 +28,22 @@
   }
 
   /* ── discovery ───────────────────────────────────────── */
-  T.search = async function (q) {
-    const key = RS.state.settings.youtube;
-    const minViews = +q.minViews || 0;
-    T.lastRelaxed = false;
-    T.lastDemoMeta = null;
-    if (!key) return T.demoSearch(q);
-    const params = new URLSearchParams({
-      part: 'snippet', type: 'video', maxResults: '30',
-      order: q.sort === 'date' ? 'date' : 'viewCount',
-      publishedAfter: new Date(Date.now() - 1000 * 3600 * 24 * 45).toISOString(),
-      key
-    });
-    if (q.q) params.set('q', q.q);
-    if (q.region) params.set('regionCode', q.region);
-    if (q.dur === 'short') params.set('videoDuration', 'short');
-    if (q.dur === 'long') params.set('videoDuration', 'long');
-    const r1 = await fetch(API + '/search?' + params.toString());
-    if (!r1.ok) {
-      const t = await r1.text();
-      if (r1.status === 403) throw new Error('YouTube API 한도 초과이거나 키가 막혔습니다 (403)');
-      throw new Error('검색 실패 (' + r1.status + ')' + t.slice(0, 120));
+  /* 검색 1페이지 호출 */
+  async function searchPage(params, pageToken) {
+    const ps = new URLSearchParams(params);
+    if (pageToken) ps.set('pageToken', pageToken);
+    const r = await fetch(API + '/search?' + ps.toString());
+    if (!r.ok) {
+      const t = await r.text();
+      if (r.status === 403) throw new Error('YouTube API 한도 초과이거나 키가 막혔습니다 (403)');
+      throw new Error('검색 실패 (' + r.status + ')' + t.slice(0, 120));
     }
-    const d1 = await r1.json();
-    const items = (d1.items || []).filter(i => i.id && i.id.videoId);
+    const d = await r.json();
+    return { items: (d.items || []).filter(i => i.id && i.id.videoId), next: d.nextPageToken || '' };
+  }
+
+  /* 검색 결과 → 조회수·구독자·길이까지 채운 카드 데이터 */
+  async function hydrate(items, q, key) {
     if (!items.length) return [];
     const ids = items.map(i => i.id.videoId).join(',');
     const r2 = await fetch(API + '/videos?part=snippet,statistics,contentDetails&id=' + ids + '&key=' + key);
@@ -64,7 +56,7 @@
       const d3 = await r3.json();
       (d3.items || []).forEach(c => { subs[c.id] = +((c.statistics || {}).subscriberCount || 0); });
     }
-    let out = vids.map(v => {
+    return vids.map(v => {
       const st = v.statistics || {};
       const views = +st.viewCount || 0;
       const sub = subs[v.snippet.channelId] || 0;
@@ -79,12 +71,63 @@
         kw: q.q
       };
     });
-    const all = out.slice();
-    out = out.filter(v => v.views >= minViews);
-    if (!out.length && all.length) { out = all; T.lastRelaxed = true; }
+  }
+
+  /* 🛡️ 위험 영상(방송·아이돌·영화·랭킹 모음집) 자동 제외 */
+  const safety = () => RS.safeFilter;
+  function noteSafe(raw, safe) {
+    T.lastRaw = raw.slice();
+    T.lastSafe = {
+      active: safe.active,
+      removed: safe.removed.length,
+      summary: safety().summary(safe.removed),
+      hits: safe.removed.slice(0, 8).map(r => r.item.title + ' — ' + r.reason.kindLabel + ' (' + r.reason.hit + ')'),
+      byKind: safe.removed.reduce((m, r) => { const k = r.reason.kindLabel; m[k] = (m[k] || 0) + 1; return m; }, {})
+    };
+  }
+
+  T.search = async function (q) {
+    const key = RS.state.settings.youtube;
+    const minViews = +q.minViews || 0;
+    T.lastRelaxed = false;
+    T.lastDemoMeta = null;
+    T.lastSafe = { active: safety().enabled(), removed: 0, summary: '', hits: [], byKind: {} };
+    if (!key) { T.lastFilters = q; return T.demoSearch(q); }
+    const params = {
+      part: 'snippet', type: 'video', maxResults: '50',
+      order: q.sort === 'date' ? 'date' : 'viewCount',
+      publishedAfter: new Date(Date.now() - 1000 * 3600 * 24 * 45).toISOString(),
+      key
+    };
+    if (q.q) params.q = q.q;
+    if (q.region) params.regionCode = q.region;
+    if (q.dur === 'short') params.videoDuration = 'short';
+    if (q.dur === 'long') params.videoDuration = 'long';
+    const p1 = await searchPage(params);
+    if (!p1.items.length) { T.lastFilters = q; T.lastRaw = []; return []; }
+    let out = await hydrate(p1.items, q, key);
+    let safe = safety().filter(out);
+    /* '모음집'·'방송 클립' 키워드처럼 걸러질 게 많은 검색은 한 페이지만 보충해서
+       안전한 소재가 너무 적어지지 않게 합니다. */
+    if (safe.list.length < 8 && p1.next) {
+      try {
+        const p2 = await searchPage(params, p1.next);
+        const more = await hydrate(p2.items, q, key);
+        const seen = new Set(out.map(v => v.id));
+        out = out.concat(more.filter(v => !seen.has(v.id)));
+        safe = safety().filter(out);
+      } catch (e) {}
+    }
+    noteSafe(out, safe);
+    T.lastFilters = q;
+    const all = safe.list;
+    out = all.filter(v => v.views >= minViews);
+    if (!out.length && all.length) { out = all.slice(); T.lastRelaxed = true; }
     if (q.sort === 'breakout') out.sort((a, b) => b.ratio - a.ratio);
     else if (q.sort === 'date') out.sort((a, b) => a.days - b.days);
     else out.sort((a, b) => b.views - a.views);
+    /* 🌍 해외 밈·글로벌 동물 클립 우선(약 75%). 최신순은 고른 순서를 지킵니다. */
+    if (q.sort !== 'date' && RS.rank) out = RS.rank.mix(out);
     return out;
   };
 
@@ -148,7 +191,11 @@
     if (mix.length < 12) push(rest, 'fresh');
     T.lastDemoMeta = { direct: direct.length, related: related.length, fresh: mix.filter(v => v.sim === 'fresh').length, relaxed };
     T.lastRelaxed = !!relaxed;
-    return mix;
+    /* 샘플 풀에도 방송·아이돌·랭킹 항목이 섞여 들어오면 여기서 한 번 더 막습니다. */
+    const safe = safety().filter(mix);
+    noteSafe(all, safe);
+    T.lastFilters = q;
+    return RS.rank ? RS.rank.mix(safe.list) : safe.list;
   };
 
 
@@ -187,7 +234,7 @@
     const r2 = await fetch(API + '/videos?part=snippet,statistics,contentDetails&id=' + ids + '&key=' + key);
     if (!r2.ok) throw new Error('영상 정보 조회 실패 (' + r2.status + ')');
     const d2 = await r2.json();
-    return (d2.items || []).map(v => {
+    const raw = (d2.items || []).map(v => {
       const st = v.statistics || {};
       const views = +st.viewCount || 0;
       return {
@@ -199,7 +246,12 @@
         published: v.snippet.publishedAt, demo: false
       };
     }).filter(v => v.views >= 100000)
-      .sort((a, b) => b.views - a.views).slice(0, 20);
+      .sort((a, b) => b.views - a.views).slice(0, 30);
+    const safe = safety().filter(raw);
+    T.lastPopularRaw = raw;
+    T.lastPopularSafe = { active: safe.active, removed: safe.removed.length, summary: safety().summary(safe.removed) };
+    if (RS.rank) safe.list = RS.rank.mix(safe.list);
+    return safe.list.slice(0, 20);
   };
 
   T.testKey = async function (key) {
