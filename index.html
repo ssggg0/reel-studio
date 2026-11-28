@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261128o">
+<link rel="stylesheet" href="css/style.css?v=20261128p">
 </head>
 <body>
 <div id="app">
@@ -62,7 +62,7 @@
         <span class="ri-no">⚙</span>
         <span class="ri-body"><span class="ri-txt">설정</span><span class="ri-sub">API 키·프리셋</span></span>
       </button>
-      <div class="rail-tip">API 키가 없어도 <b>모든 단계가 데모로</b> 그대로 동작합니다.</div>
+      <div class="rail-tip">인기 쇼츠는 <b>기본 키로 바로 실시간</b>입니다. 나머지 단계는 키 없이도 데모로 동작합니다.</div>
     </div>
   </nav>
 
@@ -156,6 +156,7 @@
       <!-- 분석 결과 (검색 카드 바로 아래 — 누르면 여기로 자동 스크롤) -->
       <div class="result-head" id="discoverResultHead">
         <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터</span>
+        <button class="btn primary sm refresh-btn" id="dMore" title="이미 본 영상은 빼고 새로운 영상 보기">🔄 다른 영상</button>
         <span class="hint" id="discoverHint">카드를 누르면 훅·대본·댓글까지 자동으로 세팅됩니다</span>
       </div>
       <div class="result-grid" id="discoverResults"></div>
@@ -176,6 +177,7 @@
           <h2>🔥 지금 터지는 인기 쇼츠 <span class="pop-sub">· 눌러서 원본 다루기</span></h2>
           <span class="safe-chip" id="popSafe" hidden>🛡️ 위험 0건 제외</span>
           <span class="tag" id="popSource">샘플</span>
+          <button class="btn ghost sm pop-more" id="popMore" title="다른 인기 영상 보기" aria-label="다른 인기 영상 보기">🔄</button>
         </div>
         <div class="pop-rail" id="popRail" aria-label="인기 쇼츠 가로 목록"></div>
         <p class="hint pop-hint">카드의 <b>▶</b>를 누르면 그 자리에서 바로 재생해 보고, <b>이걸로 대본·편집 →</b>으로 2단계에 바로 넘어갑니다. 옆으로 넘겨서 더 보세요.</p>
@@ -627,11 +629,11 @@
       <div class="modal-body">
 
         <section class="set-sec">
-          <h3>API 키 <span class="tag sm">내 브라우저에만 저장</span></h3>
-          <p class="hint">키는 이 기기의 localStorage에만 남고 어디로도 전송되지 않습니다. 피클 크레딧은 쓰지 않습니다.</p>
+          <h3>API 키 <span class="tag sm">기본 키 자동 연결</span></h3>
+          <p class="hint">YouTube는 <b>기본 키로 이미 연결돼 있어</b> 아무것도 넣지 않아도 실시간 인기 쇼츠가 뜹니다. 내 키로 바꾸고 싶을 때만 아래에 넣으세요. 넣은 키는 이 기기의 localStorage에만 남습니다.</p>
           <label class="field">
-            <span class="lab">YouTube Data API v3 키 <em>무료 · 일 10,000유닛</em></span>
-            <input id="stYtKey" type="password" autocomplete="off" placeholder="AIza...">
+            <span class="lab">YouTube Data API v3 키 <em>비워두면 기본 키 · 무료 · 일 10,000유닛</em></span>
+            <input id="stYtKey" type="password" autocomplete="off" placeholder="비워두면 기본 키로 자동 연결">
           </label>
           <div class="toolbar">
             <button class="btn ghost sm" id="stYtTest">연결 테스트</button>
@@ -768,15 +770,16 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
+<script src="js/config.js?v=20261128p"></script>
 <script src="js/sfx-pack.js?v=20261128d"></script>
 <script src="js/originals-data.js?v=20261128d"></script>
 <script src="js/safe-filter.js?v=20261128h"></script>
-<script src="js/core.js?v=20261128o"></script>
+<script src="js/core.js?v=20261128p"></script>
 <script src="js/upload-pro.js?v=20261128h"></script>
 <script src="js/audio.js?v=20261128d"></script>
 <script src="js/render.js?v=20261128o"></script>
-<script src="js/ai.js?v=20261128o"></script>
-<script src="js/tube.js?v=20261128h"></script>
-<script src="js/app.js?v=20261128o"></script>
+<script src="js/ai.js?v=20261128p"></script>
+<script src="js/tube.js?v=20261128p"></script>
+<script src="js/app.js?v=20261128p"></script>
 </body>
 </html>

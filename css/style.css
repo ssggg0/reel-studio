@@ -305,8 +305,14 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .filters .filter-grid{padding:4px 14px 14px}
 
 /* ── discover results ───────────────────────────────── */
-.result-head{display:flex;align-items:center;gap:12px;margin:20px 0 12px}
+.result-head{display:flex;align-items:center;gap:12px;margin:20px 0 12px;flex-wrap:wrap;row-gap:8px}
 .result-head .hint{margin:0;margin-left:auto}
+.result-head .refresh-btn{flex:0 0 auto;white-space:nowrap;min-height:38px;padding:8px 14px;font-size:13px;font-weight:800}
+.card-head .pop-more{margin-left:4px;padding:6px 11px;font-size:13px;line-height:1;min-height:32px}
+@media (max-width:560px){
+  .result-head{gap:8px 10px}
+  .result-head .refresh-btn{margin-left:auto;font-size:13px}
+}
 .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px}
 .rcard{
   background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;

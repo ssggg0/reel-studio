@@ -512,6 +512,12 @@
   RS.bootState = function () {
     const st = RS.state;
     st.settings = S.loadSettings();
+    /* 예전에 잘못 붙여넣은 키(모양이 다른 값)는 무시하고 기본 키로 돌립니다 */
+    if (st.settings && st.settings.youtube && !/^AIza[0-9A-Za-z_\-]{30,}$/.test(String(st.settings.youtube).replace(/\s+/g, ''))) {
+      st.settings.youtubeBad = st.settings.youtube;
+      st.settings.youtube = '';
+      try { S.saveSettings(st.settings); } catch (e) {}
+    }
     /* 저장된 내 프리셋에서 옛 기본 프리셋 사본·채널 이름을 걷어냅니다 */
     const stored = S.loadPresets();
     const cleaned = stored

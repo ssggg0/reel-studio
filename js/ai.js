@@ -7,7 +7,8 @@
   const MODEL_CANDIDATES = ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
   AI.hasGemini = () => !!(RS.state.settings && RS.state.settings.gemini);
-  AI.hasYouTube = () => !!(RS.state.settings && RS.state.settings.youtube);
+  /* 저장된 키가 없어도 기본 키로 실시간이 돌기 때문에, 키가 하나라도 있으면 연결로 봅니다 */
+  AI.hasYouTube = () => !!(RS.tube && RS.tube.hasKey ? RS.tube.hasKey() : (RS.state.settings && RS.state.settings.youtube));
 
 
   /* ── Gemini 호출 ─────────────────────────────────────── */

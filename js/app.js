@@ -62,6 +62,11 @@
     const pill = el('modePill'), txt = el('modeText');
     pill.classList.toggle('live', n > 0);
     txt.textContent = n === 0 ? '데모 모드' : n >= 2 ? 'API 연결됨' : '일부 연결';
+    const src = RS.tube && RS.tube.keySource ? RS.tube.keySource() : 'none';
+    pill.title = src === 'saved' ? '내 키로 유튜브 실시간 연결됨'
+      : src === 'builtin' ? '기본 키로 유튜브 실시간 연결됨 · 설정에서 내 키로 바꿀 수 있어요'
+      : '키가 없어 샘플로 보여줍니다';
+    const db = el('demoBanner'); if (db) db.hidden = RS.ai.hasYouTube();
     const am = el('aiMode'); if (am) am.textContent = RS.ai.hasGemini() ? 'Gemini 연결' : '데모 생성';
   }
 
@@ -1218,12 +1223,35 @@
       const list = await RS.tube.popular();
       if (list && list.length) {
         renderPopRail(list);
-        if (tag) { tag.textContent = 'YouTube 실시간'; tag.className = 'tag lime'; }
+        if (tag) { tag.textContent = RS.tube.lastPopularSource === '공개 트렌드' ? '공개 트렌드' : 'YouTube 실시간'; tag.className = 'tag lime'; }
       }
       refreshPopSafeChip();
     } catch (e) {
-      if (tag) tag.textContent = '샘플 · API 실패';
-      RS.toast('인기 쇼츠 실시간 조회 실패 — 샘플로 보여줍니다: ' + e.message, 'err');
+      if (tag) tag.textContent = '샘플 · 11.27 조회수';
+      refreshPopSafeChip();
+    }
+  }
+
+  /* 🔄 인기 쇼츠도 다른 영상으로 */
+  let popMoreBusy = false;
+  async function loadPopularMore() {
+    if (popMoreBusy) return;
+    popMoreBusy = true;
+    const btn = el('popMore');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+    const tag = el('popSource');
+    try {
+      const list = await RS.tube.popular({ more: true });
+      if (list && list.length) {
+        renderPopRail(list);
+        if (tag) { tag.textContent = RS.tube.lastPopularSource === '공개 트렌드' ? '공개 트렌드' : 'YouTube 실시간'; tag.className = 'tag lime'; }
+      }
+      refreshPopSafeChip();
+    } catch (e) {
+      RS.toast('인기 영상은 잠시 후 다시 시도해 주세요');
+    } finally {
+      popMoreBusy = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = '🔄'; }
     }
   }
 
@@ -2607,15 +2635,17 @@
     if (!shown.length) shown = safe.slice();
     if (RS.rank && f.sort !== 'date') shown = RS.rank.mix(shown);   // 해외 밈·글로벌 클립 우선 유지
     if (!RS.ai.hasYouTube()) shown = shown.slice(0, 12);   // 데모는 처음 화면과 같은 12건
-    renderDiscover(shown, { mode: RS.ai.hasYouTube() ? 'live' : 'demo', q: f.q, removed: removedNow });
-    setDiscoverStatus(RS.ai.hasYouTube() ? 'live' : 'demo', f.q, shown.length, { meta: null, relaxed: false, removed: removedNow });
+    const mode = RS.tube.lastMode || (RS.ai.hasYouTube() ? 'live' : 'demo');
+    renderDiscover(shown, { mode, q: f.q, removed: removedNow });
+    setDiscoverStatus(mode, f.q, shown.length, { meta: null, relaxed: false, removed: removedNow });
     return true;
   }
   function setDiscoverStatus(mode, q, count, opts) {
     const st = el('discoverStatus'); if (!st) return;
-    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
+    opts = opts || {};
+    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
     st.classList.toggle('off', mode !== 'live');
-    const meta = opts && opts.meta;
+    const meta = opts.meta;
     let note = '';
     if (meta) {
       const bits = [];
@@ -2624,8 +2654,11 @@
       if (meta.fresh) bits.push('추천 ' + meta.fresh);
       note = bits.length ? ' · ' + bits.join(' · ') : (q ? ' · 연관 0건 → 인기순' : '');
     }
-    if (opts && opts.relaxed && !meta) note += ' · 필터 완화';
-    const removed = (opts && typeof opts.removed === 'number') ? opts.removed : safeRemoved();
+    if (opts.refresh) note += ' · 🔄 ' + opts.refresh + '번째 새 목록' + (opts.variant ? ' · ' + opts.variant : '');
+    else if (opts.variant) note += ' · ' + opts.variant;
+    if (opts.relaxed && !meta) note += ' · 필터 완화';
+    if (mode === 'public') note += ' · 잠시 후 실시간으로 자동 복귀';
+    const removed = (typeof opts.removed === 'number') ? opts.removed : safeRemoved();
     /* 검색어 자체가 방송·아이돌·랭킹 위험 키워드면 그 사실을 짚어 줍니다
        (샘플 모드에서는 걸러질 원본이 없어 제외 0건으로 보이기 때문) */
     const qHit = (safeOn() && !removed && q && RS.safeFilter) ? RS.safeFilter.check({ title: q }) : null;
@@ -2638,34 +2671,73 @@
   }
 
   let discoverSeq = 0;
+  let moreCount = 0;
+  function setMoreBusy(on) {
+    const b = el('dMore'); if (!b) return;
+    b.disabled = !!on;
+    b.innerHTML = on ? '<span class="spin"></span> 찾는 중' : '🔄 다른 영상';
+  }
   async function runDiscover() {
     const btn = el('dSearch');
     const st = el('discoverStatus');
     const filters = readFilters();
     if (!filters.q) { filters.q = '동물'; if (el('dKeyword')) el('dKeyword').value = '동물'; }
     const seq = ++discoverSeq;
+    moreCount = 0;
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
-    if (st) { st.classList.remove('off'); st.innerHTML = '<span class="spin"></span> ' + (RS.ai.hasYouTube() ? '유튜브에서 찾는 중…' : '목록 만드는 중…'); }
+    if (st) { st.classList.remove('off'); st.innerHTML = '<span class="spin"></span> 유튜브에서 찾는 중…'; }
     showSkeletons(12);
     focusResults(false);                       // 누르자마자 결과 자리로 — 빈 화면으로 보이지 않게
-    let list = [], mode = RS.ai.hasYouTube() ? 'live' : 'demo', err = '', meta = null, relaxed = false;
+    let list = [], mode = 'live', err = '', meta = null, relaxed = false;
     try {
       list = await RS.tube.search(filters);
+      mode = RS.tube.lastMode || 'live';
       meta = RS.tube.lastDemoMeta || null;
       relaxed = !!RS.tube.lastRelaxed;
+      err = (RS.tube.lastError && RS.tube.lastError.message) || '';
     } catch (e) {
       err = e.message;
       list = RS.tube.demoSearch(filters);
       meta = RS.tube.lastDemoMeta || null;
       relaxed = !!RS.tube.lastRelaxed;
-      mode = 'fallback';
-      RS.toast('유튜브 실시간 실패 — 샘플 ' + list.length + '건으로 대신합니다', 'err');
+      mode = 'demo';
     }
     if (seq !== discoverSeq) return;           // 늦게 도착한 이전 요청은 버림
     renderDiscover(list, { mode, q: filters.q, meta, err, removed: safeRemoved() });
     setDiscoverStatus(mode, filters.q, list.length, { meta, relaxed });
     if (btn) { btn.disabled = false; btn.textContent = '분석'; }
+    setMoreBusy(false);
     focusResults(true);
+  }
+
+  /* 🔄 다른 영상 — 이미 본 영상은 빼고 새 목록을 가져옵니다 */
+  async function runMore() {
+    const filters = readFilters();
+    if (!filters.q) { filters.q = '동물'; if (el('dKeyword')) el('dKeyword').value = '동물'; }
+    const st = el('discoverStatus');
+    const seq = ++discoverSeq;
+    setMoreBusy(true);
+    if (st) { st.classList.remove('off'); st.innerHTML = '<span class="spin"></span> 새로운 영상 찾는 중…'; }
+    let list = [], mode = 'live';
+    try {
+      list = await RS.tube.more(filters);
+      mode = RS.tube.lastMode || 'live';
+    } catch (e) {
+      list = RS.tube.demoSearch(filters);
+      mode = 'demo';
+    }
+    if (seq !== discoverSeq) { setMoreBusy(false); return; }
+    if (!list || !list.length) {
+      setMoreBusy(false);
+      setDiscoverStatus(mode, filters.q, 0, { variant: RS.tube.lastVariant });
+      RS.toast('새 영상이 없어요 — 한 번 더 누르면 처음부터 다시 보여드려요');
+      return;
+    }
+    moreCount++;
+    renderDiscover(list, { mode, q: filters.q, removed: safeRemoved() });
+    setDiscoverStatus(mode, filters.q, list.length, { relaxed: !!RS.tube.lastRelaxed, refresh: moreCount, variant: RS.tube.lastVariant });
+    setMoreBusy(false);
+    RS.toast('🔄 새 영상 ' + list.length + '건 도착', 'ok');
   }
 
   function renderDiscover(list, info) {
@@ -2703,12 +2775,12 @@
           ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 32% 16%),#0b0d12 70%)">▶</div>`}
           <button class="rc-play" data-act="preview" aria-label="미리보기 재생" title="미리보기 재생">▶</button>
           <span class="ratio">${badge}</span>
-          <span class="len">${U.fmtClock(v.len)}</span>
+          <span class="len">${v.len ? U.fmtClock(v.len) : ''}</span>
           ${tag}
         </div>
         <div class="rc-body">
           <div class="rc-title">${U.esc(v.title)}</div>
-          <div class="rc-meta"><span>${U.esc(v.channel || v.cat || '')}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span></div>
+          <div class="rc-meta"><span>${U.esc(v.channel || v.cat || '')}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}${v.days == null ? '' : `<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span>`}</div>
           <div class="rc-acts">
             <button class="rc-act main" data-act="pick">대본 세팅 →</button>
             ${url ? `<a class="rc-act" href="${U.esc(url)}" target="_blank" rel="noopener" data-act="open"><span class="lab-full">원본 열기 ↗</span><span class="lab-short">원본 ↗</span></a>` : ''}
@@ -2822,6 +2894,8 @@
   function bindDiscoverOnce() {
     el('dSearch').addEventListener('click', runDiscover);
     el('dRefresh').addEventListener('click', runDiscover);
+    if (el('dMore')) el('dMore').addEventListener('click', runMore);
+    if (el('popMore')) el('popMore').addEventListener('click', loadPopularMore);
     el('dKeyword').addEventListener('keydown', e => { if (e.key === 'Enter') runDiscover(); });
     $$('#dPresets .preset-chip').forEach(b => b.addEventListener('click', () => applyDiscoverPreset(b.dataset.preset)));
     ['dRegion', 'dDur', 'dMin', 'dSort'].forEach(id => el(id).addEventListener('change', () => {
