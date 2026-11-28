@@ -280,6 +280,11 @@
       const only = base.filter(v => !hangulHeavy(v.title));
       if (only.length >= 4) base = only;
     }
+    /* 쇼츠는 60초 이하 우선 (유튜브의 short 필터는 4분 이하라 길이를 한 번 더 봅니다) */
+    if (q.dur === 'short') {
+      const shorts = base.filter(v => !v.len || v.len <= 61);
+      if (shorts.length >= 4) base = shorts;
+    }
     const min = +q.minViews || 0;
     let out = base.filter(v => v.views >= min);
     let relaxed = false;

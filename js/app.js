@@ -2794,7 +2794,8 @@
     box.innerHTML = list.map((v, i) => {
       const views = U.fmtNum(v.views || 0);
       const hasSubs = v.subs > 0;
-      const ratio = hasSubs ? (v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs)).toFixed(2)) : '';
+      const r0 = v.subs ? (v.views / Math.max(1, v.subs)) : 0;
+      const ratio = hasSubs ? (r0 >= 10 ? Math.round(r0) + '×' : r0 >= 1 ? r0.toFixed(1) + '×' : r0.toFixed(2)) : '';
       const hot = hasSubs && v.ratio >= 3;
       const hue = 196 + (i * 29) % 90;
       const badge = hasSubs ? `${hot ? '🔥 ' : ''}${ratio}` : `🔥 ${views}`;
