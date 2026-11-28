@@ -67,6 +67,7 @@
       : src === 'builtin' ? '기본 키로 유튜브 실시간 연결됨 · 설정에서 내 키로 바꿀 수 있어요'
       : '키가 없어 샘플로 보여줍니다';
     const db = el('demoBanner'); if (db) db.hidden = RS.ai.hasYouTube();
+    const nk = el('needKey'); if (nk) nk.hidden = RS.ai.hasGemini();
     const am = el('aiMode'); if (am) am.textContent = RS.ai.hasGemini() ? 'Gemini 연결' : '데모 생성';
   }
 
