@@ -985,7 +985,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .title-item .ttext{flex:1 1 auto;min-width:0;text-align:left;font-size:13px;font-weight:700;line-height:1.45;color:var(--tx);word-break:keep-all}
 .title-item.on .ttext{color:var(--accent-h)}
 .thumb-wrap#uThumbWrap{margin-top:14px}
-#uThumbCanvas{width:208px;border-radius:14px}
+#uThumbCanvas{width:240px;border-radius:14px}
 #uThumbState{font-weight:700}
 .handoff-card{
   border-color:#D7F0C4;
@@ -1008,7 +1008,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 @media (max-width:1000px){
   .title-item{padding:12px 13px}
   .title-item .ttext{font-size:13.5px;line-height:1.5}
-  #uThumbCanvas{width:170px}
+  #uThumbCanvas{width:222px}
   .handoff-card .toolbar{gap:8px}
   .handoff-card .toolbar .btn{flex:1 1 132px;justify-content:center}
 }
