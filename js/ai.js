@@ -452,6 +452,219 @@ JSON만 출력: {"hook1":"","hook2":"","cues":["원문 개수와 동일"],"title
     };
   };
 
+  /* ── 🔄 다른 추천 대본 (누를 때마다 새 각도) ─────────────
+     Gemini 키가 있으면 매번 다른 각도로 새로 쓰고, 없으면 준비된 각도 6종을 돌립니다. */
+  const ANGLES = [
+    {
+      id: 'twist', name: '반전형',
+      hook: ['그냥 지나치면 후회해요', '3초 뒤에 판이 뒤집혀요'],
+      cues: [
+        '이 영상, 처음엔 아무 일도 없어 보여요',
+        '그런데 3초만 지나면 분위기가 달라져요',
+        '다들 여기서 한 번 멈춥니다',
+        '이유는 아주 사소한 데 있었어요',
+        '한 번 더 보면 보이는 장면이 있어요',
+        '댓글에도 같은 말이 올라왔어요',
+        '결국 사람은 이런 순간에 약해요',
+        '다음 장면은 직접 보는 게 좋아요'
+      ],
+      titles: ['{kw} — 3초 뒤에 판이 뒤집혔어요', '이 장면 하나로 댓글이 터졌습니다', '끝까지 보게 되는 {kw}'],
+      desc: '{kw} 영상의 반전 장면만 모았습니다.\n한 번 더 보면 더 선명해집니다.\n\n#반전 #쇼츠 #밈',
+      tags: '반전,쇼츠,밈,웃긴영상,해외밈'
+    },
+    {
+      id: 'number', name: '숫자·팩트형',
+      hook: ['하루 만에 #300만 회', '이유는 14초에 있어요'],
+      cues: [
+        '이 영상, 하루 만에 #300만 회를 넘겼어요',
+        '처음 올라온 건 #10시간 전입니다',
+        '댓글은 #4만 개가 달렸어요',
+        '공통점은 하나였습니다',
+        '다들 같은 장면에서 멈췄어요',
+        '그 장면은 #14초에 나옵니다',
+        '숫자가 말해주는 건 하나예요',
+        '사람들은 결말보다 과정을 봅니다'
+      ],
+      titles: ['{kw} #300만 회, 이유는 14초', '하루 만에 터진 장면 하나', '{kw} — 숫자로 보면 더 놀랍습니다'],
+      desc: '{kw} 영상을 숫자로만 정리했습니다.\n14초 장면 하나가 전부입니다.\n\n# 이슈 #쇼츠 #숫자',
+      tags: '이슈,쇼츠,숫자,화제,요약'
+    },
+    {
+      id: 'empathy', name: '공감형',
+      hook: ['보자마자 생각나는 사람', '한 번쯤 겪어봤죠'],
+      cues: [
+        '이거 보면서 바로 생각난 사람 있어요',
+        '다들 한 번쯤 겪어봤을 장면이에요',
+        '처음엔 나만 그런 줄 알았어요',
+        '그런데 댓글이 전부 같은 말이에요',
+        '결국 답은 하나로 모입니다',
+        '이 영상이 오래 도는 이유예요',
+        '저장해두면 나중에 또 보게 됩니다',
+        '다음엔 이 장면 하나만 기억하세요'
+      ],
+      titles: ['{kw} — 다들 같은 데서 웃었어요', '이거 보면 한 명은 떠오릅니다', '한 번쯤 겪어봤을 {kw}'],
+      desc: '{kw} 영상을 보다가 생각난 사람에게 보내주세요.\n댓글도 전부 같은 말입니다.\n\n#공감 #쇼츠 #일상',
+      tags: '공감,쇼츠,일상,웃긴영상,밈'
+    },
+    {
+      id: 'question', name: '질문형',
+      hook: ['왜 이 장면이 터졌을까요', '답은 생각보다 단순해요'],
+      cues: [
+        '이 장면, 왜 이렇게 터졌을까요',
+        '답은 생각보다 단순합니다',
+        '사람들은 이 한 컷에 반응했어요',
+        '설명을 들으면 더 신기해요',
+        '전문가도 이유를 하나로 못 말합니다',
+        '그래서 더 돌려보게 됩니다',
+        '지금도 조회수가 오르고 있어요',
+        '여러분은 어떻게 보셨어요?'
+      ],
+      titles: ['{kw}, 왜 이렇게 터졌을까요', '사람들이 멈춘 이유는 하나였습니다', '{kw} — 답은 생각보다 단순합니다'],
+      desc: '{kw} 영상이 터진 이유를 짚어봤습니다.\n보고 나면 답이 보입니다.\n\n#화제 #쇼츠 #분석',
+      tags: '화제,쇼츠,분석,이슈,밈'
+    },
+    {
+      id: 'ending', name: '결말 예고형',
+      hook: ['끝까지 보면 이유가 나와요', '마지막 2초가 전부예요'],
+      cues: [
+        '끝까지 보면 이유가 나옵니다',
+        '마지막 2초가 전부예요',
+        '중간에 한 번 숨 고르게 됩니다',
+        '다들 여기서 빵 터졌어요',
+        '이건 연출이 아니라 실제 상황입니다',
+        '그래서 더 웃깁니다',
+        '다음에 같은 일이 생기면',
+        '이 장면을 떠올리게 됩니다'
+      ],
+      titles: ['{kw} — 마지막 2초가 전부입니다', '끝까지 봐야 하는 이유', '이 장면, 끝까지 보세요'],
+      desc: '{kw} 영상의 마지막 2초를 놓치지 마세요.\n연출이 아니라 실제 상황입니다.\n\n#반전 #쇼츠 #밈',
+      tags: '반전,쇼츠,밈,웃긴영상,결말'
+    },
+    {
+      id: 'comment', name: '댓글·인용형',
+      hook: ['댓글이 전부 같은 말이에요', '다들 여기서 멈췄어요'],
+      cues: [
+        '댓글창을 열어봤습니다',
+        '거의 모든 댓글이 같은 말이에요',
+        '다들 여기서 멈췄습니다',
+        '한 사람이 쓴 댓글이 대표였어요',
+        '이 영상은 설명이 필요 없습니다',
+        '보면 바로 이해됩니다',
+        '그래서 더 많이 돌려보게 됩니다',
+        '여러분 생각도 댓글에 남겨주세요'
+      ],
+      titles: ['{kw} — 댓글이 전부 같은 말', '다들 여기서 멈췄습니다', '이 장면 하나면 충분합니다'],
+      desc: '{kw} 영상의 댓글 반응을 모았습니다.\n보면 바로 이해됩니다.\n\n#리액션 #쇼츠 #밈',
+      tags: '리액션,쇼츠,밈,웃긴영상,댓글'
+    }
+  ];
+  function kwOfTopic(t) {
+    const words = String(t || '').replace(/[#*"'“”‘’\n]/g, ' ').split(/[\s,·]+/).filter(w => w.length > 1);
+    return (words.slice(0, 2).join(' ') || '이 영상').slice(0, 16);
+  }
+  AI.demoVariant = function (project, opts) {
+    const o = opts || {};
+    const p = project || {};
+    const attempt = Math.max(1, o.attempt || 1);
+    const A = ANGLES[(attempt - 1) % ANGLES.length];
+    const kw = kwOfTopic(o.topic || p.topic || p.name);
+    const len = +o.lengthSec || Math.max(20, Math.round(RS.util.totalDur(p) || 28));
+    const lines = A.cues.slice();
+    if (len <= 20) lines.splice(2, 2);
+    if (len >= 38) lines.splice(4, 0, '여기에 #숫자 하나가 더해집니다');
+    const times = distribute(lines.length, len);
+    return {
+      source: 'demo', angle: A.name,
+      hook1: A.hook[0], hook2: A.hook[1],
+      cues: lines.map((t, i) => ({ text: t, start: times[i].start, end: times[i].end })),
+      titles: A.titles.map(t => t.replace(/\{kw\}/g, kw).slice(0, 95)),
+      desc: A.desc.replace(/\{kw\}/g, kw),
+      tags: A.tags.replace(/\{kw\}/g, kw)
+    };
+  };
+
+  AI.regen = async function (project, opts) {
+    const o = opts || {};
+    const key = RS.state.settings && RS.state.settings.gemini;
+    if (!key) return AI.demoVariant(project, o);
+    const p = project || {};
+    const prev = (p.cues || []).map(c => String(c.text || '').replace(/[#*]/g, '')).filter(Boolean).slice(0, 12);
+    const angle = (ANGLES[((o.attempt || 1) - 1) % ANGLES.length] || ANGLES[0]).name;
+    const toneTx = o.tone === 'friend' ? '친근한 반말 (과한 유행어 금지)'
+      : o.tone === 'calm' ? '차분한 정보 전달체' : '뉴스 구어체 (음슴체·개조식 금지)';
+    const prompt = `너는 한국 유튜브 쇼츠 1인 작가다. 이미 한 번 쓴 대본이 있고, 같은 영상으로 "완전히 다른 각도"의 대본을 다시 써야 한다.
+이번 각도: ${angle} (${(o.attempt || 1)}번째 시도)
+
+주제: ${o.topic || p.topic || p.name || '최근 화제 영상'}
+언어: ${LANG_NAME[o.lang] || '한국어'}
+문체: ${toneTx}
+길이: 약 ${o.lengthSec || 28}초 · 큐 9개
+
+[이전 대본 — 이 문장들과 겹치면 안 된다]
+${JSON.stringify(prev)}
+
+[규칙]
+- 첫 큐 = 첫 1.5초. 스크롤을 멈추게 하는 훅. 12자 이내.
+- 한 큐는 7~12자(비한국어 4~8단어). 길면 두 큐로 나눈다.
+- 음슴체 절대 금지: ~함 / ~임 / ~됨 / ~모름 / ~없음 금지. "~어요 / ~습니다" 구어체만.
+- 번역투 금지: "~에 의해", "~를 통해", "그것은 ~이다" 대신 한국어 어순 그대로.
+- 이전 대본과 같은 첫 문장·같은 전개 금지. 훅의 종류(질문/숫자/반전/공감)도 바꾼다.
+- 숫자·핵심 단어 앞에 # 를 붙인다. 확인되지 않은 사실 창작 금지.
+- hook1·hook2는 상단 2줄 훅, 각 16자 이내.
+
+반드시 아래 JSON만 출력:
+{"hook1":"","hook2":"","cues":["",""],"titles":["","",""],"desc":"","tags":""}`;
+    const text = await callGemini(prompt, key);
+    const j = parseJson(text);
+    const raw = Array.isArray(j.cues) ? j.cues.filter(x => String(x).trim()) : [];
+    if (!raw.length) throw new Error('빈 대본');
+    const times = distribute(raw.length, +o.lengthSec || 28);
+    return {
+      source: 'gemini', angle,
+      hook1: j.hook1 || '', hook2: j.hook2 || '',
+      cues: raw.map((t, i) => ({ text: String(t).trim(), start: times[i].start, end: times[i].end })),
+      titles: (j.titles || []).slice(0, 3).concat(['', '', '']).slice(0, 3).map(x => String(x).slice(0, 100)),
+      desc: j.desc || '', tags: j.tags || ''
+    };
+  };
+
+  /* ── 외국 밈 자동 번역 + 한국어 대본 ─────────────────── */
+  AI.translateShort = async function (item) {
+    const key = RS.state.settings && RS.state.settings.gemini;
+    if (!key) throw new Error('Gemini 키가 없습니다');
+    const it = item || {};
+    const prompt = `너는 한국 유튜브 쇼츠 작가다. 아래 외국 쇼츠의 원제목·채널·카테고리를 보고, 한국 시청자가 바로 이해하는 한국어 제목과, 그 영상 흐름에 맞는 한국어 대본을 새로 쓴다.
+
+원제목: ${it.title || ''}
+채널: ${it.channel || '알 수 없음'}
+카테고리: ${it.cat || ''}
+
+[규칙]
+- title_ko: 원제목의 뜻을 살린 자연스러운 한국어 제목. 40자 이내. 직역투 금지, 낚시 금지.
+- 영상에 실제로 있을 법한 장면 흐름으로 9줄 대본을 쓴다(원제목에 없는 사실을 단정하지 않는다).
+- 첫 큐 = 첫 1.5초 훅, 12자 이내. 한 큐는 7~12자.
+- 음슴체 절대 금지(~함/~임/~됨/~모름/~없음). "~어요 / ~습니다" 구어체만.
+- 번역투 금지. 영어 어순을 그대로 옮기지 말고 한국어 어순으로 다시 쓴다.
+- 숫자·핵심 단어 앞에 # 를 붙인다.
+- hook1·hook2는 상단 2줄 훅, 각 16자 이내. titles 3안, 100자 이내.
+
+반드시 아래 JSON만 출력:
+{"title_ko":"","hook1":"","hook2":"","cues":["",""],"titles":["","",""],"desc":"","tags":""}`;
+    const text = await callGemini(prompt, key);
+    const j = parseJson(text);
+    const raw = Array.isArray(j.cues) ? j.cues.filter(x => String(x).trim()) : [];
+    if (!raw.length) throw new Error('빈 대본');
+    const times = distribute(raw.length, 28);
+    return {
+      source: 'gemini',
+      title_ko: String(j.title_ko || '').trim(),
+      hook1: j.hook1 || '', hook2: j.hook2 || '',
+      cues: raw.map((t, i) => ({ text: String(t).trim(), start: times[i].start, end: times[i].end })),
+      titles: (j.titles || []).slice(0, 3).concat(['', '', '']).slice(0, 3).map(x => String(x).slice(0, 100)),
+      desc: j.desc || '', tags: j.tags || ''
+    };
+  };
+
   /* ── 연결 테스트 ─────────────────────────────────────── */
   AI.testGemini = async function (key) {
     const url = 'https://generativelanguage.googleapis.com/v1beta/models?key=' + encodeURIComponent(key);

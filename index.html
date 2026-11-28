@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261128i">
+<link rel="stylesheet" href="css/style.css?v=20261128j">
 </head>
 <body>
 <div id="app">
@@ -167,7 +167,7 @@
           <span class="tag lime" id="origTag">원본 MP4</span>
         </div>
         <div class="orig-grid" id="origGrid"></div>
-        <p class="hint orig-hint"><b>⬇ 원본 다운</b>은 아이폰 앨범·캡컷에서 쓰고, <b>🎬 바로 얹기</b>는 이 스튜디오 편집기에 원본을 바로 올려 <b>2단계 대본</b>으로 넘깁니다. 유튜브 실시간 결과는 정책상 MP4를 내려받을 수 없어 <b>원본 열기</b>·<b>링크 복사</b>로 이어집니다.</p>
+        <p class="hint orig-hint"><b>▶ 미리보기</b>로 바로 재생해 보고, <b>🎬 바로 얹기</b>를 누르면 이 스튜디오 편집기에 원본이 그대로 올라가 <b>2단계</b>로 넘어갑니다. <b>⬇ 원본 다운</b>은 아이폰 앨범·캡컷에서 쓰세요.</p>
       </section>
 
       <!-- 인기 쇼츠 가로 레일 -->
@@ -178,7 +178,7 @@
           <span class="tag" id="popSource">샘플</span>
         </div>
         <div class="pop-rail" id="popRail" aria-label="인기 쇼츠 가로 목록"></div>
-        <p class="hint pop-hint">카드를 누르면 그 쇼츠의 훅·대본이 깔리고, <b>원본 영상 링크</b>와 <b>내 파일 올리기</b> 칸이 함께 열립니다. 옆으로 넘겨서 더 보세요.</p>
+        <p class="hint pop-hint">카드의 <b>▶</b>를 누르면 그 자리에서 바로 재생해 보고, <b>이걸로 대본·편집 →</b>으로 2단계에 바로 넘어갑니다. 옆으로 넘겨서 더 보세요.</p>
       </section>
 
       <div class="note">
@@ -186,133 +186,117 @@
       </div>
     </section>
 
-    <!-- ② 원본 · 대본 -->
+    <!-- ② 원본 · AI 대본 (영상 위 레이어 편집) -->
     <section class="panel" id="tab-script" data-panel="script" hidden>
-      <div class="panel-head">
+      <div class="panel-head slim">
         <div>
           <span class="eyebrow">STEP 2 / 5</span>
-          <h1>원본 · AI 대본</h1>
-          <p>스타일 카드 하나 고르고, 원본을 얹은 뒤 대본만 손보면 끝납니다. 수정은 미리보기에 즉시 반영됩니다.</p>
+          <h1>영상 위에서 바로 편집</h1>
+          <p>옆으로 넘겨 스타일을 고르고, 대본 한 줄을 고치면 영상 위 자막이 바로 바뀝니다.</p>
         </div>
         <button class="btn ghost sm" id="sNewProject">새 프로젝트</button>
       </div>
 
-      <!-- 선택한 인기 쇼츠 원본 패널 -->
-      <div class="card src-panel" id="srcPanel" hidden>
-        <div class="sp-top">
-          <div class="sp-thumb"><img id="spThumb" alt="선택한 쇼츠 썸네일" referrerpolicy="no-referrer"></div>
-          <div class="sp-info">
-            <span class="sp-cat" id="spCat">인기 쇼츠</span>
-            <div class="sp-title" id="spTitle"></div>
-            <div class="sp-meta" id="spMeta"></div>
-            <div class="sp-acts">
-              <a class="btn primary sm" id="spOpen" href="#" target="_blank" rel="noopener">원본 영상 열기 ↗</a>
-              <button class="btn outline sm" id="spCopy">🔗 링크 복사</button>
-              <button class="btn outline sm" id="spFind">무가공 원작자 찾기 ↗</button>
-              <label class="btn outline sm file-btn">
-                <input type="file" id="spFile" accept="video/mp4,video/quicktime,video/webm,video/*">
-                내 폰 원본 파일 올리기
+      <div class="stage-dock" id="stageDock">
+        <div class="sty-bar">
+          <button class="sty-arrow" id="styPrev" aria-label="이전 편집 스타일">◀</button>
+          <div class="sty-now"><b id="styIdx">1/8</b><span id="styName">도파민 2줄 띠</span></div>
+          <button class="sty-arrow" id="styNext" aria-label="다음 편집 스타일">▶</button>
+        </div>
+
+        <div class="stage-wrap" id="stageWrap">
+          <div class="stage-media" id="stageMedia">
+            <video id="stageVideo" playsinline muted loop autoplay preload="metadata" hidden></video>
+            <iframe id="stageIframe" title="유튜브 쇼츠 미리보기" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
+            <div class="stage-shield" id="stageShield" hidden></div>
+
+            <div class="ov" id="ov" aria-hidden="true">
+              <div class="ov-hook" id="ovHook"><span class="ovh-l ovh-l1"></span><span class="ovh-l ovh-l2"></span></div>
+              <div class="ov-cmt" id="ovCmt"></div>
+              <div class="ov-sub" id="ovSub"></div>
+              <div class="ov-lb ov-lb-t" id="ovLbT"></div>
+              <div class="ov-lb ov-lb-b" id="ovLbB"></div>
+            </div>
+
+            <div class="stage-empty" id="stageEmpty">
+              <b>영상이 아직 없습니다</b>
+              <span>1단계에서 영상 하나를 고르면 여기에 바로 재생되고, 그 위에 자막·댓글이 얹힙니다.</span>
+              <button class="btn primary sm" data-tab="discover">영상 고르러 가기</button>
+            </div>
+          </div>
+
+          <div class="stage-foot">
+            <div class="sf-txt">
+              <span class="sf-name" id="stageSrcName">영상 없음</span>
+              <span class="sf-meta" id="stageSrcMeta"></span>
+            </div>
+            <div class="sf-acts">
+              <button class="sf-btn" id="stageSound" hidden>🔇 소리</button>
+              <button class="sf-btn" id="stageDl" hidden>⬇ 영상 받기</button>
+              <label class="sf-btn file-btn" title="방금 받은 MP4를 고르면 영상에 바로 세팅됩니다">📂 받은 파일 넣기
+                <input type="file" id="stageFile" accept="video/*">
               </label>
-              <button class="btn ghost sm" id="spClose">패널 닫기</button>
+              <a class="sf-btn" id="stageOpen" href="#" target="_blank" rel="noopener" hidden>유튜브에서 열기 ↗</a>
+              <button class="sf-btn" id="stageBig">⤢ 크게</button>
             </div>
           </div>
         </div>
-        <div class="sp-drop" id="spDrop" tabindex="0">여기로 원본 mp4·mov 를 끌어다 놓아도 됩니다 · 아이폰은 ‘파일’ 앱에서 선택</div>
-        <div class="sp-file" id="spFileState" hidden></div>
-        <p class="hint" id="spHint">유튜브 정책상 남의 쇼츠 원본을 자동으로 내려받지는 않습니다. 내려받은 파일을 올리면 이 대본·스타일 그대로 바로 편집합니다.</p>
+
+        <div class="stage-under">
+          <div class="sty-dots" id="styDots" role="tablist" aria-label="편집 스타일 8종"></div>
+          <p class="stage-tip">좌우로 <b>쓸거나</b> ◀ ▶ 로 8종 스타일이 바뀝니다 · 자막은 영상에 굽지 않고 레이어로 얹혀 있습니다</p>
+        </div>
       </div>
 
-      <div class="card">
+      <div class="card script-main" id="scriptCard">
         <div class="card-head">
-          <h2>편집 스타일</h2>
-          <span class="tag">옆으로 넘겨 8종</span>
+          <h2>AI 대본</h2>
+          <span class="hint" id="scriptStatus">영상 흐름에 맞춘 9줄</span>
+          <button class="btn primary" id="regenScript">🔄 다른 추천 대본</button>
         </div>
-        <div class="style-rail" id="styleGrid" role="list" aria-label="편집 스타일 8종 가로 목록"></div>
-        <p class="hint">인기 쇼츠에서 검증된 편집 스타일 8종 · 카드를 누르면 상단 띠·자막 위치·강조색·색감·말속도·댓글 카드가 한 번에 바뀝니다.</p>
+        <label class="field">
+          <span class="lab">영상 주제 <em>영상에서 자동으로 뽑았습니다 · 직접 고쳐도 됩니다</em></span>
+          <input id="aiTopic" spellcheck="false" placeholder="예: 북한말로 부르면 알아듣는 강아지">
+        </label>
+        <div class="mini-row">
+          <label class="field"><span class="lab">문체</span>
+            <select id="aiTone">
+              <option value="news">뉴스 구어체</option>
+              <option value="friend">친근한 반말</option>
+              <option value="calm">차분한 정보</option>
+            </select>
+          </label>
+          <label class="field"><span class="lab">길이</span>
+            <select id="aiLen"><option value="20">20초</option><option value="28" selected>28초</option><option value="38">38초</option><option value="52">52초</option></select>
+          </label>
+          <label class="field"><span class="lab">언어</span>
+            <select id="aiLang">
+              <option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="es">Español</option><option value="vi">Tiếng Việt</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="cue-tools-bar">
+          <button class="btn ghost sm" id="cueAdd">+ 줄 추가</button>
+          <button class="btn ghost sm" id="cueFit" title="문자 수에 맞춰 시작·끝을 다시 배분">시간 자동 맞춤</button>
+          <button class="btn ghost sm" id="cueSrt">SRT 복사</button>
+          <button class="btn ghost sm" id="cueCommentAll">댓글 전체 켜기</button>
+          <span class="hint" id="cueSummary">9큐 · 27.4초</span>
+        </div>
+        <p class="hint cue-hint">줄을 누르면 그 줄이 영상 위에 뜨고, 고치는 즉시 위 화면에 반영됩니다 · <code>#단어</code> 강조, <code>*단어*</code> 강조+밑줄</p>
+        <div id="cueList" class="cue-list"></div>
       </div>
 
-      <details class="card" id="secSource" open>
-        <summary><span class="sec-t">원본 소스</span><span class="sec-v" id="sourceSummary">샘플 · 다큐 다크</span></summary>
-        <div class="sec-body">
-          <div class="seg" id="sRatio">
-            <button class="seg-btn is-on" data-ratio="9:16">9:16 쇼츠</button>
-            <button class="seg-btn" data-ratio="16:9">16:9 롱폼</button>
-          </div>
-          <div class="chips" id="sSamples">
-            <button class="chip" data-sample="docu">다큐 다크</button>
-            <button class="chip" data-sample="chart">라이브 차트</button>
-            <button class="chip" data-sample="neon">네온 스트리트</button>
-            <button class="chip" data-sample="paper">페이퍼</button>
-          </div>
-          <div class="upload-row">
-            <label class="btn outline sm file-btn">
-              <input type="file" id="sVideoFile" accept="video/mp4,video/quicktime,video/webm,video/*">
-              영상 파일 올리기
-            </label>
-            <span class="file-name" id="sVideoName">아직 파일 없음</span>
-            <button class="btn ghost sm" id="sVideoClear" hidden>빼기</button>
-          </div>
-          <p class="hint">mp4 · mov · webm. 아이폰은 파일 앱에서 ‘이리저리’ 대신 사진/파일을 그대로 고르면 됩니다. 긴 영상은 앞 90초만 사용합니다.</p>
-
-          <div class="slider-grid">
-            <label class="field slider"><span class="lab">확대 <b id="vZoomVal">100%</b></span>
-              <input type="range" id="vZoom" min="50" max="200" value="100"></label>
-            <label class="field slider"><span class="lab">세로 위치 <b id="vOffsetVal">가운데</b></span>
-              <input type="range" id="vOffset" min="0" max="100" value="50"></label>
-            <label class="field slider"><span class="lab">밝기 <b id="vBrightVal">0</b></span>
-              <input type="range" id="vBright" min="-50" max="50" value="0"></label>
-            <label class="field slider"><span class="lab">대비 <b id="vContrastVal">0</b></span>
-              <input type="range" id="vContrast" min="-50" max="50" value="0"></label>
-            <label class="field slider"><span class="lab">채도 <b id="vSatVal">0</b></span>
-              <input type="range" id="vSat" min="-50" max="50" value="0"></label>
-            <label class="field"><span class="lab">색감 프리셋</span>
-              <select id="vGrade">
-                <option value="none">원본 그대로</option>
-                <option value="cine" selected>시네마 (다큐)</option>
-                <option value="warm">따뜻하게</option>
-                <option value="cool">차갑게</option>
-                <option value="vivid">쨍하게</option>
-                <option value="mono">흑백</option>
-              </select>
-            </label>
-          </div>
+      <div class="card tool-card">
+        <div class="tool-row">
+          <button class="tool-btn" id="toneFix"><b>✨</b><span>음슴체 제거</span><i>~함·~임 → 구어체</i></button>
+          <button class="tool-btn" id="emphFix"><b>🎯</b><span>숫자·핵심어 강조</span><i>#강조 를 자동으로</i></button>
+          <button class="tool-btn" id="tempoFix"><b>⏱️</b><span>25초 템포 맞춤</span><i>전체 길이를 25초로</i></button>
         </div>
-      </details>
+      </div>
 
-      <details class="card" id="secAI" open>
-        <summary><span class="sec-t">AI 대본</span><span class="sec-v" id="aiMode">데모 생성</span></summary>
-        <div class="sec-body">
-          <label class="field">
-            <span class="lab">주제 · 각도 <em>한 줄이면 충분합니다</em></span>
-            <textarea id="aiTopic" rows="2" placeholder="예: 북한말로 부르면 알아듣는 강아지가 화제인 이유"></textarea>
-          </label>
-          <div class="field-row">
-            <label class="field"><span class="lab">문체</span>
-              <select id="aiTone">
-                <option value="news">뉴스 구어체 (음슴체 금지)</option>
-                <option value="friend">친근한 반말</option>
-                <option value="calm">차분한 정보 전달</option>
-              </select>
-            </label>
-            <label class="field"><span class="lab">길이</span>
-              <select id="aiLen"><option value="20">20초</option><option value="28" selected>28초</option><option value="38">38초</option><option value="52">52초</option></select>
-            </label>
-          </div>
-          <div class="field-row">
-            <label class="field grow"><span class="lab">언어</span>
-              <select id="aiLang">
-                <option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="es">Español</option><option value="vi">Tiếng Việt</option>
-              </select>
-            </label>
-            <button class="btn primary" id="aiGen">대본 생성</button>
-            <button class="btn outline" id="aiTranslate" title="현재 대본을 선택 언어로">번역</button>
-          </div>
-          <p class="hint" id="aiHint">Gemini 키가 없어도 데모 대본이 3초 만에 나옵니다. 키를 넣으면 주제에 맞춰 실제로 씁니다.</p>
-        </div>
-      </details>
-
-      <details class="card" id="secHook" open>
-        <summary><span class="sec-t">상단 훅 문구</span><span class="sec-v" id="hookSummary">2줄</span></summary>
+      <details class="card" id="secHook">
+        <summary><span class="sec-t">상단 제목 띠 · 훅 문구</span><span class="sec-v" id="hookSummary">2줄</span></summary>
         <div class="sec-body">
           <label class="field"><span class="lab">1줄</span><input id="hook1" maxlength="34" placeholder="첫 0.5초에 꽂히는 한 줄"></label>
           <label class="field"><span class="lab">2줄</span><input id="hook2" maxlength="34" placeholder="두 번째 줄 (선택)"></label>
@@ -321,38 +305,12 @@
               <select id="hookStyle">
                 <option value="band">상단 검은 띠</option>
                 <option value="card">흰 라운드 카드</option>
+                <option value="pill">뱃지 알약 띠</option>
                 <option value="plain">민무늬 큰 글씨</option>
               </select>
             </label>
             <label class="switch-line"><input type="checkbox" id="hookOn" checked><span>훅 표시</span></label>
           </div>
-        </div>
-      </details>
-
-      <div class="card">
-        <div class="card-head">
-          <h2>원클릭 대본 도구</h2>
-          <span class="tag">전체 큐에 한 번에</span>
-        </div>
-        <div class="tool-row">
-          <button class="tool-btn" id="toneFix"><b>✨</b><span>음슴체 제거</span><i>~함·~임 → 구어체</i></button>
-          <button class="tool-btn" id="emphFix"><b>🎯</b><span>숫자·핵심어 강조</span><i>#강조 를 자동으로</i></button>
-          <button class="tool-btn" id="tempoFix"><b>⏱️</b><span>25초 템포 맞춤</span><i>전체 길이를 25초로</i></button>
-        </div>
-        <p class="hint">누르는 즉시 모든 큐에 적용되고, 아래 타임라인에서 결과를 바로 고칠 수 있습니다.</p>
-      </div>
-
-      <details class="card" id="secCues" open>
-        <summary><span class="sec-t">큐 타임라인</span><span class="sec-v" id="cueSummary">9큐 · 27.4초</span></summary>
-        <div class="sec-body">
-          <div class="toolbar">
-            <button class="btn ghost sm" id="cueAdd">+ 큐</button>
-            <button class="btn ghost sm" id="cueFit" title="문자 수에 맞춰 시작·끝을 다시 배분">시간 자동 맞춤</button>
-            <button class="btn ghost sm" id="cueSrt">SRT 복사</button>
-            <button class="btn ghost sm" id="cueCommentAll">댓글 전체 켜기</button>
-          </div>
-          <p class="hint">문장을 눌러 바로 고치세요. 본문에서 <code>#단어</code>는 강조색, <code>*단어*</code>는 강조+밑줄로 나옵니다.</p>
-          <div id="cueList" class="cue-list"></div>
         </div>
       </details>
 
@@ -611,9 +569,13 @@
           <li><b>2</b><span>두 파일을 참외 채팅에 올립니다. 제목·설명은 <b>📋 복사</b>로 붙여넣습니다.</span></li>
           <li><b>3</b><span>참외가 최종 검수 + 유튜브 저작권 '문제없음' 확인 후 업로드·예약 공개까지 마칩니다.</span></li>
         </ol>
+        <div class="handoff-set">
+          <button class="btn primary wide" id="uCopySet">📋 참외에게 보낼 작업 세트 복사</button>
+          <p class="hint">원본 영상 링크(또는 클린 원본명) · 편집 스타일 · 최종 대본 · 고른 제목이 한 번에 복사됩니다. 참외 채팅에 붙여넣기만 하면 바로 완성본 제작·업로드로 이어집니다.</p>
+        </div>
         <div class="toolbar">
-          <button class="btn primary" id="uSaveVideo">⬇ 완성 MP4 저장</button>
-          <button class="btn outline" id="uSaveThumb">⬇ 썸네일 PNG 저장</button>
+          <button class="btn outline" id="uSaveVideo">⬇ 완성 MP4 저장</button>
+          <button class="btn ghost" id="uSaveThumb">⬇ 썸네일 PNG 저장</button>
           <button class="btn ghost" id="uCopyMeta2">📋 제목·설명 복사</button>
         </div>
         <p class="hint" id="uHandoffHint">렌더 영상이 없으면 미리보기 탭에서 먼저 렌더하세요.</p>
@@ -761,6 +723,35 @@
     </div>
   </div>
 
+  <!-- ── 미리보기 모달 (발굴 카드 · 클린 원본) ─────────── -->
+  <div class="modal pv-modal" id="previewModal" hidden>
+    <div class="modal-back" data-close="preview"></div>
+    <div class="modal-card pv-card">
+      <div class="modal-head">
+        <h2 id="pvTitle">미리보기</h2>
+        <button class="icon-btn" data-close="preview" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body pv-body">
+        <div class="pv-frame" id="pvFrameWrap">
+          <iframe id="pvIframe" title="쇼츠 미리보기" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen hidden></iframe>
+          <video id="pvVideo" playsinline controls hidden></video>
+          <div class="pv-skel" id="pvSkel">▶ 불러오는 중…</div>
+        </div>
+        <div class="pv-meta" id="pvMeta"></div>
+        <div class="pv-acts">
+          <button class="btn primary" id="pvPick">이걸로 대본·편집 →</button>
+          <a class="btn outline sm" id="pvDl" download hidden>⬇ MP4 저장</a>
+          <a class="btn ghost sm" id="pvCobalt" target="_blank" rel="noopener" hidden>⬇ 영상 받기</a>
+          <label class="btn ghost sm file-btn">📂 받은 파일 넣기
+            <input type="file" id="pvFile" accept="video/*">
+          </label>
+          <a class="btn ghost sm" id="pvOpen" target="_blank" rel="noopener" hidden>원본 열기 ↗</a>
+          <button class="btn ghost sm" data-close="preview">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── 확인 모달 ──────────────────────────────────────── -->
   <div class="modal" id="confirmModal" hidden>
     <div class="modal-back" data-close="confirm"></div>
@@ -780,12 +771,12 @@
 <script src="js/sfx-pack.js?v=20261128d"></script>
 <script src="js/originals-data.js?v=20261128d"></script>
 <script src="js/safe-filter.js?v=20261128h"></script>
-<script src="js/core.js?v=20261128h"></script>
+<script src="js/core.js?v=20261128j"></script>
 <script src="js/upload-pro.js?v=20261128h"></script>
 <script src="js/audio.js?v=20261128d"></script>
-<script src="js/render.js?v=20261128i"></script>
-<script src="js/ai.js?v=20261128i"></script>
+<script src="js/render.js?v=20261128j"></script>
+<script src="js/ai.js?v=20261128j"></script>
 <script src="js/tube.js?v=20261128h"></script>
-<script src="js/app.js?v=20261128i"></script>
+<script src="js/app.js?v=20261128j"></script>
 </body>
 </html>
