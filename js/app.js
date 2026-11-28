@@ -677,11 +677,16 @@
     const label = btn ? btn.textContent : '';
     grabbing = true;
     if (btn) { btn.setAttribute('disabled', 'disabled'); btn.textContent = '⬇ 받는 중…'; }
+    /* 사용자 손가락 안에서 탭을 미리 열어 둡니다 (다운로드 시도 뒤에는 팝업이 막힘) */
+    let pre = null;
+    try { pre = window.open('https://cobalt.tools/', '_blank'); } catch (e) { pre = null; }
+    if (pre) { try { pre.opener = null; } catch (e) {} }
     let blob = null;
-    try { blob = await cobaltGrab(url, 7000); } catch (e) { blob = null; }
+    try { blob = await cobaltGrab(url, 4200); } catch (e) { blob = null; }
     grabbing = false;
     if (btn) { btn.removeAttribute('disabled'); btn.textContent = label || '⬇ 영상 받기'; }
     if (blob) {
+      try { if (pre) pre.close(); } catch (e) {}
       const id = ytIdOf(url) || 'short';
       const file = new File([blob], id + '.mp4', { type: blob.type && /mp4/.test(blob.type) ? blob.type : 'video/mp4' });
       loadVideoFile(file);
@@ -691,8 +696,8 @@
       return;
     }
     const ok = await U.copy(url);
-    const w = window.open('https://cobalt.tools/', '_blank', 'noopener');
-    if (!w) RS.toast("링크는 복사했습니다 · cobalt.tools를 열어 붙여넣고, 받은 파일은 '📂 받은 파일 넣기'로 넣어주세요", ok ? 'ok' : 'err');
+    if (!pre) pre = window.open('https://cobalt.tools/', '_blank');
+    if (!pre) RS.toast("링크는 복사했습니다 · cobalt.tools를 열어 붙여넣고, 받은 파일은 '📂 받은 파일 넣기'로 넣어주세요", ok ? 'ok' : 'err');
     else RS.toast("링크 복사 완료 · cobalt에서 받은 뒤 '📂 받은 파일 넣기'를 눌러주세요", ok ? 'ok' : 'err');
   }
 
@@ -2530,7 +2535,8 @@
     const t = String(title || '').replace(/#[\w가-힣]+/g, '').trim();
     if (!t && !href) { RS.toast('검색할 제목이 없습니다', 'err'); return; }
     const url = where === 'tiktok' ? ttSearchUrl(t) : ytSearchUrl(t);
-    const w = window.open(url, '_blank', 'noopener');
+    const w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) {} }
     if (!w) RS.toast('새 탭이 막혔습니다 — 팝업을 허용해 주세요', 'err');
     else RS.toast(where === 'tiktok' ? '틱톡에서 원작자를 찾습니다 ↗' : '유튜브에서 원작자를 찾습니다 ↗');
   }
