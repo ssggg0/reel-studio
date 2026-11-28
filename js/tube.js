@@ -80,8 +80,8 @@
               msg = (e0 && e0.message) || '';
             } catch (e) {}
             /* 429(순간 요청 폭주)는 잠깐 쉬었다 두 번까지만 다시 */
-            if (r.status === 429 && attempt < 2) { await sleep(attempt ? 2500 : 1100); continue; }
-            if (r.status === 429) cooldownUntil = Date.now() + 20000;
+            if (r.status === 429 && attempt < 2) { await sleep(attempt ? 4000 : 1500); continue; }
+            if (r.status === 429) cooldownUntil = Date.now() + 15000;
             const err = new Error('YouTube ' + r.status + (reason ? ' · ' + reason : ''));
             err.status = r.status;
             err.reason = reason;
@@ -567,11 +567,17 @@
     /* ① 공식 인기 차트 — 검색 한도와 무관하게 항상 동작 */
     try {
       const region = POP_REGIONS[pop.ri % POP_REGIONS.length];
-      const chart = await T.chart({ region }, { catIdx: pop.wi, seen: pop.seen });
-      if (chart && chart.length) {
+      let merged = [], tried = 0;
+      while (merged.length < 12 && tried < 3) {
+        const chart = await T.chart({ region }, { catIdx: pop.wi + tried, seen: pop.seen });
+        tried++;
+        if (!chart || !chart.length) break;
+        chart.forEach(v => { if (!merged.some(x => x.id === v.id)) merged.push(v); });
+      }
+      if (merged.length >= 6) {
         pop.ri++; if (pop.ri % POP_REGIONS.length === 0) pop.wi++;
-        T.lastPopularRaw = chart;
-        const safe = safety().filter(chart);
+        T.lastPopularRaw = merged;
+        const safe = safety().filter(merged);
         T.lastPopularSafe = { active: safe.active, removed: safe.removed.length, summary: safety().summary(safe.removed) };
         T.lastPopularRegion = region;
         T.lastPopularSource = '유튜브 인기';
