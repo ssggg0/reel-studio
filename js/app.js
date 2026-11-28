@@ -2533,6 +2533,13 @@
     const tt = el('uThumbText');
     if (tt && !tt.dataset.touched) tt.value = RS.up.plain(el('uTitle').value || (p.hook && p.hook.line1) || '').slice(0, 40);
     renderStyleChips();
+    /* 프로젝트가 바뀌면 제목 5안·썸네일 배경 프레임을 새로 뽑습니다 */
+    if (UPX.projId !== p.id) {
+      UPX.projId = p.id;
+      UPX.frame = null;
+      UPX.titles = [];
+      renderTitles(RS.up.titlesSmart(p), 'template');
+    }
     refreshThumb(false);
     if (!UPX.titles.length) renderTitles(RS.up.titlesSmart(p), 'template');
     renderCheck(RS.up.precheck(upCtx()));
