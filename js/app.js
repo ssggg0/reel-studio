@@ -2632,7 +2632,7 @@
   function setDiscoverStatus(mode, q, count, opts) {
     const st = el('discoverStatus'); if (!st) return;
     opts = opts || {};
-    const label = opts.foreign ? '외국 현지 쇼츠'
+    const label = opts.foreign ? '외국 현지'
       : mode === 'live' ? 'YouTube 실시간' : mode === 'chart' ? '유튜브 인기' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
     st.classList.toggle('off', mode !== 'live');
     const meta = opts.meta;
@@ -2654,12 +2654,11 @@
        (샘플 모드에서는 걸러질 원본이 없어 제외 0건으로 보이기 때문) */
     const qHit = (safeOn() && !removed && q && RS.safeFilter) ? RS.safeFilter.check({ title: q }) : null;
     const shield = (safeOn() && removed)
-      ? '<b class="safe-note">🛡️ 방송·아이돌·랭킹 등 위험 ' + removed + '건 자동 제외</b>'
+      ? '<b class="safe-note">🛡️ 위험 ' + removed + '건 제외</b>'
       : qHit
         ? '<b class="safe-note">🛡️ ' + U.esc(q) + '은 ' + U.esc(qHit.kindLabel) + ' 위험 키워드 — 안전한 소재만</b>'
         : (safeOn() ? '' : '<b class="safe-note">🛡️ 자동 제외 꺼짐</b>');
-    st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(q) + "' " + count + '건' + note + shield
-      + (opts.foreign ? ' · 현지 언어로 검색' : '');
+    st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(q) + "' " + count + '건' + note + shield;
   }
 
   let discoverSeq = 0;
