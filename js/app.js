@@ -939,17 +939,20 @@
     });
   }
 
+  function cleanLine(t) {
+    return String(t == null ? '' : t).replace(/^[\s"'“”‘’「」]+|[\s"'“”‘’「」]+$/g, '').trim();
+  }
   function applyScript(res, lang, keepComments) {
     const p = S.project;
-    p.hook.line1 = res.hook1 || p.hook.line1;
-    p.hook.line2 = res.hook2 || p.hook.line2;
+    p.hook.line1 = cleanLine(res.hook1) || p.hook.line1;
+    p.hook.line2 = cleanLine(res.hook2) || p.hook.line2;
     p.lang = lang || 'ko';
     const old = p.cues;
     p.cues = res.cues.map((c, i) => ({
-      id: U.uid(), text: c.text, start: c.start, end: c.end, sfx: i === 0 ? 'impact' : '',
+      id: U.uid(), text: cleanLine(c.text), start: c.start, end: c.end, sfx: i === 0 ? 'impact' : '',
       comment: keepComments && old[i] ? old[i].comment : { on: false, text: '', name: '시청자' }
     }));
-    if (res.titles) p.meta.titles = res.titles.map(t => String(t || '').slice(0, 100));
+    if (res.titles) p.meta.titles = res.titles.map(t => cleanLine(t).slice(0, 100));
     if (res.desc != null) p.meta.desc = res.desc;
     if (res.tags != null) p.meta.tags = res.tags;
     p.topic = el('aiTopic').value.trim() || p.topic;
@@ -3389,7 +3392,10 @@
       });
       return { subBottom: Math.round(sub), cardBottom: Math.round(card), safeY: AUDIT_SAFE_Y };
     },
-    errors: () => window.__rsErrors.slice()
+    errors: () => window.__rsErrors.slice(),
+    set: () => handoffSetText(),
+    overlay: () => ({ cue: (el('ovSub') || {}).innerText || '', hook: (el('ovHook') || {}).innerText || '', cmt: (el('ovCmt') || {}).innerText || '', style: el('styName').innerText, idx: el('styIdx').innerText, kind: stage.kind }),
+    swipe: n => stepStyle(n)
   };
 
   // bind discover after DOM ready (buttons exist already)
