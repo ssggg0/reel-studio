@@ -1166,3 +1166,12 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .mini-row{grid-template-columns:repeat(2,minmax(0,1fr))}
   .mini-row .field:last-child{grid-column:1 / -1}
 }
+
+/* 스크롤 시 스테이지 컴팩트 모드 — 대본 자리 확보 */
+.stage-dock.is-compact .stage-media{height:min(30dvh,300px)}
+.stage-dock.is-compact .stage-under{display:none}
+.stage-dock.is-compact .stage-foot{margin-top:6px}
+.stage-dock.is-compact .sf-meta{display:none}
+.stage-dock.is-compact .sty-bar{margin-bottom:6px}
+.stage-dock.is-compact .sty-arrow{width:32px;height:32px;flex-basis:32px}
+.panel[data-panel="script"]{scroll-padding-top:var(--dock-h,120px)}

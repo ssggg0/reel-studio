@@ -368,7 +368,7 @@
     const cue = overlayCue();
     const cKey = cue ? [cue.id, cue.text, cue.comment && cue.comment.on, cue.comment && cue.comment.text, cue.comment && cue.comment.name].join('~') : '';
     const key = [p.presetId, cKey, S.ui.pinnedCue || '', p.hook.line1, p.hook.line2, p.hook.style, p.hook.on,
-      p.sub.fontSize, p.sub.box, p.card.on, p.card.style, Math.round(W)].join('|');
+      p.sub.fontSize, p.sub.box, p.card.on, p.card.style, Math.round(W), Math.round(H)].join('|');
     if (!force && key === lastOverlayKey) return;
     lastOverlayKey = key;
 
@@ -758,9 +758,28 @@
       else RS.toast('1단계에서 영상을 먼저 고르세요', 'err');
     });
 
+    /* 스크롤하면 스테이지를 살짝 접어 대본 자리를 확보 (자막은 계속 위에서 보임) */
+    const panel = el('tab-script');
+    if (panel) {
+      panel.addEventListener('scroll', () => {
+        const y = panel.scrollTop;
+        const dock = el('stageDock');
+        if (!dock) return;
+        if (y > 90 && !dock.classList.contains('is-compact')) dock.classList.add('is-compact');
+        else if (y < 30 && dock.classList.contains('is-compact')) dock.classList.remove('is-compact');
+      }, { passive: true });
+    }
+
     if (window.ResizeObserver) {
-      const ro = new ResizeObserver(() => { lastOverlayKey = ''; paintOverlay(true); });
+      const ro = new ResizeObserver(() => {
+        lastOverlayKey = '';
+        paintOverlay(true);
+        /* 스티키 스테이지 높이만큼 스크롤 여백을 잡아 입력칸이 가려지지 않게 */
+        const dock = el('stageDock');
+        if (dock && panel) panel.style.setProperty('--dock-h', Math.round(dock.getBoundingClientRect().height + 8) + 'px');
+      });
       if (el('stageMedia')) ro.observe(el('stageMedia'));
+      if (el('stageDock')) ro.observe(el('stageDock'));
     }
   }
 
