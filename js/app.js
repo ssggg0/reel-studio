@@ -91,6 +91,7 @@
     if (name === 'upload') syncUploadFields();
     if (name === 'script') {
       renderCues();
+      restoreStage();
       stage.last = performance.now();
       syncStyleBar();
       paintStageMedia();
@@ -695,6 +696,16 @@
     else RS.toast("링크 복사 완료 · cobalt에서 받은 뒤 '📂 받은 파일 넣기'를 눌러주세요", ok ? 'ok' : 'err');
   }
 
+  /* 새로고침해도 고른 유튜브 원본은 다시 세팅 (MP4 blob은 세션에만 남음) */
+  function restoreStage() {
+    const p = S.project, src = p.source || {};
+    if (stage.kind !== 'none') return;
+    if (src.type === 'youtube' && src.id) {
+      if (!S.ui.picked || !S.ui.picked.id) S.ui.picked = { id: src.id, url: src.url, title: src.title, channel: src.channel, views: src.views, cat: src.cat };
+      openStageYoutube({ id: src.id, url: src.url, title: src.title || p.name, channel: src.channel, views: src.views });
+    }
+  }
+
   function bindStage() {
     const prev = el('styPrev'), next = el('styNext');
     if (prev) prev.addEventListener('click', () => stepStyle(-1));
@@ -807,11 +818,12 @@
     try {
       const res = await RS.ai.translateShort({ title: v.title, channel: v.channel, cat: v.cat });
       if (res.title_ko) {
-        S.project.name = String(res.title_ko).slice(0, 34);
-        S.project.topic = res.title_ko;
-        el('aiTopic').value = res.title_ko;
-        el('projName').value = S.project.name;
-        const nm = el('stageSrcName'); if (nm) nm.textContent = res.title_ko;
+        const tk = String(res.title_ko).replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, '').slice(0, 34);
+        S.project.name = tk;
+        S.project.topic = tk;
+        el('aiTopic').value = tk;
+        el('projName').value = tk;
+        const nm = el('stageSrcName'); if (nm) nm.textContent = tk;
       }
       S.ui.pinnedCue = null;
       applyScript(res, 'ko');
@@ -1237,6 +1249,8 @@
     S.ui.picked = v;
     S.ui.pinnedCue = null;
     if (S.media.videoURL) clearVideo();
+    const ytId = (v.id && /^[A-Za-z0-9_-]{6,}$/.test(String(v.id))) ? String(v.id) : ytIdOf(v.url);
+    p.source = { type: 'youtube', id: ytId, url: v.url || ('https://www.youtube.com/shorts/' + ytId), title: v.title || '', channel: v.channel || '', views: v.views || 0, cat: v.cat || '' };
     openStageYoutube(v);
     renderCues(); syncProjectToUI(true); drawStatic(); touch();
     setTab('script');
