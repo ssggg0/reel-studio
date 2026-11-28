@@ -778,7 +778,7 @@
   function updateScriptStatus(txt) {
     const s = el('scriptStatus');
     if (!s) return;
-    s.textContent = txt || ('영상 속 대사 ' + (S.project.cues || []).length + '줄');
+    s.textContent = txt || ((RS.ai.hasGemini() ? '영상 속 대사 ' : '기본 대본 ') + (S.project.cues || []).length + '줄');
   }
 
   /* ── 영상 속 실제 대사·리액션을 시간에 맞춰 옮깁니다 ─────────
