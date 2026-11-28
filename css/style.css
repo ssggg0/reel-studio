@@ -962,6 +962,53 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .status-line{flex-wrap:wrap;row-gap:2px}
 .status-line .safe-note{display:inline-flex;align-items:center;gap:4px;margin-left:6px}
 @media (max-width:1000px){.status-line .safe-note{margin-left:0;flex:1 1 100%}}
-/* 빈 결과 안내는 결과 그리드 전체 폭 사용 */
-#discoverResults .rcard-empty{grid-column:1/-1}
-#discoverResults .rcard-empty .btn{margin-top:8px;margin-right:6px}
+/* 빈 결과 안내는 결과 그리드 전체 폭 사용 — 문장은 일반 흐름으로(버튼은 아래) */
+#discoverResults .rcard-empty{grid-column:1/-1;display:block;justify-content:flex-start}
+#discoverResults .rcard-empty .btn{margin-top:10px;margin-right:6px}
+
+/* ── 5단계 마무리: 제목 5안 · 썸네일 · 3줄 체크 · 피클 넘기기 ── */
+.title-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.title-item{
+  display:flex;align-items:flex-start;gap:10px;text-align:left;width:100%;
+  padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;
+  transition:border-color .14s,background .14s,box-shadow .14s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+.title-item:hover{border-color:var(--accent-line);background:#FBFBFE}
+.title-item:active{transform:scale(.995)}
+.title-item.on{border-color:var(--accent-line);background:var(--accent-t);box-shadow:inset 0 0 0 1px var(--accent-line)}
+.title-item .tkind{
+  flex:0 0 auto;font-size:10.5px;font-weight:800;letter-spacing:-.01em;
+  color:var(--accent-h);background:#fff;border:1px solid var(--accent-line);
+  border-radius:999px;padding:3px 8px;margin-top:1px;
+}
+.title-item .ttext{font-size:13px;font-weight:700;line-height:1.45;color:var(--tx);word-break:keep-all}
+.title-item.on .ttext{color:var(--accent-h)}
+.thumb-wrap#uThumbWrap{margin-top:14px}
+#uThumbCanvas{width:208px;border-radius:14px}
+#uThumbState{font-weight:700}
+.handoff-card{
+  border-color:#D7F0C4;
+  background:linear-gradient(180deg,#F8FFF3 0%,#FFFFFF 62%);
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 14px 34px rgba(101,163,13,.10);
+}
+.handoff-card .card-head h2{color:#3F6212}
+.handoff-steps{margin:2px 0 14px;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.handoff-steps li{display:flex;gap:10px; align-items:flex-start;font-size:12.5px;color:var(--tx2);line-height:1.6}
+.handoff-steps li b{
+  flex:0 0 auto;width:20px;height:20px;border-radius:50%;background:#84CC16;color:#FFFFFF;
+  display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;margin-top:1px;
+}
+.handoff-steps li span b{display:inline;width:auto;height:auto;background:none;color:var(--tx);font-weight:800;border-radius:0;margin:0;font-size:inherit}
+#uCheckCard .audit-list{margin-top:12px}
+
+/* 터치 반응 · 스크롤 (모바일) */
+.btn,.chip,.tbtn,.title-item,.preset-chip,.tb-item{touch-action:manipulation}
+.panel,#main{-webkit-overflow-scrolling:touch}
+@media (max-width:1000px){
+  .title-item{padding:12px 13px}
+  .title-item .ttext{font-size:13.5px;line-height:1.5}
+  #uThumbCanvas{width:170px}
+  .handoff-card .toolbar{gap:8px}
+  .handoff-card .toolbar .btn{flex:1 1 132px;justify-content:center}
+}
