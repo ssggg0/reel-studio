@@ -824,9 +824,9 @@
       updateScriptStatus((res.cues.length || 0) + '줄 · 대사 싱크 완료');
     } catch (e) {
       if (seq !== dialogueSeq) return;
-      RS.toast('대사 추출 실패 — ' + e.message, 'err');
-      if (!S.project.cues.length) applyScript(RS.ai.viral(ctx.title || '', ctx.cat || '유머'), 'ko');
-      updateScriptStatus();
+      /* 상황 해설 대본으로 대신 채우지 않습니다 — 다시 뽑기를 누르면 됩니다 */
+      RS.toast('대사 추출 실패 — ' + e.message + ' · 🔄 대사 새로 뽑기를 눌러주세요', 'err');
+      updateScriptStatus('대사 추출 실패 · 🔄 다시');
     }
   }
 
