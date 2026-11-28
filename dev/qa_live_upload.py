@@ -74,6 +74,27 @@ with sync_playwright() as pw:
         zone.append({'id': sid, 'sub': g['subBottom'], 'card': g['cardBottom'], 'ok': g['subBottom'] <= g['safeY'] and g['cardBottom'] <= g['safeY']})
     res['safe_zone'] = zone
     res['overflowX'] = p.evaluate("()=>document.documentElement.scrollWidth - window.innerWidth")
+
+    # 스크롤 부드러움(업로드 패널 40프레임)
+    p.evaluate("()=>window.__rsQA.tab('upload')")
+    p.wait_for_timeout(700)
+    res['scroll'] = p.evaluate("""()=>new Promise(res=>{
+        const panel = document.querySelector('.panel[data-panel=upload]');
+        panel.scrollTop = 0;
+        const deltas = []; let last = performance.now(), n = 0;
+        function step(){
+          const now = performance.now(); deltas.push(now - last); last = now;
+          panel.scrollTop += 80; n++;
+          if (n < 40) requestAnimationFrame(step);
+          else {
+            const avg = deltas.reduce((a,b)=>a+b,0)/deltas.length;
+            res({avgMs: Math.round(avg*10)/10, maxMs: Math.round(Math.max(...deltas)), fps: Math.round(1000/avg), scrollTop: panel.scrollTop});
+          }
+        }
+        requestAnimationFrame(step);
+    })""")
+    p.evaluate("()=>window.__rsQA.tab('upload')")
+    p.wait_for_timeout(300)
     p.close()
     ctx.close()
 
