@@ -462,7 +462,7 @@
           const base = hit.length >= 4 ? hit : chart;
           const safe = safety().filter(base);
           noteSafe(base, safe);
-          const r = refine(safe.list, Object.assign({}, q || {}, { sort: 'views' }));
+          const r = refine(safe.list, Object.assign({}, q || {}, { sort: (q && q.sort === 'date') ? 'date' : 'views' }));
           if (r.list.length) {
             T.lastMode = 'chart';
             T.lastSource = '유튜브 인기';
