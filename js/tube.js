@@ -261,9 +261,12 @@
 
   /* ── 🔄 다른 영상 (새로고침) ──────────────────────────── */
   T.more = async function (q) {
-    const s = ensureSession(q);
+    const key = JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort]);
+    /* 아직 한 번도 분석한 적이 없으면 그냥 새로 분석 */
+    if (!T.sess || T.sess.q !== key) return T.search(q);
+    const s = T.sess;
     T.lastError = null;
-    if (!T.hasKey() || T.lastMode !== 'live') {
+    if (!T.hasKey()) {
       s.shots++;
       return T.fallbackSearch(q, T.lastError || 'fallback');
     }

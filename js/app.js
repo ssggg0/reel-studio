@@ -2715,6 +2715,7 @@
     const filters = readFilters();
     if (!filters.q) { filters.q = '동물'; if (el('dKeyword')) el('dKeyword').value = '동물'; }
     const st = el('discoverStatus');
+    const hadResults = document.querySelectorAll('#discoverResults .rcard').length > 0;
     const seq = ++discoverSeq;
     setMoreBusy(true);
     if (st) { st.classList.remove('off'); st.innerHTML = '<span class="spin"></span> 새로운 영상 찾는 중…'; }
@@ -2733,9 +2734,9 @@
       RS.toast('새 영상이 없어요 — 한 번 더 누르면 처음부터 다시 보여드려요');
       return;
     }
-    moreCount++;
+    if (!hadResults) moreCount = 0; else moreCount++;
     renderDiscover(list, { mode, q: filters.q, removed: safeRemoved() });
-    setDiscoverStatus(mode, filters.q, list.length, { relaxed: !!RS.tube.lastRelaxed, refresh: moreCount, variant: RS.tube.lastVariant });
+    setDiscoverStatus(mode, filters.q, list.length, { relaxed: !!RS.tube.lastRelaxed, refresh: moreCount || 0, variant: RS.tube.lastVariant });
     setMoreBusy(false);
     RS.toast('🔄 새 영상 ' + list.length + '건 도착', 'ok');
   }
