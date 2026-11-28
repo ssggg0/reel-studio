@@ -265,17 +265,28 @@
     return T.sess;
   }
 
-  /* 안전 필터 + 최소 조회수 (0건이면 완화) */
+  /* 제목이 한글 위주면 국내 채널로 봅니다 (외국 테마 검색에서 제외) */
+  function hangulHeavy(title) {
+    const s = String(title || '').replace(/[\s\d#@.,!?~'"()\[\]·…\-_/|:;+&%]+/g, '');
+    if (!s) return false;
+    const h = (s.match(/[가-힣]/g) || []).length;
+    return h / s.length >= 0.35;
+  }
+  /* 안전 필터 + 최소 조회수 (0건이면 완화) — 정렬은 고른 필터 그대로 */
   function refine(list, q) {
     const safe = safety().filter(list);
+    let base = safe.list;
+    if (q && q.foreign) {
+      const only = base.filter(v => !hangulHeavy(v.title));
+      if (only.length >= 4) base = only;
+    }
     const min = +q.minViews || 0;
-    let out = safe.list.filter(v => v.views >= min);
+    let out = base.filter(v => v.views >= min);
     let relaxed = false;
-    if (!out.length && safe.list.length) { out = safe.list.slice(); relaxed = true; }
+    if (!out.length && base.length) { out = base.slice(); relaxed = true; }
     if (q.sort === 'date') out.sort((a, b) => (a.days || 0) - (b.days || 0));
     else if (q.sort === 'breakout') out.sort((a, b) => (b.ratio || 0) - (a.ratio || 0));
     else out.sort((a, b) => (b.views || 0) - (a.views || 0));
-    if (q.sort !== 'date' && RS.rank) out = RS.rank.mix(out);
     return { list: out, relaxed, removed: safe.removed.length };
   }
 
