@@ -117,6 +117,46 @@
     lastSearchAt = Date.now();
   }
 
+  /* ── 🔎 외국 테마 검색 ────────────────────────────────
+     '외국'·'해외' 같은 말은 제목에그 한글이 든 국내 영상을 찾는 게 아니라
+     현지 언어 쿼리 + regionCode / relevanceLanguage 로 진짜 외국 쇼츠를 찾습니다. */
+  const FOREIGN_THEMES = [
+    { re: /(외국|해외|외국밈|글로벌|foreign|overseas|global)/i, label: '외국', region: 'US', lang: 'en', q: ['viral funny moment', 'unexpected twist', 'caught on camera', 'satisfying moment'] },
+    { re: /(미국|미쿡|usa|america)/i, label: '미국', region: 'US', lang: 'en', q: ['viral funny', 'trending shorts'] },
+    { re: /(영국|uk|britain)/i, label: '영국', region: 'GB', lang: 'en', q: ['funny british moment', 'viral uk'] },
+    { re: /(일본|japan|japanese)/i, label: '일본', region: 'JP', lang: 'ja', q: ['面白い バズる', '思わず笑った 瞬間', '衝撃 映像'] },
+    { re: /(중국|china|chinese)/i, label: '중국', region: 'HK', lang: 'zh-Hant', q: ['搞笑 瞬間', '爆笑 視頻'] },
+    { re: /(유럽|europe)/i, label: '유럽', region: 'DE', lang: 'en', q: ['viral europe', 'funny moment'] },
+    { re: /(인도|india)/i, label: '인도', region: 'IN', lang: 'en', q: ['viral funny india'] }
+  ];
+  const KO_TOPIC = {
+    '고양이': 'cat', '냥': 'cat', '강아지': 'dog', '멍': 'dog', '동물': 'animal', '웃긴': 'funny', '웃음': 'funny',
+    '반전': 'twist', '요리': 'cooking', '음식': 'food', '일상': 'daily life', '사고': 'accident', '축구': 'football',
+    '여행': 'travel', '아기': 'baby', '커플': 'couple', '댄스': 'dance', '노래': 'singing', '힐링': 'healing',
+    '자연': 'nature', '택배': 'delivery', '집': 'home', '차': 'car', '로봇': 'robot', '게임': 'game'
+  };
+  function strHash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h;
+  }
+  T.foreignIntent = function (raw) {
+    const s = String(raw || '').trim();
+    if (!s) return null;
+    const th = FOREIGN_THEMES.find(t => t.re.test(s));
+    if (!th) return null;
+    /* 테마 단어를 빼고 남은 말(고양이·웃긴·cat…)은 영어 키워드로 붙입니다 */
+    const rest = s.replace(th.re, ' ').replace(/[^\w가-힣\s]/g, ' ').trim();
+    const extra = rest.split(/\s+/).filter(Boolean)
+      .map(w => KO_TOPIC[w] || (/^[A-Za-z]{2,}$/.test(w) ? w : ''))
+      .filter(Boolean).slice(0, 2).join(' ');
+    const base = th.q[strHash(s) % th.q.length];
+    return {
+      q: (base + (extra ? ' ' + extra : '')).trim(),
+      region: th.region, lang: th.lang, label: th.label, foreign: true, raw: s
+    };
+  };
+
   /* ── 검색 ─────────────────────────────────────────────── */
   async function searchPage(params, pageToken) {
     const ps = Object.assign({}, params);
@@ -195,6 +235,7 @@
     if (query) params.q = query;
     const region = v.region !== undefined ? v.region : q.region;
     if (region) params.regionCode = region;
+    if (q.lang) params.relevanceLanguage = q.lang;
     if (q.dur === 'short') params.videoDuration = 'short';
     if (q.dur === 'long') params.videoDuration = 'long';
     if (pageToken) params.pageToken = pageToken;
@@ -217,10 +258,10 @@
   ];
 
   function newSession(q) {
-    return { q: JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort]), seen: new Set(), vi: -1, pages: 0, token: '', shots: 0 };
+    return { q: JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort, q.lang || '']), seen: new Set(), vi: -1, pages: 0, token: '', shots: 0 };
   }
   function ensureSession(q) {
-    if (!T.sess || T.sess.q !== JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort])) T.sess = newSession(q);
+    if (!T.sess || T.sess.q !== JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort, q.lang || ''])) T.sess = newSession(q);
     return T.sess;
   }
 
@@ -282,7 +323,7 @@
 
   /* ── 🔄 다른 영상 (새로고침) ──────────────────────────── */
   T.more = async function (q) {
-    const key = JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort]);
+    const key = JSON.stringify([q.q, q.region, q.dur, q.minViews, q.sort, q.lang || '']);
     /* 아직 한 번도 분석한 적이 없으면 그냥 새로 분석 */
     if (!T.sess || T.sess.q !== key) return T.search(q);
     const s = T.sess;

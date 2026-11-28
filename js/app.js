@@ -47,11 +47,11 @@
     const demoList = safeList(RS.demoDiscover).slice(0, 12);
     renderDiscover(demoList, { mode: 'demo' });
     if (el('discoverStatus')) el('discoverStatus').innerHTML = '<i class="dot"></i>샘플 떡상 데이터 · ' + demoList.length + '건 (검색하면 키워드로 다시 찾습니다)';
-    loadPopularRail();
+    loadBootList();
     voiceLibInit();
     loop();
     if (!RS.store.loadProject()) {
-      setTimeout(() => RS.toast('데모 프로젝트로 열었어요 · 설정에서 API 키를 넣으면 실데이터로 바뀝니다'), 700);
+      /* 첫 화면은 조용히 열립니다 */
     }
     document.fonts && document.fonts.ready.then(() => { drawStatic(); });
   }
@@ -200,7 +200,7 @@
 
   /* ── script tab ─────────────────────────────────────── */
   function bindScript() {
-    el('sNewProject').addEventListener('click', async () => {
+    if (el('sNewProject')) el('sNewProject').addEventListener('click', async () => {
       if (!(await RS.confirm('새 프로젝트', '지금 대본과 큐를 지우고 새로 시작할까요? 저장된 프리셋은 그대로 남습니다.'))) return;
       S.project = RS.newProject();
       S.player.t = 0; S.ui.pinnedCue = null; pause();
@@ -245,7 +245,7 @@
       const ok = await U.copy(U.srt(S.project));
       RS.toast(ok ? 'SRT를 복사했습니다 (캡컷에 붙여넣기)' : '복사 실패', ok ? 'ok' : 'err');
     });
-    el('cueCommentAll').addEventListener('click', () => {
+    if (el('cueCommentAll')) el('cueCommentAll').addEventListener('click', () => {
       const p = S.project;
       const allOn = p.cues.every(c => c.comment.on);
       p.cues.forEach(c => c.comment.on = !allOn);
@@ -622,7 +622,12 @@
     const dt = Math.min(0.5, (now - (stage.last || now)) / 1000);
     stage.last = now;
     const dur = U.totalDur(S.project) || 1;
-    if (stagePlaying() && !S.ui.pinnedCue) stage.capT = (stage.capT + dt) % dur;
+    if (stagePlaying() && !S.ui.pinnedCue) {
+      const v = el('stageVideo');
+      /* 내려받은 영상은 영상 시간 그대로 자막을 맞춥니다 (밀리지 않게) */
+      if (stage.kind === 'video' && v && v.duration && !v.paused && !v.ended) stage.capT = v.currentTime;
+      else stage.capT = (stage.capT + dt) % dur;
+    }
     paintOverlay(false);
   }
   function jumpStageToCue(t) {
@@ -640,70 +645,35 @@
   /* 유튜브 → MP4 2단 폴백
      ① 공개 Cobalt 인스턴스로 바로 받아 스테이지에 꽂기
      ② 실패하면 링크 복사 + cobalt.tools 열기 + '받은 파일 넣기' 안내 */
-  const COBALT_APIS = [
-    'https://api.cobalt.tools/api/json',
-    'https://co.wuk.sh/api/json',
-    'https://cobalt-api.kwiatekmiki.com/api/json',
-    'https://cobalt-backend.canine.tools/api/json'
-  ];
-  function fetchT(url, opts, ms) {
-    const ctrl = new AbortController();
-    const to = setTimeout(() => ctrl.abort(), ms);
-    return fetch(url, Object.assign({}, opts, { signal: ctrl.signal })).finally(() => clearTimeout(to));
+  /* ── ⬇ 다운받기 ─────────────────────────────────────
+     손가락 안에서 다운로더 탭을 열고 유튜브 링크를 미리 넣어 둡니다.
+     (정적 웹페이지는 유튜브 MP4를 대신 받아 폰에 저장할 수 없습니다) */
+  function dlUrl(url) { return 'https://cobalt.tools/?u=' + encodeURIComponent(url); }
+  function itemVideoUrl(item) {
+    const it = item || {};
+    if (it.url) return it.url;
+    if (it.id && /^[A-Za-z0-9_-]{6,}$/.test(String(it.id))) return 'https://www.youtube.com/shorts/' + it.id;
+    return '';
   }
-  async function cobaltGrab(url, budgetMs) {
-    const deadline = Date.now() + (budgetMs || 4200);
-    for (const api of COBALT_APIS) {
-      const left = deadline - Date.now();
-      if (left < 800) break;
-      const ms = Math.min(2200, left);
-      try {
-        const res = await fetchT(api, {
-          method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url, vQuality: '1080', filenameStyle: 'basic', downloadMode: 'auto' })
-        }, ms);
-        if (!res.ok) continue;
-        const j = await res.json();
-        const link = j.url || j.tunnel || (Array.isArray(j.picker) && j.picker[0] && j.picker[0].url);
-        if (!link) continue;
-        const vr = await fetchT(link, { method: 'GET' }, Math.max(3000, deadline - Date.now()));
-        if (!vr.ok) continue;
-        const blob = await vr.blob();
-        if (blob && blob.size > 60000) return blob;
-      } catch (e) { /* 다음 인스턴스 */ }
+  function downloadPick(item, btn) {
+    const url = itemVideoUrl(item);
+    if (!url) { RS.toast('다운로드할 영상이 없습니다', 'err'); return; }
+    let tab = null;
+    try { tab = window.open(dlUrl(url), '_blank'); } catch (e) { tab = null; }
+    if (tab) { try { tab.opener = null; } catch (e) {} }
+    if (!tab) {
+      U.copy(url);
+      RS.toast('팝업이 막혔어요 · 링크를 복사했으니 cobalt.tools에 붙여넣어 주세요', 'err');
     }
-    return null;
+    if (btn) { btn.disabled = true; setTimeout(() => { btn.disabled = false; }, 1200); }
+    try { if (el('previewModal') && !el('previewModal').hidden) closePreview(); } catch (e) {}
+    /* 돌아왔을 때 바로 편집할 수 있게 2단계에 영상·대사를 미리 세팅 */
+    selectShort(item);
+    setTimeout(() => RS.toast('다운로드 탭을 열었어요 · 저장한 영상은 위 "📂 영상 올리기"로 넣으면 바로 편집됩니다', 'ok'), 260);
   }
-  let grabbing = false;
-  async function grabVideo(url, btn) {
-    if (!url) { RS.toast('받을 링크가 없습니다', 'err'); return; }
-    if (grabbing) return;
-    const label = btn ? btn.textContent : '';
-    grabbing = true;
-    if (btn) { btn.setAttribute('disabled', 'disabled'); btn.textContent = '⬇ 받는 중…'; }
-    /* 사용자 손가락 안에서 탭을 미리 열어 둡니다 (다운로드 시도 뒤에는 팝업이 막힘) */
-    let pre = null;
-    try { pre = window.open('https://cobalt.tools/', '_blank'); } catch (e) { pre = null; }
-    if (pre) { try { pre.opener = null; } catch (e) {} }
-    let blob = null;
-    try { blob = await cobaltGrab(url, 4200); } catch (e) { blob = null; }
-    grabbing = false;
-    if (btn) { btn.removeAttribute('disabled'); btn.textContent = label || '⬇ 영상 받기'; }
-    if (blob) {
-      try { if (pre) pre.close(); } catch (e) {}
-      const id = ytIdOf(url) || 'short';
-      const file = new File([blob], id + '.mp4', { type: blob.type && /mp4/.test(blob.type) ? blob.type : 'video/mp4' });
-      loadVideoFile(file);
-      const st = el('scriptStatus');
-      if (st) updateScriptStatus('MP4 받아서 영상에 세팅 완료 · 자막 굽기·내보내기 가능');
-      RS.toast('MP4를 바로 받아 영상에 세팅했습니다 (' + fmtMB(blob.size) + ') — 이제 자막 굽기·MP4 내보내기 됩니다', 'ok');
-      return;
-    }
-    const ok = await U.copy(url);
-    if (!pre) pre = window.open('https://cobalt.tools/', '_blank');
-    if (!pre) RS.toast("링크는 복사했습니다 · cobalt.tools를 열어 붙여넣고, 받은 파일은 '📂 받은 파일 넣기'로 넣어주세요", ok ? 'ok' : 'err');
-    else RS.toast("링크 복사 완료 · cobalt에서 받은 뒤 '📂 받은 파일 넣기'를 눌러주세요", ok ? 'ok' : 'err');
+  /* 예전 이름 유지 — 스테이지/모달에서 부르는 곳이 있어도 동작하게 */
+  function grabVideo(url, btn) {
+    downloadPick({ url: url }, btn);
   }
 
   /* 새로고침해도 고른 유튜브 원본은 다시 세팅 (MP4 blob은 세션에만 남음) */
@@ -807,73 +777,83 @@
   function updateScriptStatus(txt) {
     const s = el('scriptStatus');
     if (!s) return;
-    s.textContent = txt || ('영상 흐름에 맞춘 ' + (S.project.cues || []).length + '줄');
+    s.textContent = txt || ('영상 속 대사 ' + (S.project.cues || []).length + '줄');
   }
 
-  /* 외국어 제목이면 Gemini로 자연스러운 한국어 제목·대본을 새로 뽑습니다 */
-  function isForeignTitle(t) {
-    const s = String(t || '').replace(/[\s\d#@.,!?~'"(){}\[\]·…\-_/|]/g, '');
-    if (s.length < 4) return false;
-    const hangul = (s.match(/[가-힣]/g) || []).length;
-    return hangul / s.length < 0.25;
+  /* ── 영상 속 실제 대사·리액션을 시간에 맞춰 옮깁니다 ─────────
+     상황 해설·나레이션 금지. Gemini가 영상을 직접 보고 말한 줄만 뽑습니다. */
+  let dialogueSeq = 0;
+  function pickedContext(v) {
+    const it = v || {};
+    const src = (S.project && S.project.source) || {};
+    return {
+      id: it.id || src.id || '',
+      url: it.url || src.url || '',
+      title: it.title || S.project.topic || S.project.name || '',
+      channel: it.channel || src.channel || '',
+      cat: it.cat || src.cat || '',
+      len: it.len || src.len || S.media.videoDur || 0
+    };
   }
-  async function autoTranslateForeign(v) {
-    if (!isForeignTitle(v && v.title)) return;
+  async function startDialogue(v, opts) {
+    const ctx = pickedContext(v);
+    if (!ctx.id && !ctx.url) { updateScriptStatus('영상 속 대사'); return; }
     if (!RS.ai.hasGemini()) {
-      updateScriptStatus('외국어 영상 · 한국어 기본 대본 (키를 넣으면 자동 번역)');
+      updateScriptStatus('영상 속 실제 대사 · 설정에 Gemini 키를 넣으면 자동으로 뽑습니다');
       return;
     }
+    const seq = ++dialogueSeq;
     const st = el('scriptStatus');
-    if (st) st.innerHTML = '<span class="spin"></span> 외국 밈 자동 번역 중…';
+    if (st) st.innerHTML = '<span class="spin"></span> 영상 속 대사 듣고 번역하는 중… (20~40초)';
     try {
-      const res = await RS.ai.translateShort({ title: v.title, channel: v.channel, cat: v.cat });
+      const res = await RS.ai.dialogue(ctx, opts || {});
+      if (seq !== dialogueSeq) return;
       if (res.title_ko) {
         const tk = String(res.title_ko).replace(/^[\s"'“”‘’]+|[\s"'“”‘’]+$/g, '').slice(0, 34);
-        S.project.name = tk;
-        S.project.topic = tk;
-        el('aiTopic').value = tk;
-        el('projName').value = tk;
+        S.project.name = tk; S.project.topic = tk;
+        if (el('aiTopic')) el('aiTopic').value = tk;
+        if (el('projName')) el('projName').value = tk;
         const nm = el('stageSrcName'); if (nm) nm.textContent = tk;
       }
       S.ui.pinnedCue = null;
       applyScript(res, 'ko');
       stage.capT = 0; stage.last = performance.now();
-      RS.toast('🌐 외국 밈을 한국어로 번역해 영상 흐름에 맞는 대본을 새로 썼습니다', 'ok');
+      paintOverlay(true);
+      RS.toast((res.cues.length || 0) + '줄 · 실제 대사를 영상 시간에 맞춰 얹었습니다', 'ok');
+      updateScriptStatus((res.cues.length || 0) + '줄 · 대사 싱크 완료');
     } catch (e) {
-      RS.toast('자동 번역 실패 — ' + e.message + ' (한국어 기본 대본으로 둡니다)', 'err');
-    } finally {
+      if (seq !== dialogueSeq) return;
+      RS.toast('대사 추출 실패 — ' + e.message, 'err');
+      if (!S.project.cues.length) applyScript(RS.ai.viral(ctx.title || '', ctx.cat || '유머'), 'ko');
       updateScriptStatus();
     }
   }
 
-  /* 🔄 다른 추천 대본 — 누를 때마다 새 각도 */
+  /* 🔄 대사 새로 뽑기 — 같은 영상을 다시 듣고 시간·문장을 새로 맞춥니다 */
   let regenN = 0;
   async function regenScript() {
     const p = S.project;
-    const topic = ((el('aiTopic') && el('aiTopic').value) || '').trim() || p.topic || p.name;
-    if (!topic) { RS.toast('주제를 한 줄 넣어주세요', 'err'); el('aiTopic').focus(); return; }
+    const v = pickedContext(null);
     const btn = el('regenScript');
     const label = btn ? btn.textContent : '';
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 새 대본 쓰는 중'; }
-    const st = el('scriptStatus');
-    if (st) st.textContent = '새 각도로 쓰는 중…';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 다시 듣는 중'; }
     regenN++;
     try {
-      const res = await RS.ai.regen(p, {
-        topic, tone: el('aiTone').value, lang: el('aiLang').value,
-        lengthSec: +el('aiLen').value, attempt: regenN
-      });
-      S.ui.pinnedCue = null;
-      applyScript(res, el('aiLang').value);
-      stage.capT = 0; stage.last = performance.now();
-      paintOverlay(true);
-      RS.toast(res.source === 'gemini'
-        ? '추천 대본 ' + regenN + '번째 · ' + res.cues.length + '줄 (음슴체 0%)'
-        : '새 각도 대본 ' + res.cues.length + '줄 · Gemini 키를 넣으면 누를 때마다 새로 씁니다', 'ok');
+      if (RS.ai.hasGemini()) {
+        await startDialogue(v, { retry: regenN });
+      } else {
+        const topic = ((el('aiTopic') && el('aiTopic').value) || '').trim() || p.topic || p.name;
+        const res = await RS.ai.regen(p, { topic, lengthSec: 28, attempt: regenN });
+        S.ui.pinnedCue = null;
+        applyScript(res, 'ko');
+        stage.capT = 0; stage.last = performance.now();
+        paintOverlay(true);
+        RS.toast('기본 대본 ' + res.cues.length + '줄 · Gemini 키를 넣으면 실제 대사로 뽑습니다', 'ok');
+      }
     } catch (e) {
-      RS.toast('새 대본 실패: ' + e.message, 'err');
+      RS.toast('대사 새로 뽑기 실패: ' + e.message, 'err');
     } finally {
-      if (btn) { btn.disabled = false; btn.textContent = label || '🔄 다른 추천 대본'; }
+      if (btn) { btn.disabled = false; btn.textContent = label || '🔄 대사 새로 뽑기'; }
       updateScriptStatus();
     }
   }
@@ -891,11 +871,8 @@
       ? [item.cat || '무가공 원본', item.len ? Math.round(item.len) + '초' : '', item.w && item.h ? item.w + '×' + item.h : '']
       : [item.channel, item.views ? '조회 ' + U.fmtNum(item.views) + '회' : '', item.cat]).filter(Boolean).join(' · ');
     if (sk) sk.hidden = false;
-    const dl = el('pvDl'), op = el('pvOpen'), co = el('pvCobalt'), pick = el('pvPick');
-    if (dl) dl.hidden = true;
-    if (op) op.hidden = true;
-    if (co) { co.hidden = true; co.textContent = '⬇ 영상 받기'; }
-    if (pick) pick.textContent = kind === 'original' ? '🎬 이 원본으로 편집 →' : '이걸로 대본·편집 →';
+    const pick = el('pvPick');
+    if (pick) pick.textContent = '⬇ 다운받기';
 
     if (kind === 'original') {
       const url = origUrl(item);
@@ -905,7 +882,6 @@
         if (vd.src !== new URL(url, location.href).href) vd.src = url;
         try { const pr = vd.play(); if (pr && pr.catch) pr.catch(() => {}); } catch (e) {}
       }
-      if (dl) { dl.href = url; dl.download = String(item.file || '').split('/').pop(); dl.hidden = false; }
     } else {
       const id = (item.id && /^[A-Za-z0-9_-]{6,}$/.test(String(item.id))) ? String(item.id) : ytIdOf(item.url);
       if (vd) { vd.hidden = true; try { vd.pause(); } catch (e) {} vd.removeAttribute('src'); }
@@ -913,8 +889,6 @@
         fr.hidden = false;
         fr.src = 'https://www.youtube.com/embed/' + id + '?playsinline=1&autoplay=1&rel=0&modestbranding=1';
       }
-      if (op) { op.href = item.url || ('https://www.youtube.com/shorts/' + id); op.hidden = false; }
-      if (co) co.hidden = false;
     }
     RS.openModal('preview');
     setTimeout(() => { if (sk) sk.hidden = true; }, 1200);
@@ -933,7 +907,7 @@
       const it = PV.item; if (!it) return;
       closePreview();
       if (PV.kind === 'original') applyOriginal(it.id);
-      else selectShort(it);
+      else downloadPick(it, null);
     });
     const co = el('pvCobalt');
     if (co) co.addEventListener('click', () => {
@@ -1123,13 +1097,13 @@
       applyPreset(pr);
       RS.toast(pr.name + ' 적용 — 띠·자막·강조색·배속·댓글 카드까지 한 번에 바뀌었습니다', 'ok');
     });
-    el('toneFix').addEventListener('click', () => {
+    if (el('toneFix')) el('toneFix').addEventListener('click', () => {
       const p = S.project; let n = 0;
       p.cues.forEach(c => { if (hasEumSum(c.text)) { c.text = eumConvert(c.text); n++; } });
       renderCues(); touch(); drawStatic();
       RS.toast(n ? '음슴체 ' + n + '곳을 구어체로 바꿨습니다' : '음슴체가 없습니다 — 이미 구어체입니다', n ? 'ok' : '');
     });
-    el('emphFix').addEventListener('click', () => {
+    if (el('emphFix')) el('emphFix').addEventListener('click', () => {
       const p = S.project; let n = 0, marks = 0;
       p.cues.forEach(c => {
         const r = emphasizeText(c.text);
@@ -1138,7 +1112,7 @@
       renderCues(); touch(); drawStatic();
       RS.toast(n ? n + '개 큐에 강조 ' + marks + '곳을 넣었습니다 (#단어 는 강조색)' : '이미 강조가 충분합니다', n ? 'ok' : '');
     });
-    el('tempoFix').addEventListener('click', () => {
+    if (el('tempoFix')) el('tempoFix').addEventListener('click', () => {
       const p = S.project;
       if (!p.cues.length) { RS.toast('큐가 없습니다', 'err'); return; }
       const total = U.totalDur(p);
@@ -1278,7 +1252,9 @@
     el('aiTopic').value = p.topic;
     el('aiLang').value = 'ko';
     el('aiLen').value = '28';
-    applyScript(RS.ai.viral(v.title || '', v.cat || '유머'), 'ko');
+    /* 실제 대사를 바로 받아오므로, 상황 해설 대본은 깔지 않습니다 (키가 없을 때만 기본 대본) */
+    if (!RS.ai.hasGemini()) applyScript(RS.ai.viral(v.title || '', v.cat || '유머'), 'ko');
+    else { p.cues = []; p.hook.line1 = ''; p.hook.line2 = ''; }
     if (p.cues[0]) p.cues[0].sfx = 'impact';
     const seed = String(v.title || '').length;
     [2, 5].forEach((idx, k) => {
@@ -1299,8 +1275,8 @@
     stage.capT = 0; stage.last = performance.now();
     paintStageMedia(); paintOverlay(true); syncStyleBar();
     updateScriptStatus();
-    RS.toast((v.cat || '인기') + ' 쇼츠 · 영상이 위에서 바로 재생됩니다 — 옆으로 넘겨 스타일을 고르세요', 'ok');
-    autoTranslateForeign(v);
+    RS.toast((v.cat || '인기') + ' 쇼츠 · 위에서 바로 재생됩니다 — 옆으로 넘겨 스타일을 고르세요', 'ok');
+    startDialogue(v);
   }
 
   function bindSourcePanel() { /* 원본 패널은 2단계 스테이지로 흡수 */ }
@@ -2519,9 +2495,8 @@
     ai: { q: 'AI 기술', region: '', dur: 'short', min: '100000', sort: 'breakout' }
   };
   function syncFilterLabel() {
-    const box = el('filterNow'); if (!box) return;
-    const txt = id => { const s = el(id); const o = s && s.options[s.selectedIndex]; return o ? o.text : ''; };
-    box.textContent = [txt('dRegion') || '전체', txt('dDur'), txt('dMin'), txt('dSort')].filter(Boolean).join(' · ');
+    const sort = (el('dSort') && el('dSort').value) || 'breakout';
+    $$('#dSortBar .d-seg-btn').forEach(b => b.classList.toggle('is-on', b.dataset.sort === sort));
   }
   function applyDiscoverPreset(key) {
     const pr = DISCOVER_PRESETS[key]; if (!pr) return;
@@ -2530,15 +2505,22 @@
     el('dDur').value = pr.dur;
     el('dMin').value = pr.min;
     el('dSort').value = pr.sort;
-    $$('#dChips .chip').forEach(x => x.classList.remove('on'));
-    $$('#dPresets .preset-chip').forEach(b => b.classList.toggle('on', b.dataset.preset === key));
     syncFilterLabel();
     runDiscover();
   }
+  /* 검색어 하나로 조건을 다 정한다 — 화면에 보이는 필터는 조회수·폭등·최신 3개뿐 */
   function readFilters() {
+    const raw = el('dKeyword').value.trim();
+    const fi = (RS.tube && RS.tube.foreignIntent) ? RS.tube.foreignIntent(raw) : null;
     return {
-      q: el('dKeyword').value.trim(), region: el('dRegion').value,
-      dur: el('dDur').value, minViews: el('dMin').value, sort: el('dSort').value
+      q: fi ? fi.q : raw,
+      region: fi ? fi.region : '',
+      lang: fi ? (fi.lang || '') : '',
+      foreign: !!(fi && fi.foreign),
+      label: fi ? fi.label : '',
+      raw: raw,
+      dur: el('dDur').value, minViews: el('dMin').value,
+      sort: el('dSort').value || 'breakout'
     };
   }
 
@@ -2649,7 +2631,8 @@
   function setDiscoverStatus(mode, q, count, opts) {
     const st = el('discoverStatus'); if (!st) return;
     opts = opts || {};
-    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'chart' ? '유튜브 인기' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
+    const label = opts.foreign ? '외국 현지 쇼츠'
+      : mode === 'live' ? 'YouTube 실시간' : mode === 'chart' ? '유튜브 인기' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
     st.classList.toggle('off', mode !== 'live');
     const meta = opts.meta;
     let note = '';
@@ -2674,11 +2657,23 @@
       : qHit
         ? '<b class="safe-note">🛡️ ' + U.esc(q) + '은 ' + U.esc(qHit.kindLabel) + ' 위험 키워드 — 안전한 소재만</b>'
         : (safeOn() ? '' : '<b class="safe-note">🛡️ 자동 제외 꺼짐</b>');
-    st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(q) + "' " + count + '건' + note + shield;
+    st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(q) + "' " + count + '건' + note + shield
+      + (opts.foreign ? ' · 현지 언어로 검색' : '');
   }
 
   let discoverSeq = 0;
   let moreCount = 0;
+  /* 첫 화면 — 검색 한도(100 units)를 쓰지 않고 인기 차트(1 unit)로 바로 채웁니다 */
+  async function loadBootList() {
+    if (!RS.ai.hasYouTube()) return;
+    try {
+      const list = await RS.tube.chart({ q: '동물', region: '', dur: 'short', minViews: '100000', sort: 'breakout' });
+      if (!list || !list.length) return;
+      if (document.querySelectorAll('#discoverResults .rcard').length && RS.tube.lastMode === 'live') return;
+      renderDiscover(list, { mode: 'chart' });
+      setDiscoverStatus('chart', '지금 뜨는 쇼츠', list.length, {});
+    } catch (e) { /* 샘플 유지 */ }
+  }
   function setMoreBusy(on) {
     const b = el('dMore'); if (!b) return;
     b.disabled = !!on;
@@ -2710,9 +2705,10 @@
       mode = 'demo';
     }
     if (seq !== discoverSeq) return;           // 늦게 도착한 이전 요청은 버림
-    renderDiscover(list, { mode, q: filters.q, meta, err, removed: safeRemoved() });
-    setDiscoverStatus(mode, filters.q, list.length, { meta, relaxed });
-    if (btn) { btn.disabled = false; btn.textContent = '분석'; }
+    decorateForeign(list, filters);
+    renderDiscover(list, { mode, q: filters.raw || filters.q, foreign: filters.foreign, removed: safeRemoved() });
+    setDiscoverStatus(mode, filters.raw || filters.q, list.length, { meta, relaxed, foreign: filters.foreign });
+    if (btn) { btn.disabled = false; btn.textContent = '찾기'; }
     setMoreBusy(false);
     focusResults(true);
   }
@@ -2742,10 +2738,42 @@
       return;
     }
     if (!hadResults) moreCount = 0; else moreCount++;
-    renderDiscover(list, { mode, q: filters.q, removed: safeRemoved() });
-    setDiscoverStatus(mode, filters.q, list.length, { relaxed: !!RS.tube.lastRelaxed, refresh: moreCount || 0, variant: RS.tube.lastVariant });
+    decorateForeign(list, filters);
+    renderDiscover(list, { mode, q: filters.raw || filters.q, foreign: filters.foreign, removed: safeRemoved() });
+    setDiscoverStatus(mode, filters.raw || filters.q, list.length, { relaxed: !!RS.tube.lastRelaxed, refresh: moreCount || 0, variant: RS.tube.lastVariant, foreign: filters.foreign });
     setMoreBusy(false);
     RS.toast('🔄 새 영상 ' + list.length + '건 도착', 'ok');
+  }
+
+  /* 외국 검색 결과에 원어 배지를 달고, 제목 번역은 따로 채웁니다 */
+  const LANG_TAG = { en: 'EN', ja: 'JA', zh: 'ZH', ko: 'KR' };
+  function decorateForeign(list, filters) {
+    if (!filters || !filters.foreign) return;
+    (list || []).forEach(v => {
+      v.foreign = true;
+      v.lang = filters.lang || 'en';
+      v.langTag = (filters.label || '외국').slice(0, 6) + ' · ' + (LANG_TAG[v.lang] || 'EN');
+    });
+  }
+  const titleKoCache = new Map();
+  async function translateShownTitles(list) {
+    if (!RS.ai || !RS.ai.hasGemini || !RS.ai.hasGemini()) return;
+    const need = (list || []).filter(v => v && v.title && !v.titleKo && !titleKoCache.has(v.id)).slice(0, 12);
+    if (!need.length) {
+      (list || []).forEach(v => { if (v && !v.titleKo && titleKoCache.has(v.id)) v.titleKo = titleKoCache.get(v.id); });
+      return;
+    }
+    try {
+      const map = await RS.ai.translateTitles(need.map(v => ({ id: v.id, title: v.title })));
+      Object.keys(map || {}).forEach(id => titleKoCache.set(id, map[id]));
+      document.querySelectorAll('#discoverResults .rcard').forEach(card => {
+        const ko = map && map[card.dataset.id];
+        if (!ko) return;
+        const t = card.querySelector('.rc-title');
+        if (t) t.textContent = ko;
+        card.dataset.titleKo = ko;
+      });
+    } catch (e) { /* 번역 실패 — 원제목 그대로 */ }
   }
 
   function renderDiscover(list, info) {
@@ -2756,17 +2784,11 @@
       const rem = (info && info.removed) || 0;
       box.innerHTML = rem
         ? `<div class="note rcard-empty">🛡️ 방송·아이돌·영화·랭킹 영상 <b>${rem}건이 전부 자동 제외</b>되어 남은 게 없습니다.<br>단일 장면 키워드(동물·일상·꿀팁·해외밈)로 다시 찾아보세요.
-            <button class="btn primary sm" id="dRelax">필터 풀고 다시</button>
-            <button class="btn outline sm" id="dSafeOff">🛡️ 자동 제외 끄고 보기</button></div>`
-        : `<div class="note rcard-empty">조건에 맞는 영상이 없습니다. 필터를 풀면 바로 다시 찾아봅니다.
+            <button class="btn primary sm" id="dRelax">필터 풀고 다시</button></div>`
+        : `<div class="note rcard-empty">조건에 맞는 영상이 없습니다. 검색어를 바꾸면 바로 다시 찾아봅니다.
             <button class="btn primary sm" id="dRelax">필터 풀고 다시</button></div>`;
       const rb = el('dRelax');
-      if (rb) rb.addEventListener('click', () => {
-        el('dMin').value = '10000'; el('dDur').value = 'short'; el('dRegion').value = '';
-        syncFilterLabel(); runDiscover();
-      });
-      const sb = el('dSafeOff');
-      if (sb) sb.addEventListener('click', applySafeToggle);
+      if (rb) rb.addEventListener('click', () => { el('dMin').value = '10000'; runDiscover(); });
       return;
     }
     box.innerHTML = list.map((v, i) => {
@@ -2776,46 +2798,37 @@
       const hot = hasSubs && v.ratio >= 3;
       const hue = 196 + (i * 29) % 90;
       const badge = hasSubs ? `${hot ? '🔥 ' : ''}${ratio}` : `🔥 ${views}`;
-      const tag = v.sim === 'related' ? '<span class="rc-tag">비슷한 결</span>' : v.sim === 'fresh' ? '<span class="rc-tag">추천</span>' : '';
-      const url = v.url || '';
-      return `<article class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}" tabindex="0" role="button" aria-label="${U.esc(v.title)} — 눌러서 대본 세팅">
+      const langChip = v.langTag ? `<span class="rc-lang">${U.esc(v.langTag)}</span>` : '';
+      const showTitle = v.titleKo || v.title || '';
+      return `<article class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}" tabindex="0" role="button" aria-label="${U.esc(showTitle)} — 영상 재생">
         <div class="thumb">
           ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 32% 16%),#0b0d12 70%)">▶</div>`}
-          <button class="rc-play" data-act="preview" aria-label="미리보기 재생" title="미리보기 재생">▶</button>
+          ${langChip}
           <span class="ratio">${badge}</span>
           <span class="len">${v.len ? U.fmtClock(v.len) : ''}</span>
-          ${tag}
         </div>
         <div class="rc-body">
-          <div class="rc-title">${U.esc(v.title)}</div>
-          <div class="rc-meta"><span>${U.esc(v.channel || v.cat || '')}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}${v.days == null ? '' : `<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span>`}</div>
-          <div class="rc-acts">
-            <button class="rc-act main" data-act="pick">대본 세팅 →</button>
-            ${url ? `<a class="rc-act" href="${U.esc(url)}" target="_blank" rel="noopener" data-act="open"><span class="lab-full">원본 열기 ↗</span><span class="lab-short">원본 ↗</span></a>` : ''}
-            ${url ? '<button class="rc-act" data-act="copy"><span class="lab-full">링크 복사</span><span class="lab-short">복사</span></button>' : ''}
-            <button class="rc-act" data-act="find"><span class="lab-full">원작자 찾기</span><span class="lab-short">원작자</span></button>
+          <div class="rc-title">${U.esc(showTitle)}</div>
+          <div class="rc-meta"><span>${U.esc(v.channel || v.cat || '')}</span><span><b>${views}</b>회</span>${v.days == null ? '' : `<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span>`}</div>
+          <div class="rc-acts2">
+            <button class="rc-b" data-act="play" type="button">▶ 영상 재생</button>
+            <button class="rc-b solid" data-act="dl" type="button">⬇ 다운받기</button>
           </div>
         </div>
       </article>`;
     }).join('');
     box.querySelectorAll('.rcard').forEach(card => {
       const item = list.find(x => String(x.id) === card.dataset.id) || {};
-      const pick = () => { if (item.url) selectShort(item); else oneClickImport(card.dataset.title); };
       card.addEventListener('click', e => {
         const act = e.target.closest('[data-act]');
-        if (!act) { pick(); return; }
-        const kind = act.dataset.act;
-        if (kind === 'pick') { pick(); return; }
-        e.preventDefault(); e.stopPropagation();
-        if (kind === 'preview') openPreview(item, 'short');
-        else if (kind === 'copy') copyText(item.url || '');
-        else if (kind === 'find') findOriginal(item.title, 'youtube', item.url);
-        else if (kind === 'open' && item.url) window.open(item.url, '_blank', 'noopener');
+        if (act && act.dataset.act === 'dl') { downloadPick(item, act); return; }
+        openPreview(item, 'short');
       });
       card.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPreview(item, 'short'); }
       });
     });
+    if (info && info.foreign) translateShownTitles(list);
   }
 
   /* ── 무가공 클린 원본 (originals/manifest.json 번들) ──── */
@@ -2901,23 +2914,23 @@
 
   function bindDiscoverOnce() {
     el('dSearch').addEventListener('click', runDiscover);
-    el('dRefresh').addEventListener('click', runDiscover);
     if (el('dMore')) el('dMore').addEventListener('click', runMore);
-    if (el('popMore')) el('popMore').addEventListener('click', loadPopularMore);
     el('dKeyword').addEventListener('keydown', e => { if (e.key === 'Enter') runDiscover(); });
-    $$('#dPresets .preset-chip').forEach(b => b.addEventListener('click', () => applyDiscoverPreset(b.dataset.preset)));
-    ['dRegion', 'dDur', 'dMin', 'dSort'].forEach(id => el(id).addEventListener('change', () => {
-      $$('#dPresets .preset-chip').forEach(b => b.classList.remove('on'));
-      syncFilterLabel();
-    }));
-    syncFilterLabel();
-    $$('#dChips .chip').forEach(c => c.addEventListener('click', () => {
-      el('dKeyword').value = c.dataset.kw;
-      $$('#dChips .chip').forEach(x => x.classList.toggle('on', x === c));
-      $$('#dPresets .preset-chip').forEach(b => b.classList.remove('on'));
+    $$('#dSortBar .d-seg-btn').forEach(b => b.addEventListener('click', () => {
+      el('dSort').value = b.dataset.sort;
+      $$('#dSortBar .d-seg-btn').forEach(x => x.classList.toggle('is-on', x === b));
       runDiscover();
     }));
-    renderOriginals();
+    $$('#dThemes .d-theme').forEach(c => c.addEventListener('click', () => {
+      el('dKeyword').value = c.dataset.kw;
+      $$('#dThemes .d-theme').forEach(x => x.classList.toggle('is-on', x === c));
+      runDiscover();
+    }));
+    el('dKeyword').addEventListener('input', () => {
+      const q = el('dKeyword').value.trim();
+      $$('#dThemes .d-theme').forEach(x => x.classList.toggle('is-on', x.dataset.kw === q));
+    });
+    syncFilterLabel();
   }
 
   /* ── 5단계 마무리: 제목 5안 · 썸네일 · 3줄 체크 · 피클 넘기기 ── */

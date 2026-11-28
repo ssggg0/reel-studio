@@ -12,27 +12,40 @@
 
 
   /* ── Gemini 호출 ─────────────────────────────────────── */
-  async function callGemini(prompt, key) {
+  async function callGemini(prompt, key, opts) {
+    const o = opts || {};
     let lastErr = null;
     for (const model of MODEL_CANDIDATES) {
       const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key);
       try {
+        const parts = [];
+        if (o.videoUrl) parts.push({ fileData: { fileUri: o.videoUrl } });
+        parts.push({ text: prompt });
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.9, topP: 0.95, maxOutputTokens: 8192, responseMimeType: 'application/json' }
+            contents: [{ role: 'user', parts: parts }],
+            generationConfig: {
+              temperature: o.temperature == null ? 0.9 : o.temperature,
+              topP: 0.95,
+              maxOutputTokens: o.maxOutputTokens || 8192,
+              responseMimeType: 'application/json'
+            }
           })
         });
         if (res.status === 404) { lastErr = new Error('모델 없음: ' + model); continue; }
         if (!res.ok) {
           const t = await res.text();
-          throw new Error('Gemini ' + res.status + ' · ' + t.slice(0, 220));
+          const err = new Error('Gemini ' + res.status + ' · ' + t.slice(0, 220));
+          err.status = res.status;
+          /* 과부하(503)는 다음 모델로 넘어갑니다 */
+          if (res.status === 503) { lastErr = err; continue; }
+          throw err;
         }
         const data = await res.json();
-        const parts = (((data.candidates || [])[0] || {}).content || {}).parts || [];
-        const text = parts.map(p => p.text || '').join('\n').trim();
+        const parts2 = (((data.candidates || [])[0] || {}).content || {}).parts || [];
+        const text = parts2.map(p => p.text || '').join('\n').trim();
         if (!text) throw new Error('빈 응답');
         return text;
       } catch (e) {
@@ -664,6 +677,123 @@ ${JSON.stringify(prev)}
       titles: (j.titles || []).slice(0, 3).concat(['', '', '']).slice(0, 3).map(x => String(x).slice(0, 100)),
       desc: j.desc || '', tags: j.tags || ''
     };
+  };
+
+  /* ── 영상 속 실제 대사·리액션을 시간 그대로 한국어 큐로 ──────────
+     · 제3자 상황 해설·나레이션 금지 ("이 영상에서는 ~하고 있습니다")
+     · 영상이 실제로 들리는 말만, 시작·끝 초를 붙여서
+     · 한국어는 말하듯 자연스럽게 (번역투 금지) */
+  const DIALOGUE_PROMPT = (meta, retry) => `너는 영상 속에서 실제로 들리는 말만 받아 적는 한국어 쇼츠 자막 작가다.
+
+아래 유튜브 쇼츠 영상을 처음부터 끝까지 직접 보고 들으면서 작업해라.
+영상 제목: ${meta.title || '(모름)'}
+채널: ${meta.channel || '(모름)'}
+영상 길이: ${meta.dur ? '약 ' + Math.round(meta.dur) + '초 — 마지막 줄이 영상 끝 근처에서 끝나게' : '(직접 확인)'}
+
+[절대 규칙]
+1. 영상 속 인물이 실제로 말한 대사, 외침, 웃음, 탄식, 리액션만 적는다.
+2. 제3자 상황 해설·나레이션 절대 금지. "이 영상에서는", "~하고 있습니다", "~하는 장면입니다", "놀라운 장면이 펼쳐집니다" 같은 문장은 쓰지 않는다.
+3. 각 줄에 영상 기준 시작 초(s)와 끝 초(e)를 숫자로 적는다. 말이 시작되는 순간과 끝나는 순간 그대로. 0.1초 단위.
+4. 한 줄은 1~3초. 너무 짧게 끊기면 붙이고, 3초를 넘으면 나눈다. 들리지 않는 무음 구간은 건너뛴다.
+5. say에는 들린 원문 그대로(원어), ko에는 한국 사람이 말하듯 자연스러운 구어체 번역. 직역투("그것은 ~이다", "~에 의해") 금지. 이름·숫자는 그대로.
+6. 웃음·비명·한숨 같은 소리는 괄호로 표시한다: (웃음), (비명), (한숨).
+6-1. 말소리가 전혀 없는 영상(음악·동물·풍경)이면 화면에서 실제로 보이는 것만 사실로 4~6줄 적는다. "이 영상에서는", "~하고 있습니다" 같은 해설체 대신 짧은 사실 문장(~해요/~습니다)으로. 추측·과장 금지. 이때 한 줄은 2~4초.
+6-2. 말소리가 조금이라도 있으면 6-1은 쓰지 않고 말소리만 적는다.
+7. 영상 앞부분 1.5초 안에 들리는 가장 센 말은 hook1에, 바로 이어지는 말은 hook2에 넣는다. 각 18자 이내.
+8. title_ko는 영상 내용을 살린 자연스러운 한국어 제목(40자 이내). lang은 원어 코드(en/ja/zh/es/ko 등).
+9. numbers·핵심 단어 앞에 # 를 붙인다 (예: #3개, #5초).
+${retry ? '10. 지난번보다 더 꼼꼼하게 다시 듣고, 시간이 밀리지 않게 초를 새로 맞춰라.' : ''}
+
+반드시 아래 JSON만 출력:
+{"title_ko":"","lang":"en","hook1":"","hook2":"","lines":[{"s":0.0,"e":1.8,"say":"","ko":""}],"titles":["","",""],"desc":"","tags":""}`;
+
+  /* 대사 줄을 1~3초 큐로 합칩니다 (겹치거나 비는 시간 없이) */
+  function toCues(lines, duration) {
+    const raw = (lines || []).map(l => {
+      const s = Math.max(0, +l.s);
+      const e = Math.max(s + 0.4, +l.e);
+      return { s: +s.toFixed(1), e: +e.toFixed(1), say: String(l.say || '').trim(), ko: String(l.ko || '').trim() || String(l.say || '').trim() };
+    }).filter(l => l.ko).sort((a, b) => a.s - b.s);
+    const out = [];
+    raw.forEach(l => {
+      const last = out[out.length - 1];
+      const gap = last ? l.s - last.e : 0;
+      const mergeable = last && gap <= 0.45 && (l.e - last.s) <= 3.2
+        && !/[.!?…]$/.test(last.ko);
+      if (mergeable) {
+        last.ko = (last.ko + ' ' + l.ko).replace(/\s+/g, ' ').trim();
+        last.say = (last.say + ' ' + l.say).replace(/\s+/g, ' ').trim();
+        last.e = Math.max(last.e, l.e);
+      } else {
+        out.push({ s: l.s, e: l.e, say: l.say, ko: l.ko });
+      }
+    });
+    const dur = +duration || 0;
+    const cues = out.slice(0, 18).map(c => ({
+      text: c.ko,
+      start: c.s,
+      end: dur ? Math.min(c.e, Math.max(c.s + 0.4, dur)) : c.e,
+      say: c.say
+    }));
+    /* 시작이 같거나 끝이 시작보다 짧은 큐 정리 */
+    for (let i = 0; i < cues.length; i++) {
+      if (cues[i].end - cues[i].start < 0.3) cues[i].end = +(cues[i].start + 0.6).toFixed(1);
+      if (i && cues[i].start < cues[i - 1].start) cues[i].start = cues[i - 1].start;
+    }
+    return cues;
+  }
+
+  AI.dialogue = async function (item, opts) {
+    const key = RS.state.settings && RS.state.settings.gemini;
+    if (!key) throw new Error('Gemini 키 없음');
+    const it = item || {};
+    const vid = (it.id && /^[A-Za-z0-9_-]{6,}$/.test(String(it.id))) ? String(it.id)
+      : (String(it.url || '').match(/(?:shorts\/|watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/) || [])[1] || '';
+    if (!vid) throw new Error('영상 ID를 찾지 못했습니다');
+    const meta = { title: it.title || '', channel: it.channel || '', cat: it.cat || '', dur: +it.len || 0 };
+    const retry = Math.max(0, +(opts && opts.retry) || 0);
+    const text = await callGemini(DIALOGUE_PROMPT(meta, retry), key, {
+      videoUrl: 'https://www.youtube.com/watch?v=' + vid,
+      temperature: retry ? 0.55 : 0.2,
+      maxOutputTokens: 8192
+    });
+    const j = parseJson(text);
+    const lines = Array.isArray(j.lines) ? j.lines : [];
+    const duration = +(j.duration || 0) || (+it.len || 0);
+    const cues = toCues(lines, duration);
+    if (!cues.length) throw new Error('영상에서 말소리를 찾지 못했습니다');
+    return {
+      source: 'gemini-video',
+      lang: String(j.lang || it.lang || '').slice(0, 6),
+      title_ko: String(j.title_ko || '').trim(),
+      hook1: cleanLine2(j.hook1), hook2: cleanLine2(j.hook2),
+      cues: cues.map(c => ({ text: cleanLine2(c.text), start: c.start, end: c.end })),
+      titles: (j.titles || []).slice(0, 3).concat(['', '', '']).slice(0, 3).map(s => cleanLine2(s).slice(0, 100)),
+      desc: j.desc || '', tags: j.tags || ''
+    };
+  };
+
+  function cleanLine2(t) {
+    return String(t == null ? '' : t).replace(/^[\s"'“”‘’「」]+|[\s"'“”‘’「」]+$/g, '').trim();
+  }
+
+  /* ── 외국 쇼츠 제목 한 번에 한국어로 ─────────────────── */
+  AI.translateTitles = async function (items) {
+    const key = RS.state.settings && RS.state.settings.gemini;
+    if (!key) return {};
+    const list = (items || []).filter(x => x && x.title).slice(0, 12);
+    if (!list.length) return {};
+    const prompt = `다음 유튜브 쇼츠 제목들을 한국 시청자가 바로 이해하는 자연스러운 한국어로 번역한다. 직역투·낚시 금지, 40자 이내, 이모지는 그대로 둔다.
+
+${JSON.stringify(list)}
+
+반드시 아래 JSON만 출력:
+{"items":[{"id":"","ko":""}]}`;
+    const text = await callGemini(prompt, key, { temperature: 0.3, maxOutputTokens: 4096 });
+    const j = parseJson(text);
+    const map = {};
+    (j.items || []).forEach(x => { if (x && x.id && x.ko) map[String(x.id)] = cleanLine2(x.ko).slice(0, 90); });
+    return map;
   };
 
   /* ── 연결 테스트 ─────────────────────────────────────── */
