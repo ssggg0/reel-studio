@@ -2648,7 +2648,7 @@
     else if (opts.variant) note += ' · ' + opts.variant;
     if (opts.relaxed && !meta) note += ' · 필터 완화';
     if (mode === 'public') note += ' · 잠시 후 실시간으로 자동 복귀';
-    if (mode === 'chart') note += ' · 인기로 채움(검색 한도)' + (RS.tube.lastChart ? ' · ' + RS.tube.lastChart.region : '');
+    if (mode === 'chart' && !opts.boot) note += ' · 인기로 채움(검색 한도)' + (RS.tube.lastChart ? ' · ' + RS.tube.lastChart.region : '');
     const removed = (typeof opts.removed === 'number') ? opts.removed : safeRemoved();
     /* 검색어 자체가 방송·아이돌·랭킹 위험 키워드면 그 사실을 짚어 줍니다
        (샘플 모드에서는 걸러질 원본이 없어 제외 0건으로 보이기 때문) */
@@ -2671,7 +2671,7 @@
       if (!list || !list.length) return;
       if (document.querySelectorAll('#discoverResults .rcard').length && RS.tube.lastMode === 'live') return;
       renderDiscover(list, { mode: 'chart' });
-      setDiscoverStatus('chart', '지금 뜨는 쇼츠', list.length, {});
+      setDiscoverStatus('chart', '지금 뜨는 쇼츠', list.length, { boot: true });
     } catch (e) { /* 샘플 유지 */ }
   }
   function setMoreBusy(on) {
