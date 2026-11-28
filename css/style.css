@@ -862,3 +862,65 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   .tts-row .tts-f{flex:1 1 132px}
   #apiTtsCard .toolbar{flex-wrap:wrap}
 }
+
+/* ── 발굴 결과 카드 액션 · 스켈레톤 ────────────────── */
+.rcard{cursor:pointer}
+.rcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rcard .rc-tag{
+  position:absolute;left:8px;bottom:8px;padding:3px 7px;border-radius:6px;
+  background:rgba(15,23,42,.72);color:#fff;font-size:10px;font-weight:800;letter-spacing:-.01em;
+}
+.rcard .rc-acts{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.rcard .rc-act{
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  padding:6px 9px;border-radius:9px;border:1px solid var(--line2);background:#fff;
+  font-size:11px;font-weight:800;color:var(--tx2);text-decoration:none;line-height:1.2;
+  transition:.15s;font-family:inherit;
+}
+.rcard .rc-act:hover{border-color:var(--accent-line);color:var(--accent-h);background:var(--accent-t)}
+.rcard .rc-act.main{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(79,70,229,.22)}
+.rcard .rc-act.main:hover{background:var(--accent-h);color:#fff}
+.rcard.skel{pointer-events:none;cursor:default}
+.rcard.skel .thumb{background:linear-gradient(100deg,#EEF2F7 20%,#F7FAFF 40%,#EEF2F7 60%);background-size:220% 100%;animation:shimmer 1.25s linear infinite}
+.rcard.skel .sk-line{height:11px;border-radius:6px;background:#EDF1F7}
+.rcard.skel .sk-line.w90{width:90%}.rcard.skel .sk-line.w65{width:65%}.rcard.skel .sk-line.w40{width:40%}
+@keyframes shimmer{to{background-position:-120% 0}}
+.rcard-empty{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between}
+
+/* ── 무가공 클린 원본 ──────────────────────────────── */
+.orig-wrap{margin-top:18px}
+.orig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ocard{
+  display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:14px;overflow:hidden;box-shadow:var(--sh-sm);transition:.16s;
+}
+.ocard:hover{border-color:var(--accent-line);box-shadow:0 12px 28px rgba(15,23,42,.09);transform:translateY(-2px)}
+.ocard-thumb{position:relative;aspect-ratio:9/16;background:linear-gradient(150deg,#334155,#0F172A);overflow:hidden}
+.ocard-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.ocard-len{position:absolute;right:7px;bottom:7px;padding:3px 7px;border-radius:6px;background:rgba(15,23,42,.82);color:#fff;font-size:10.5px;font-weight:700}
+.ocard-cat{position:absolute;left:7px;bottom:7px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.94);color:var(--accent-h);font-size:10px;font-weight:800;border:1px solid var(--accent-line)}
+.ocard-body{padding:10px 11px 11px;display:flex;flex-direction:column;gap:5px;flex:1}
+.ocard-title{font-size:12.5px;font-weight:800;line-height:1.35;color:var(--tx);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ocard-hook{font-size:11px;color:var(--mut);font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ocard-acts{display:flex;gap:5px;margin-top:auto;padding-top:7px}
+.ocard-acts .btn{flex:1;justify-content:center;padding:8px 6px;font-size:11.5px;white-space:nowrap}
+.ocard-acts .btn.outline{background:#fff}
+.orig-hint{margin-top:12px}
+@media (max-width:1000px){
+  .orig-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .ocard-thumb{aspect-ratio:9/13}
+  .ocard-acts{flex-direction:column}
+  .ocard-acts .btn{width:100%}
+  .rcard .rc-act{flex:1 1 auto;padding:7px 6px;font-size:10.5px}
+  .rcard .rc-act.main{flex:1 0 100%}
+}
+
+/* 결과 카드 액션 라벨: 모바일은 짧게 */
+.rcard .rc-act .lab-short{display:none}
+@media (max-width:1000px){
+  .rcard .rc-act .lab-full{display:none}
+  .rcard .rc-act .lab-short{display:inline}
+  .rcard .rc-acts{gap:4px}
+  .rcard .rc-act{flex:1 1 0;min-width:0;padding:7px 4px;font-size:10.5px}
+  .rcard .rc-act.main{flex:1 0 100%}
+}

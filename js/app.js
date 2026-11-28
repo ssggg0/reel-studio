@@ -41,7 +41,8 @@
     renderSfxPack();
     bindVoiceLib();
     syncProjectToUI(true);
-    renderDiscover();
+    renderDiscover(RS.demoDiscover.slice(0, 12), { mode: 'demo' });
+    if (el('discoverStatus')) el('discoverStatus').innerHTML = '<i class="dot"></i>샘플 떡상 데이터 · 12건 (검색하면 키워드로 다시 찾습니다)';
     loadPopularRail();
     voiceLibInit();
     loop();
@@ -594,11 +595,18 @@
     box.hidden = false;
     const th = el('spThumb');
     if (v.thumb) { th.hidden = false; th.src = v.thumb; } else { th.hidden = true; th.removeAttribute('src'); }
-    el('spCat').textContent = (v.cat || '인기') + ' · 인기 쇼츠';
+    el('spCat').textContent = v.local ? ((v.cat || '원본') + ' · 무가공 클린 원본') : ((v.cat || '인기') + ' · 인기 쇼츠');
     el('spTitle').textContent = v.title || '';
-    el('spMeta').textContent = '조회 ' + U.fmtNum(v.views) + '회' + (v.channel ? ' · ' + v.channel : '') + ' · YouTube Shorts';
+    el('spMeta').textContent = v.local
+      ? ((v.len ? Math.round(v.len) + '초 · ' : '') + (v.w && v.h ? v.w + '×' + v.h + ' · ' : '') + (v.credit || '직접 첨부한 원본') + ' · MP4')
+      : ('조회 ' + U.fmtNum(v.views) + '회' + (v.channel ? ' · ' + v.channel : '') + ' · YouTube Shorts');
     const open = el('spOpen');
-    if (v.url) { open.href = v.url; open.hidden = false; } else { open.hidden = true; }
+    if (v.url) { open.href = v.url; open.hidden = false; open.textContent = v.local ? '원본 재생 · 다운 ↗' : '원본 영상 열기 ↗'; } else { open.hidden = true; }
+    const cp = el('spCopy'); if (cp) cp.hidden = !v.url;
+    const hint = el('spHint');
+    if (hint) hint.innerHTML = v.local
+      ? '이 파일은 스튜디오에 직접 첨부한 <b>무가공 원본</b>입니다. 아래에서 바로 재생·다운로드되고, 이 대본·스타일 그대로 편집됩니다.'
+      : '유튜브 정책상 남의 쇼츠 원본을 자동으로 내려받지는 않습니다. <b>원본 열기</b>로 원본을 보고, 내려받은 파일을 올리면 이 대본·스타일 그대로 바로 편집합니다.';
     const fs = el('spFileState'); if (fs) fs.hidden = true;
     S.ui.picked = v;
   }
@@ -631,6 +639,17 @@
   function bindSourcePanel() {
     if (!el('spClose')) return;
     el('spClose').addEventListener('click', () => { el('srcPanel').hidden = true; });
+    if (el('spCopy')) el('spCopy').addEventListener('click', () => {
+      const v = S.ui.picked || {};
+      if (!v.url) { RS.toast('복사할 링크가 없습니다', 'err'); return; }
+      let url = v.url;
+      try { url = new URL(v.url, location.href).href; } catch (e) {}
+      copyText(url);
+    });
+    if (el('spFind')) el('spFind').addEventListener('click', () => {
+      const v = S.ui.picked || {};
+      findOriginal(v.search || v.title, /tiktok/i.test(v.credit || '') ? 'tiktok' : 'youtube', v.url);
+    });
     el('spFile').addEventListener('change', e => {
       const f = e.target.files && e.target.files[0];
       if (f) loadVideoFile(f);
@@ -1854,7 +1873,7 @@
     kr: { q: '뉴스', region: 'KR', dur: 'short', min: '100000', sort: 'breakout' },
     us: { q: 'viral', region: 'US', dur: 'short', min: '100000', sort: 'breakout' },
     jp: { q: 'ニュース', region: 'JP', dur: 'short', min: '100000', sort: 'breakout' },
-    animal: { q: '동물 구조', region: '', dur: 'short', min: '100000', sort: 'breakout' },
+    animal: { q: '동물', region: '', dur: 'short', min: '100000', sort: 'breakout' },
     ai: { q: 'AI 기술', region: '', dur: 'short', min: '100000', sort: 'breakout' }
   };
   function syncFilterLabel() {
@@ -1880,57 +1899,238 @@
       dur: el('dDur').value, minViews: el('dMin').value, sort: el('dSort').value
     };
   }
-  async function runDiscover() {
-    const btn = el('dSearch');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
-    const st = el('discoverStatus');
-    st.innerHTML = '<span class="spin"></span> 분석 중…';
-    st.classList.remove('off');
+
+  /* 링크 복사 · 원작자 찾기 */
+  function legacyCopy(text, done) {
     try {
-      const list = await RS.tube.search(readFilters());
-      renderDiscover(list);
-      const demo = !RS.ai.hasYouTube();
-      st.classList.toggle('off', demo);
-      st.innerHTML = '<i class="dot"></i>' + (demo ? '샘플 떡상 데이터 · ' : 'YouTube 실시간 · ') + list.length + '건';
-      if (!list.length) el('discoverResults').innerHTML = '<div class="note">조건에 맞는 영상이 없습니다. 최소 조회수를 낮추거나 다른 키워드로 해보세요.</div>';
-    } catch (e) {
-      st.classList.add('off');
-      st.innerHTML = '<i class="dot"></i>실패: ' + U.esc(e.message);
-      renderDiscover(RS.tube.demoSearch(readFilters()));
-      RS.toast('API 실패 — 샘플로 대신합니다: ' + e.message, 'err');
-    } finally { btn.disabled = false; btn.textContent = '분석'; }
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.select(); ta.setSelectionRange(0, text.length);
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      done(!!ok);
+    } catch (e) { done(false); }
+  }
+  function copyText(text) {
+    const done = ok => RS.toast(ok ? '🔗 링크 복사됨 — 붙여넣기 하세요' : '복사가 막혔습니다 — 링크를 길게 눌러 복사해 주세요', ok ? 'ok' : 'err');
+    if (!text) { RS.toast('복사할 링크가 없습니다', 'err'); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => done(true), () => legacyCopy(text, done));
+    } else legacyCopy(text, done);
+  }
+  const ytSearchUrl = t => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(String(t || '').slice(0, 90));
+  const ttSearchUrl = t => 'https://www.tiktok.com/search?q=' + encodeURIComponent(
+    String(t || '').replace(/[^\w가-힣\s]/g, ' ').trim().split(/\s+/).slice(0, 6).join(' '));
+  function findOriginal(title, where, href) {
+    const t = String(title || '').replace(/#[\w가-힣]+/g, '').trim();
+    if (!t && !href) { RS.toast('검색할 제목이 없습니다', 'err'); return; }
+    const url = where === 'tiktok' ? ttSearchUrl(t) : ytSearchUrl(t);
+    const w = window.open(url, '_blank', 'noopener');
+    if (!w) RS.toast('새 탭이 막혔습니다 — 팝업을 허용해 주세요', 'err');
+    else RS.toast(where === 'tiktok' ? '틱톡에서 원작자를 찾습니다 ↗' : '유튜브에서 원작자를 찾습니다 ↗');
   }
 
-  function renderDiscover(list) {
+  /* 결과 자리로 스크롤 (패널이 스크롤 컨테이너) */
+  function scrollPanelTo(node, smooth) {
+    if (!node) return;
+    const scroller = node.closest('.panel');
+    if (!scroller) { node.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' }); return; }
+    const top = node.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 10;
+    try { scroller.scrollTo({ top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' }); }
+    catch (e) { scroller.scrollTop = Math.max(0, top); }
+  }
+  function focusResults(smooth) { scrollPanelTo(el('discoverResultHead'), smooth); }
+
+  const SKELETON = `<div class="rcard skel" aria-hidden="true"><div class="thumb"></div>
+    <div class="rc-body"><div class="sk-line w90"></div><div class="sk-line w65"></div><div class="sk-line w40"></div></div></div>`;
+  function showSkeletons(n) {
+    const box = el('discoverResults'); if (!box) return;
+    box.innerHTML = new Array(n || 12).fill(SKELETON).join('');
+  }
+
+  let discoverSeq = 0;
+  async function runDiscover() {
+    const btn = el('dSearch');
+    const st = el('discoverStatus');
+    const filters = readFilters();
+    if (!filters.q) { filters.q = '동물'; if (el('dKeyword')) el('dKeyword').value = '동물'; }
+    const seq = ++discoverSeq;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+    if (st) { st.classList.remove('off'); st.innerHTML = '<span class="spin"></span> ' + (RS.ai.hasYouTube() ? '유튜브에서 찾는 중…' : '목록 만드는 중…'); }
+    showSkeletons(12);
+    focusResults(false);                       // 누르자마자 결과 자리로 — 빈 화면으로 보이지 않게
+    let list = [], mode = RS.ai.hasYouTube() ? 'live' : 'demo', err = '', meta = null, relaxed = false;
+    try {
+      list = await RS.tube.search(filters);
+      meta = RS.tube.lastDemoMeta || null;
+      relaxed = !!RS.tube.lastRelaxed;
+    } catch (e) {
+      err = e.message;
+      list = RS.tube.demoSearch(filters);
+      meta = RS.tube.lastDemoMeta || null;
+      relaxed = !!RS.tube.lastRelaxed;
+      mode = 'fallback';
+      RS.toast('유튜브 실시간 실패 — 샘플 ' + list.length + '건으로 대신합니다', 'err');
+    }
+    if (seq !== discoverSeq) return;           // 늦게 도착한 이전 요청은 버림
+    renderDiscover(list, { mode, q: filters.q, meta, err });
+    if (st) {
+      const label = mode === 'live' ? 'YouTube 실시간' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
+      st.classList.toggle('off', mode !== 'live');
+      let note = '';
+      if (meta) {
+        const bits = [];
+        if (meta.direct) bits.push('일치 ' + meta.direct);
+        if (meta.related) bits.push('비슷한 결 ' + meta.related);
+        if (meta.fresh) bits.push('추천 ' + meta.fresh);
+        note = bits.length ? ' · ' + bits.join(' · ') : (filters.q ? ' · 연관 0건 → 인기순' : '');
+      }
+      if (relaxed && !meta) note += ' · 필터 완화';
+      st.innerHTML = '<i class="dot"></i>' + label + " · '" + U.esc(filters.q) + "' " + list.length + '건' + note;
+    }
+    if (btn) { btn.disabled = false; btn.textContent = '분석'; }
+    focusResults(true);
+  }
+
+  function renderDiscover(list, info) {
     const box = el('discoverResults');
     if (!box) return;
     list = list || RS.demoDiscover;
+    if (!list.length) {
+      box.innerHTML = `<div class="note rcard-empty">조건에 맞는 영상이 없습니다. 필터를 풀면 바로 다시 찾아봅니다.
+        <button class="btn primary sm" id="dRelax">필터 풀고 다시</button></div>`;
+      const rb = el('dRelax');
+      if (rb) rb.addEventListener('click', () => {
+        el('dMin').value = '10000'; el('dDur').value = 'short'; el('dRegion').value = '';
+        syncFilterLabel(); runDiscover();
+      });
+      return;
+    }
     box.innerHTML = list.map((v, i) => {
-      const views = U.fmtNum(v.views);
+      const views = U.fmtNum(v.views || 0);
       const hasSubs = v.subs > 0;
       const ratio = hasSubs ? (v.ratio >= 1 ? v.ratio.toFixed(1) + '×' : (v.views / Math.max(1, v.subs)).toFixed(2)) : '';
       const hot = hasSubs && v.ratio >= 3;
       const hue = 196 + (i * 29) % 90;
       const badge = hasSubs ? `${hot ? '🔥 ' : ''}${ratio}` : `🔥 ${views}`;
-      return `<button class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}" data-cat="${U.esc(v.cat || v.kw || '')}">
+      const tag = v.sim === 'related' ? '<span class="rc-tag">비슷한 결</span>' : v.sim === 'fresh' ? '<span class="rc-tag">추천</span>' : '';
+      const url = v.url || '';
+      return `<article class="rcard" data-id="${U.esc(v.id || i)}" data-title="${U.esc(v.title)}" tabindex="0" role="button" aria-label="${U.esc(v.title)} — 눌러서 대본 세팅">
         <div class="thumb">
           ${v.thumb ? `<img src="${U.esc(v.thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="ph" style="background:linear-gradient(150deg,hsl(${hue} 32% 16%),#0b0d12 70%)">▶</div>`}
           <span class="ratio">${badge}</span>
           <span class="len">${U.fmtClock(v.len)}</span>
+          ${tag}
         </div>
         <div class="rc-body">
           <div class="rc-title">${U.esc(v.title)}</div>
-          <div class="rc-meta"><span>${U.esc(v.channel)}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span></div>
-          <div class="rc-cta">눌러서 원본·대본 다루기 →</div>
+          <div class="rc-meta"><span>${U.esc(v.channel || v.cat || '')}</span><span><b>${views}</b>회</span>${hasSubs ? `<span>구독 ${U.fmtNum(v.subs)}</span>` : ''}<span>${v.days === 0 ? '오늘' : v.days + '일 전'}</span></div>
+          <div class="rc-acts">
+            <button class="rc-act main" data-act="pick">대본 세팅 →</button>
+            ${url ? `<a class="rc-act" href="${U.esc(url)}" target="_blank" rel="noopener" data-act="open"><span class="lab-full">원본 열기 ↗</span><span class="lab-short">원본 ↗</span></a>` : ''}
+            ${url ? '<button class="rc-act" data-act="copy"><span class="lab-full">링크 복사</span><span class="lab-short">복사</span></button>' : ''}
+            <button class="rc-act" data-act="find"><span class="lab-full">원작자 찾기</span><span class="lab-short">원작자</span></button>
+          </div>
         </div>
-      </button>`;
+      </article>`;
     }).join('');
-    box.querySelectorAll('.rcard').forEach(card => card.addEventListener('click', () => {
-      const v = list.find(x => String(x.id) === card.dataset.id);
-      if (v && v.url) selectShort(v);
-      else oneClickImport(card.dataset.title);
+    box.querySelectorAll('.rcard').forEach(card => {
+      const item = list.find(x => String(x.id) === card.dataset.id) || {};
+      const pick = () => { if (item.url) selectShort(item); else oneClickImport(card.dataset.title); };
+      card.addEventListener('click', e => {
+        const act = e.target.closest('[data-act]');
+        if (!act) { pick(); return; }
+        const kind = act.dataset.act;
+        if (kind === 'pick') { pick(); return; }
+        e.preventDefault(); e.stopPropagation();
+        if (kind === 'copy') copyText(item.url || '');
+        else if (kind === 'find') findOriginal(item.title, 'youtube', item.url);
+        else if (kind === 'open' && item.url) window.open(item.url, '_blank', 'noopener');
+      });
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+      });
+    });
+  }
+
+  /* ── 무가공 클린 원본 (originals/manifest.json 번들) ──── */
+  function origUrl(o) { return './' + String(o.file).replace(/^\.?\//, ''); }
+  function renderOriginals() {
+    const wrap = el('origWrap'), box = el('origGrid');
+    const list = RS.originals || [];
+    if (!wrap || !box) return;
+    if (!list.length) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    if (el('origSub')) el('origSub').textContent = '· ' + list.length + '편 · 다운로드 없이 딸깍';
+    box.innerHTML = list.map(o => `<article class="ocard" data-id="${U.esc(o.id)}">
+        <div class="ocard-thumb">
+          <img src="${U.esc(o.thumb)}" alt="${U.esc(o.title)} 썸네일" loading="lazy" decoding="async">
+          <span class="ocard-len">${Math.round(o.len || 0)}초</span>
+          <span class="ocard-cat">${U.esc(o.cat || '원본')}</span>
+        </div>
+        <div class="ocard-body">
+          <div class="ocard-title">${U.esc(o.title)}</div>
+          <div class="ocard-hook">훅 · ${U.esc(o.hook || '')}</div>
+          <div class="ocard-acts">
+            <a class="btn outline sm" href="${U.esc(origUrl(o))}" download="${U.esc(String(o.file).split('/').pop())}" data-dl="${U.esc(o.id)}">⬇ 원본 다운</a>
+            <button class="btn primary sm" data-apply="${U.esc(o.id)}">🎬 바로 얹기</button>
+          </div>
+        </div>
+      </article>`).join('');
+    box.querySelectorAll('[data-apply]').forEach(b => b.addEventListener('click', () => applyOriginal(b.dataset.apply, b)));
+    box.querySelectorAll('[data-dl]').forEach(a => a.addEventListener('click', () => {
+      const o = list.find(x => x.id === a.dataset.dl) || {};
+      RS.toast('⬇ 원본 다운 시작 · ' + (o.title || '') + ' (' + fmtMB(o.bytes || 0) + ')');
     }));
   }
+
+  async function applyOriginal(id, btn) {
+    const o = (RS.originals || []).find(x => x.id === id);
+    if (!o) { RS.toast('원본 정보를 찾지 못했습니다', 'err'); return; }
+    if (S.ui.applyingOriginal) { RS.toast('이미 원본을 받는 중입니다', 'err'); return; }
+    S.ui.applyingOriginal = true;
+    const label = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 받는 중…'; }
+    let failed = '';
+    try {
+      const res = await fetch(origUrl(o), { cache: 'force-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const total = +res.headers.get('content-length') || o.bytes || 0;
+      let blob;
+      if (res.body && res.body.getReader && total) {
+        const reader = res.body.getReader();
+        const chunks = []; let got = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value); got += value.length;
+          if (btn) btn.innerHTML = '<span class="spin"></span> ' + Math.min(99, Math.round(got / total * 100)) + '%';
+        }
+        blob = new Blob(chunks, { type: 'video/mp4' });
+      } else {
+        blob = await res.blob();
+      }
+      if (!blob || blob.size < 20000) throw new Error('파일이 비어 있습니다');
+      const fname = String(o.file).split('/').pop();
+      const file = (typeof File === 'function') ? new File([blob], fname, { type: 'video/mp4' }) : blob;
+      if (!file.name) file.name = fname;
+      loadVideoFile(file);
+      showSourcePanel(Object.assign({}, o, { local: true, url: origUrl(o), channel: o.credit || '', views: 0 }));
+      setTab('script');
+      setTimeout(() => { if (!el('srcPanel').hidden) scrollPanelTo(el('srcPanel'), true); }, 160);
+      RS.toast('🎬 원본 얹음 · ' + o.title + ' (' + fmtMB(blob.size) + ')', 'ok');
+    } catch (e) {
+      failed = e.message;
+      RS.toast('원본을 받지 못했습니다: ' + e.message + ' — ⬇ 원본 다운으로 받아 올려 주세요', 'err');
+    } finally {
+      S.ui.applyingOriginal = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = label || '🎬 바로 얹기'; }
+    }
+    return !failed;
+  }
+
   function bindDiscoverOnce() {
     el('dSearch').addEventListener('click', runDiscover);
     el('dRefresh').addEventListener('click', runDiscover);
@@ -1947,6 +2147,7 @@
       $$('#dPresets .preset-chip').forEach(b => b.classList.remove('on'));
       runDiscover();
     }));
+    renderOriginals();
   }
 
   /* ── upload ─────────────────────────────────────────── */

@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261128c">
+<link rel="stylesheet" href="css/style.css?v=20261128d">
 </head>
 <body>
 <div id="app">
@@ -144,6 +144,23 @@
         </details>
       </div>
 
+      <!-- 분석 결과 (검색 카드 바로 아래 — 누르면 여기로 자동 스크롤) -->
+      <div class="result-head" id="discoverResultHead">
+        <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터</span>
+        <span class="hint" id="discoverHint">카드를 누르면 훅·대본·댓글까지 자동으로 세팅됩니다</span>
+      </div>
+      <div class="result-grid" id="discoverResults"></div>
+
+      <!-- 무가공 클린 원본 (직접 첨부한 MP4) -->
+      <section class="card orig-wrap" id="origWrap" hidden>
+        <div class="card-head">
+          <h2>📦 바로 쓰는 무가공 클린 원본 <span class="pop-sub" id="origSub">· 다운로드 없이 딸깍</span></h2>
+          <span class="tag lime" id="origTag">원본 MP4</span>
+        </div>
+        <div class="orig-grid" id="origGrid"></div>
+        <p class="hint orig-hint"><b>⬇ 원본 다운</b>은 아이폰 앨범·캡컷에서 쓰고, <b>🎬 바로 얹기</b>는 이 스튜디오 편집기에 원본을 바로 올려 <b>2단계 대본</b>으로 넘깁니다. 유튜브 실시간 결과는 정책상 MP4를 내려받을 수 없어 <b>원본 열기</b>·<b>링크 복사</b>로 이어집니다.</p>
+      </section>
+
       <!-- 인기 쇼츠 가로 레일 -->
       <section class="card pop-wrap">
         <div class="card-head">
@@ -153,12 +170,6 @@
         <div class="pop-rail" id="popRail" aria-label="인기 쇼츠 가로 목록"></div>
         <p class="hint pop-hint">카드를 누르면 그 쇼츠의 훅·대본이 깔리고, <b>원본 영상 링크</b>와 <b>내 파일 올리기</b> 칸이 함께 열립니다. 옆으로 넘겨서 더 보세요.</p>
       </section>
-
-      <div class="result-head">
-        <span id="discoverStatus" class="status-line"><i class="dot"></i>샘플 떡상 데이터</span>
-        <span class="hint" id="discoverHint">카드를 누르면 훅·대본·댓글까지 자동으로 세팅됩니다</span>
-      </div>
-      <div class="result-grid" id="discoverResults"></div>
 
       <div class="note">
         <b>떡상률</b>은 조회수 ÷ 구독자 수로 계산합니다. 1.0배를 넘으면 구독자보다 외부 유입이 큰 영상이라, 내 채널에도 같은 각도가 먹힐 확률이 높습니다.
@@ -186,6 +197,8 @@
             <div class="sp-meta" id="spMeta"></div>
             <div class="sp-acts">
               <a class="btn primary sm" id="spOpen" href="#" target="_blank" rel="noopener">원본 영상 열기 ↗</a>
+              <button class="btn outline sm" id="spCopy">🔗 링크 복사</button>
+              <button class="btn outline sm" id="spFind">무가공 원작자 찾기 ↗</button>
               <label class="btn outline sm file-btn">
                 <input type="file" id="spFile" accept="video/mp4,video/quicktime,video/webm,video/*">
                 내 폰 원본 파일 올리기
@@ -196,7 +209,7 @@
         </div>
         <div class="sp-drop" id="spDrop" tabindex="0">여기로 원본 mp4·mov 를 끌어다 놓아도 됩니다 · 아이폰은 ‘파일’ 앱에서 선택</div>
         <div class="sp-file" id="spFileState" hidden></div>
-        <p class="hint">유튜브 정책상 남의 쇼츠 원본을 자동으로 내려받지는 않습니다. 내려받은 파일을 올리면 이 대본·스타일 그대로 바로 편집합니다.</p>
+        <p class="hint" id="spHint">유튜브 정책상 남의 쇼츠 원본을 자동으로 내려받지는 않습니다. 내려받은 파일을 올리면 이 대본·스타일 그대로 바로 편집합니다.</p>
       </div>
 
       <div class="card">
@@ -734,13 +747,14 @@
   <input type="file" id="hiddenFile" hidden>
 </div>
 
-<script src="js/sfx-pack.js?v=20261128c"></script>
-<script src="js/core.js?v=20261128c"></script>
-<script src="js/audio.js?v=20261128c"></script>
-<script src="js/render.js?v=20261128c"></script>
-<script src="js/ai.js?v=20261128c"></script>
-<script src="js/tube.js?v=20261128c"></script>
-<script src="js/app.js?v=20261128c"></script>
+<script src="js/sfx-pack.js?v=20261128d"></script>
+<script src="js/originals-data.js?v=20261128d"></script>
+<script src="js/core.js?v=20261128d"></script>
+<script src="js/audio.js?v=20261128d"></script>
+<script src="js/render.js?v=20261128d"></script>
+<script src="js/ai.js?v=20261128d"></script>
+<script src="js/tube.js?v=20261128d"></script>
+<script src="js/app.js?v=20261128d"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>
 </html>

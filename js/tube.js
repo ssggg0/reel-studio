@@ -31,6 +31,8 @@
   T.search = async function (q) {
     const key = RS.state.settings.youtube;
     const minViews = +q.minViews || 0;
+    T.lastRelaxed = false;
+    T.lastDemoMeta = null;
     if (!key) return T.demoSearch(q);
     const params = new URLSearchParams({
       part: 'snippet', type: 'video', maxResults: '30',
@@ -77,32 +79,76 @@
         kw: q.q
       };
     });
+    const all = out.slice();
     out = out.filter(v => v.views >= minViews);
+    if (!out.length && all.length) { out = all; T.lastRelaxed = true; }
     if (q.sort === 'breakout') out.sort((a, b) => b.ratio - a.ratio);
     else if (q.sort === 'date') out.sort((a, b) => a.days - b.days);
     else out.sort((a, b) => b.views - a.views);
     return out;
   };
 
+  /* 키워드 → 비슷한 결의 카테고리 (데모에서 어떤 단어든 결과가 나오게) */
+  const DEMO_SYNONYMS = [
+    [/(동물|강아지|고양이|댕댕|냥|멍|반려|애완|puppy|cat|dog|animal|힐링)/i, ['동물', '자연', 'ASMR']],
+    [/(반전|밈|웃긴|유머|개그|드립|meme|funny|해외밈|초월번역|영상)/i, ['반전', '유머', '공감', '해외일상']],
+    [/(cctv|사고|블박|블랙박스|교통|아찔|사건)/i, ['CCTV', '블랙박스', '신기한 현상']],
+    [/(꿀팁|생활|살림|청소|정리|자취|tip|hack)/i, ['꿀팁', '요리']],
+    [/(요리|음식|레시피|먹방|간식|food|cook|recipe)/i, ['요리', '꿀팁']],
+    [/(운동|홈트|다이어트|헬스|스쿼트|workout|gym|몸짱)/i, ['운동']],
+    [/(여행|풍경|감성|꽃|travel|trip|휴가)/i, ['여행', '자연']],
+    [/(일본|해외|외국|브이로그|japan|vlog|일상)/i, ['해외일상', '여행']],
+    [/(asmr|소리|사운드|만족|satisfying)/i, ['ASMR']],
+    [/(신기|놀라|현상|마술|amazing|자연|과학)/i, ['신기한 현상', '자연']],
+    [/(ai|테크|기술|로봇|인공지능|미래)/i, ['신기한 현상', '유머']],
+    [/(웃프|눈물|감동|사연|이야기|공감)/i, ['공감', '유머', '반전']]
+  ];
   T.demoSearch = function (q) {
-    const toks = String(q.q || '').split(/\s+/).filter(Boolean);
-    let list = RS.demoDiscover.slice();
-    if (toks.length) {
-      const hit = list.filter(v => toks.some(t => (v.title + v.kw).toLowerCase().includes(t.toLowerCase())));
-      if (hit.length >= 3) list = hit;
-      else list = list.map(v => Object.assign({}, v, { kwScore: 0 })).sort((a, b) => (b.title.includes(toks[0]) ? 1 : 0) - (a.title.includes(toks[0]) ? 1 : 0));
+    const raw = String(q.q || '').trim();
+    const toks = raw.split(/\s+/).filter(Boolean).map(t => t.toLowerCase());
+    const all = RS.demoDiscover.slice();
+    const hitText = v => toks.some(t => (v.title + ' ' + (v.kw || '') + ' ' + (v.cat || '')).toLowerCase().includes(t));
+    const cats = new Set();
+    if (raw) DEMO_SYNONYMS.forEach(([re, cs]) => { if (re.test(raw)) cs.forEach(c => cats.add(c)); });
+    const sortFn = q.sort === 'date' ? (a, b) => (a.days || 0) - (b.days || 0)
+      : q.sort === 'views' ? (a, b) => (b.views || 0) - (a.views || 0)
+      : (a, b) => ((b.ratio || 0) - (a.ratio || 0)) || ((b.views || 0) - (a.views || 0));
+    const pass = v => {
+      if (q.region && v.region !== q.region) return false;
+      if (q.dur === 'short' && !(v.len <= 60)) return false;
+      if (q.dur === 'long' && !(v.len > 60)) return false;
+      if (+q.minViews && v.views < +q.minViews) return false;
+      return true;
+    };
+    let tier = pass, relaxed = '';
+    let direct = [], related = [], rest = [];
+    const build = () => {
+      direct = all.filter(v => tier(v) && hitText(v)).sort(sortFn);
+      related = all.filter(v => tier(v) && !hitText(v) && cats.has(v.cat)).sort(sortFn);
+      rest = all.filter(v => tier(v) && !hitText(v) && !cats.has(v.cat)).sort(sortFn);
+    };
+    build();
+    if (!direct.length && !related.length) {
+      tier = v => (!q.dur || (q.dur === 'short' ? v.len <= 60 : v.len > 60));
+      relaxed = '필터를 조금 풀어';
+      build();
     }
-    if (q.region) {
-      const r = list.filter(v => v.region === q.region);
-      if (r.length >= 2) list = r;
+    if (!direct.length && !related.length) {
+      tier = () => true; relaxed = '조건에 맞는 샘플이 없어 인기순으로';
+      build();
     }
-    list = list.filter(v => v.views >= (+q.minViews || 0));
-    if (q.dur === 'short') list = list.filter(v => v.len <= 60);
-    if (q.dur === 'long') list = list.filter(v => v.len > 60);
-    if (q.sort === 'breakout') list.sort((a, b) => b.ratio - a.ratio);
-    else if (q.sort === 'date') list.sort((a, b) => a.days - b.days);
-    else list.sort((a, b) => b.views - a.views);
-    return list.map(v => Object.assign({}, v, { demo: true, published: new Date(Date.now() - v.days * 86400000).toISOString() }));
+    const mix = [];
+    const push = (arr, tag) => arr.forEach(v => {
+      if (mix.length >= 12) return;
+      if (mix.some(x => x.id === v.id)) return;
+      mix.push(Object.assign({}, v, { demo: true, sim: tag, published: new Date(Date.now() - (v.days || 0) * 86400000).toISOString() }));
+    });
+    push(direct, 'match');
+    push(related, 'related');
+    if (mix.length < 12) push(rest, 'fresh');
+    T.lastDemoMeta = { direct: direct.length, related: related.length, fresh: mix.filter(v => v.sim === 'fresh').length, relaxed };
+    T.lastRelaxed = !!relaxed;
+    return mix;
   };
 
 
