@@ -66,35 +66,55 @@
     if (!ks.length) { const e = new Error('YouTube 키가 없습니다'); e.noKey = true; throw e; }
     let lastErr = null;
     for (let i = 0; i < ks.length; i++) {
-      const ps = new URLSearchParams(params);
-      ps.set('key', ks[i]);
-      try {
-        const r = await fetch(API + path + '?' + ps.toString());
-        if (!r.ok) {
-          let reason = '', msg = '';
-          try {
-            const j = await r.json();
-            const e0 = j && j.error;
-            reason = (e0 && e0.errors && e0.errors[0] && e0.errors[0].reason) || (e0 && e0.status) || '';
-            msg = (e0 && e0.message) || '';
-          } catch (e) {}
-          const err = new Error('YouTube ' + r.status + (reason ? ' · ' + reason : ''));
-          err.status = r.status;
-          err.reason = reason;
-          err.quota = /quotaExceeded|dailyLimitExceeded|rateLimitExceeded/i.test(reason + ' ' + msg);
-          err.keyInvalid = r.status === 400 || /keyInvalid|API_KEY_INVALID|keyNotValid/i.test(reason + ' ' + msg);
-          /* 저장된 키가 잘못됐으면(400·키 무효) 기본 키로 한 번 더 시도 */
-          err.tryNext = err.keyInvalid && i < ks.length - 1;
-          throw err;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const ps = new URLSearchParams(params);
+        ps.set('key', ks[i]);
+        try {
+          const r = await fetch(API + path + '?' + ps.toString());
+          if (!r.ok) {
+            let reason = '', msg = '';
+            try {
+              const j = await r.json();
+              const e0 = j && j.error;
+              reason = (e0 && e0.errors && e0.errors[0] && e0.errors[0].reason) || (e0 && e0.status) || '';
+              msg = (e0 && e0.message) || '';
+            } catch (e) {}
+            /* 429(순간 요청 폭주)는 잠깐 쉬었다 두 번까지만 다시 */
+            if (r.status === 429 && attempt < 2) { await sleep(attempt ? 2500 : 1100); continue; }
+            if (r.status === 429) cooldownUntil = Date.now() + 20000;
+            const err = new Error('YouTube ' + r.status + (reason ? ' · ' + reason : ''));
+            err.status = r.status;
+            err.reason = reason;
+            err.quota = r.status === 429 || /quotaExceeded|dailyLimitExceeded|rateLimitExceeded/i.test(reason + ' ' + msg);
+            err.keyInvalid = r.status === 400 || /keyInvalid|API_KEY_INVALID|keyNotValid/i.test(reason + ' ' + msg);
+            /* 저장된 키가 잘못됐으면(400·키 무효) 기본 키로 한 번 더 시도 */
+            err.tryNext = err.keyInvalid && i < ks.length - 1;
+            throw err;
+          }
+          return await r.json();
+        } catch (e) {
+          lastErr = e;
+          if (e && e.tryNext) break;          /* 다음 키로 */
+          throw e;
         }
-        return await r.json();
-      } catch (e) {
-        lastErr = e;
-        if (e && e.tryNext) continue;
-        throw e;
       }
     }
     throw lastErr;
+  }
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  /* 검색은 분당 한도가 빡빡해서 연달아 눌렀을 때 429가 납니다 — 최소 1.1초 텀 */
+  let lastSearchAt = 0;
+  let cooldownUntil = 0;
+  async function searchGap() {
+    if (Date.now() < cooldownUntil) {
+      const e = new Error('YouTube 429 · 잠시 쉬는 중');
+      e.quota = true;
+      throw e;
+    }
+    const w = lastSearchAt + 1100 - Date.now();
+    if (w > 0) await sleep(w);
+    lastSearchAt = Date.now();
   }
 
   /* ── 검색 ─────────────────────────────────────────────── */
@@ -104,6 +124,7 @@
     const ck = 's|' + JSON.stringify(ps);
     const hit = cacheGet(ck);
     if (hit) return hit;
+    await searchGap();
     const d = await getJSON('/search', ps);
     const out = {
       items: (d.items || []).filter(i => i.id && i.id.videoId),
@@ -315,10 +336,70 @@
   };
 
   /* ── 키가 없거나 API가 막혔을 때 ──────────────────────── */
+  /* ── 유튜브 인기 차트 (검색 한도와 무관 · videos.list 1유닛) ──
+     검색(search) 한도가 차도 공식 API로 진짜 인기 영상을 계속 보여줄 수 있습니다.
+     새로고침마다 나라·카테고리를 바꿔 새 영상이 나옵니다. */
+  const CHART_REGIONS = ['KR', 'US', 'JP', 'GB'];
+  const CHART_CATS = [
+    { id: '', tag: '전체' }, { id: '15', tag: '동물' }, { id: '23', tag: '코미디' },
+    { id: '24', tag: '엔터' }, { id: '20', tag: '게임' }, { id: '26', tag: '노하우' }, { id: '22', tag: '인물' }
+  ];
+  let chartTurn = 0;
+  T.chart = async function (q, opts) {
+    opts = opts || {};
+    const n = chartTurn++;
+    const wantRegion = (q && q.region) || CHART_REGIONS[n % CHART_REGIONS.length];
+    const cat = CHART_CATS[(opts.catIdx != null ? opts.catIdx : n) % CHART_CATS.length];
+    const params = { part: 'snippet,statistics,contentDetails', chart: 'mostPopular', maxResults: '50', regionCode: wantRegion };
+    if (cat.id) params.videoCategoryId = cat.id;
+    const ck = 'ch|' + JSON.stringify(params);
+    let d = cacheGet(ck);
+    if (!d) { d = await getJSON('/videos', params); cacheSet(ck, d); }
+    const shorts = (d.items || []).map(v => {
+      const st = v.statistics || {};
+      return {
+        id: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
+        views: +st.viewCount || 0, subs: 0, len: isoDur(v.contentDetails && v.contentDetails.duration),
+        days: daysAgo(v.snippet.publishedAt), published: v.snippet.publishedAt, region: wantRegion,
+        thumb: 'https://i.ytimg.com/vi/' + v.id + '/mqdefault.jpg',
+        url: 'https://www.youtube.com/shorts/' + v.id,
+        ratio: 0, kw: '', cat: catOf(v.snippet.title)
+      };
+    }).filter(v => v.len > 0 && v.len <= 61);
+    const seen = opts.seen || (T.sess && T.sess.seen) || new Set();
+    const fresh = shorts.filter(v => !seen.has(v.id));
+    const pick = (fresh.length ? fresh : shorts).sort((a, b) => b.views - a.views).slice(0, 24);
+    pick.forEach(v => seen.add(v.id));
+    T.lastChart = { region: wantRegion, cat: cat.tag };
+    return pick;
+  };
+
   T.fallbackSearch = async function (q, reason) {
     const err = reason && reason.message ? reason : null;
     if (err) T.lastError = err;
-    /* ① 공개 트렌드(키 없이) — 실제 유튜브 영상. 새로고침마다 나라를 바꿔 새 영상을 찾습니다 */
+    /* ① 공식 인기 차트 (검색 한도·키 문제와 무관하게 동작) */
+    if (T.hasKey()) {
+      try {
+        const chart = await T.chart(q);
+        if (chart.length) {
+          /* 검색어와 제목이 맞는 게 있으면 먼저 */
+          const toks = String((q && q.q) || '').toLowerCase().split(/\s+/).filter(Boolean);
+          const hit = toks.length ? chart.filter(v => toks.some(t => String(v.title).toLowerCase().includes(t))) : [];
+          const base = hit.length >= 4 ? hit : chart;
+          const safe = safety().filter(base);
+          noteSafe(base, safe);
+          const r = refine(safe.list, Object.assign({}, q || {}, { sort: 'views' }));
+          if (r.list.length) {
+            T.lastMode = 'chart';
+            T.lastSource = '유튜브 인기';
+            T.lastDemoMeta = null;
+            T.lastRelaxed = r.relaxed;
+            return r.list;
+          }
+        }
+      } catch (e) {}
+    }
+    /* ② 공개 트렌드(키 없이) — 실제 유튜브 영상. 새로고침마다 나라를 바꿔 새 영상을 찾습니다 */
     const REGIONS = ['KR', 'US', 'JP', 'GB'];
     if (typeof T.fbRegion !== 'number') T.fbRegion = Math.max(0, REGIONS.indexOf((q && q.region) || 'KR'));
     for (let i = 0; i < REGIONS.length; i++) {
@@ -343,7 +424,7 @@
         }
       } catch (e) {}
     }
-    /* ② 준비된 샘플 (새로고침마다 다른 묶음) */
+    /* ③ 준비된 샘플 (새로고침마다 다른 묶음) */
     const list = T.demoSearch(q || {});
     T.lastMode = 'demo';
     T.lastSource = '샘플 떡상 데이터';
@@ -483,6 +564,20 @@
     opts = opts || {};
     if (!opts.more) { pop.seen.clear(); pop.ri = 0; pop.wi = 0; pop.token = ''; pop.pages = 0; pop.shots = 0; }
     if (!T.hasKey()) return [];
+    /* ① 공식 인기 차트 — 검색 한도와 무관하게 항상 동작 */
+    try {
+      const region = POP_REGIONS[pop.ri % POP_REGIONS.length];
+      const chart = await T.chart({ region }, { catIdx: pop.wi, seen: pop.seen });
+      if (chart && chart.length) {
+        pop.ri++; if (pop.ri % POP_REGIONS.length === 0) pop.wi++;
+        T.lastPopularRaw = chart;
+        const safe = safety().filter(chart);
+        T.lastPopularSafe = { active: safe.active, removed: safe.removed.length, summary: safety().summary(safe.removed) };
+        T.lastPopularRegion = region;
+        T.lastPopularSource = '유튜브 인기';
+        return (RS.rank ? RS.rank.mix(safe.list) : safe.list).slice(0, 20);
+      }
+    } catch (e) {}
     const region = POP_REGIONS[pop.ri % POP_REGIONS.length];
     const days = POP_WINDOWS[pop.wi % POP_WINDOWS.length];
     try {
@@ -492,7 +587,9 @@
         publishedAfter: new Date(Date.now() - 1000 * 3600 * 24 * days).toISOString()
       };
       if (pop.token) params.pageToken = pop.token;
-      const d1 = await getJSON('/search', params);
+      const pck = 's|' + JSON.stringify(params);
+      let d1 = cacheGet(pck);
+      if (!d1) { await searchGap(); d1 = await getJSON('/search', params); cacheSet(pck, d1); }
       pop.pages++;
       pop.token = d1.nextPageToken || '';
       if (!pop.token && pop.pages >= 1) { /* 다음 새로고침 때 지역·기간을 바꿉니다 */ }

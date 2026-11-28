@@ -1173,6 +1173,12 @@
     '공감': { preset: 'comment-flood', bgm: 'humor', emoji: '🙂', comments: ['완전 내 얘기', '이거 나잖아', '공감 100%'] }
   };
   const shortCfg = cat => SHORT_CFG[cat] || SHORT_CFG['유머'];
+  function popTagText() {
+    const s = RS.tube.lastPopularSource;
+    if (s === '공개 트렌드') return '공개 트렌드';
+    if (s === '유튜브 인기') return '유튜브 인기';
+    return 'YouTube 실시간';
+  }
 
   function renderPopRail(list) {
     const box = el('popRail'); if (!box) return;
@@ -1223,7 +1229,7 @@
       const list = await RS.tube.popular();
       if (list && list.length) {
         renderPopRail(list);
-        if (tag) { tag.textContent = RS.tube.lastPopularSource === '공개 트렌드' ? '공개 트렌드' : 'YouTube 실시간'; tag.className = 'tag lime'; }
+        if (tag) { tag.textContent = popTagText(); tag.className = 'tag lime'; }
       }
       refreshPopSafeChip();
     } catch (e) {
@@ -1244,7 +1250,7 @@
       const list = await RS.tube.popular({ more: true });
       if (list && list.length) {
         renderPopRail(list);
-        if (tag) { tag.textContent = RS.tube.lastPopularSource === '공개 트렌드' ? '공개 트렌드' : 'YouTube 실시간'; tag.className = 'tag lime'; }
+        if (tag) { tag.textContent = popTagText(); tag.className = 'tag lime'; }
       }
       refreshPopSafeChip();
     } catch (e) {
@@ -2643,7 +2649,7 @@
   function setDiscoverStatus(mode, q, count, opts) {
     const st = el('discoverStatus'); if (!st) return;
     opts = opts || {};
-    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
+    const label = mode === 'live' ? 'YouTube 실시간' : mode === 'chart' ? '유튜브 인기' : mode === 'public' ? '공개 트렌드' : mode === 'fallback' ? '샘플로 대체' : '샘플 떡상 데이터';
     st.classList.toggle('off', mode !== 'live');
     const meta = opts.meta;
     let note = '';
@@ -2658,6 +2664,7 @@
     else if (opts.variant) note += ' · ' + opts.variant;
     if (opts.relaxed && !meta) note += ' · 필터 완화';
     if (mode === 'public') note += ' · 잠시 후 실시간으로 자동 복귀';
+    if (mode === 'chart') note += ' · 검색 한도가 차서 인기 영상으로' + (RS.tube.lastChart ? ' · ' + RS.tube.lastChart.region + ' ' + RS.tube.lastChart.cat : '');
     const removed = (typeof opts.removed === 'number') ? opts.removed : safeRemoved();
     /* 검색어 자체가 방송·아이돌·랭킹 위험 키워드면 그 사실을 짚어 줍니다
        (샘플 모드에서는 걸러질 원본이 없어 제외 0건으로 보이기 때문) */
