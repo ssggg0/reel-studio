@@ -8,7 +8,7 @@
 
   AI.hasGemini = () => !!(RS.state.settings && RS.state.settings.gemini);
   AI.hasYouTube = () => !!(RS.state.settings && RS.state.settings.youtube);
-  AI.hasOauth = () => !!(RS.state.settings && RS.state.settings.oauth);
+
 
   /* ── Gemini 호출 ─────────────────────────────────────── */
   async function callGemini(prompt, key) {
@@ -237,7 +237,7 @@
 
     const toneTx = tone === 'friend' ? '친근한 반말 (친구에게 말하듯, 과한 유행어 금지)'
       : tone === 'calm' ? '차분한 정보 전달체' : '뉴스 구어체 (음슴체·개조식 금지, 자연스러운 입말)';
-    const prompt = `너는 한국 유튜브 쇼츠 전문 작가다. 동물·반전·CCTV·꿀팁·해외일상·자연·유머 등 장르를 가리지 않고, 아래 주제에 맞는 톤으로 쇼츠 대본을 쓴다.
+    const prompt = `너는 한국 유튜브 쇼츠 1인 작가다. 동물·반전·CCTV·꿀팁·해외일상·자연·유머 등 장르를 가리지 않고, 아래 주제에 맞는 톤으로 쇼츠 대본을 쓴다.
 
 주제: ${topic || '최근 화제 이슈'}
 언어: ${LANG_NAME[lang] || '한국어'}
@@ -245,14 +245,19 @@
 길이: 약 ${lengthSec}초
 큐 개수: ${lengthSec <= 20 ? 7 : lengthSec >= 38 ? 11 : 9}
 
-규칙:
-- 첫 큐는 0.5초에 꽂히는 팩트/반전. 스포일러 없이 궁금증.
+[가장 중요한 규칙]
+- 첫 큐 = 첫 1.5초. 스크롤을 멈추게 하는 도파민 훅. 가장 센 숫자·반전·금기·의외성을 맨 앞에 꺼낸다. 12자 이내.
+- 한 큐는 7~12자(비한국어는 4~8단어). 한 눈에 읽히는 호흡. 길면 두 큐로 나눈다.
+- 음슴체 절대 금지: ~함 / ~임 / ~됨 / ~모름 / ~없음 / ~했다함 같은 개조식·음슴체 금지. "~어요 / ~습니다"의 자연스러운 구어체만.
+- 번역투 금지: "그것은 ~이다", "~에 의해", "~를 통해", "~에 대해" 같은 직역투 대신 한국어 어순 그대로. 영어 원문을 옮긴 티가 나면 다시 쓴다.
+- 구어체 리듬: 짧은 문장, 말하듯 끊기. 접속사 남발 금지.
+
+[그 밖]
 - 숫자·단위는 정확히 쓰고, 핵심 키워드/숫자 앞에 # 를 붙여 강조 표시한다 (예: #4,697, #3.4%).
-- 한 큐는 12~24자(비한국어는 6~12단어). 자막으로 읽힐 길이.
 - 결론을 "아직 모른다"로 끝내지 말고 기대감 80% + 팩트 20%로 맺는다.
 - 중학생도 이해하는 일상어. 전문용어 금지. 확인되지 않은 루머 금지.
-- hook1, hook2는 상단에 얹힐 2줄 후킹. 각 18자 이내(비한국어 8단어 이내).
-- titles는 클릭률 높은 서로 다른 각도 3개. 100자 이내.
+- hook1, hook2는 상단에 얹힐 2줄 후킹. 각 16자 이내(비한국어 7단어 이내), 음슴체 금지.
+- titles는 클릭률 높은 서로 다른 각도 3개. 100자 이내, 음슴체 금지.
 - desc는 3~4줄 + 해시태그. tags는 콤마 구분 8개.
 
 반드시 아래 JSON만 출력:
@@ -270,6 +275,41 @@
       titles: (j.titles || []).slice(0, 3).concat(['', '', '']).slice(0, 3).map(s => String(s).slice(0, 100)),
       desc: j.desc || '', tags: j.tags || ''
     };
+  };
+
+  /* ── 제목 5안 (5단계 딸깍 선택) ─────────────────────────── */
+  AI.TITLE_KINDS = ['호기심형', '숫자·충격형', '반전형', '썰형', '질문형'];
+  AI.titles5 = async function (project) {
+    const key = RS.state.settings && RS.state.settings.gemini;
+    if (!key) throw new Error('Gemini 키 없음');
+    const p = project || {};
+    const cues = (p.cues || []).map(c => String(c.text || '').replace(/[#*]/g, '')).filter(Boolean).slice(0, 12);
+    const payload = {
+      현재제목: ((p.meta && p.meta.titles) || []).map(s => String(s || '').replace(/[#*]/g, '')).filter(Boolean).slice(0, 3),
+      훅: [p.hook && p.hook.line1, p.hook && p.hook.line2].filter(Boolean),
+      대본: cues,
+      주제: p.topic || p.name || ''
+    };
+    const prompt = `너는 한국 유튜브 쇼츠 제목 전문가다. 아래 영상의 제목 후보 5개를 서로 다른 각도로 뽑는다.
+
+${JSON.stringify(payload)}
+
+규칙:
+- 5개는 반드시 이 순서의 유형: 호기심형, 숫자·충격형, 반전형, 썰형, 질문형
+- 각 14~38자, 100자 이내. 모바일에서 한 줄에 읽히는 길이.
+- 첫 10자 안에 핵심 단어·숫자를 넣는다. 낚시성 거짓 단정 금지(내용에 없는 사실 창작 금지).
+- 음슴체(~함/~임/~모름) 절대 금지. 자연스러운 한국어 어순, 번역투 금지.
+- 이모지·특수문자 남발 금지. 숫자가 있으면 숫자형에 그대로 쓴다.
+
+반드시 아래 JSON만 출력:
+{"titles":[{"kind":"호기심형","text":""},{"kind":"숫자·충격형","text":""},{"kind":"반전형","text":""},{"kind":"썰형","text":""},{"kind":"질문형","text":""}]}`;
+    const text = await callGemini(prompt, key);
+    const j = parseJson(text);
+    const arr = Array.isArray(j.titles) ? j.titles : [];
+    return arr.map((t, i) => ({
+      kind: String(t.kind || AI.TITLE_KINDS[i] || '추천'),
+      text: String(t.text || t.title || '').trim()
+    })).filter(t => t.text);
   };
 
   /* ── 번역 ────────────────────────────────────────────── */

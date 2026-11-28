@@ -56,10 +56,10 @@
 
   /* ── mode / meta ────────────────────────────────────── */
   function updateMode() {
-    const n = (RS.ai.hasGemini() ? 1 : 0) + (RS.ai.hasYouTube() ? 1 : 0) + (RS.ai.hasOauth() ? 1 : 0);
+    const n = (RS.ai.hasGemini() ? 1 : 0) + (RS.ai.hasYouTube() ? 1 : 0);
     const pill = el('modePill'), txt = el('modeText');
     pill.classList.toggle('live', n > 0);
-    txt.textContent = n === 0 ? '데모 모드' : n >= 3 ? 'API 연결됨' : '일부 연결';
+    txt.textContent = n === 0 ? '데모 모드' : n >= 2 ? 'API 연결됨' : '일부 연결';
     el('aiMode').textContent = RS.ai.hasGemini() ? 'Gemini 연결' : '데모 생성';
   }
 
@@ -2243,99 +2243,267 @@
     renderOriginals();
   }
 
-  /* ── upload ─────────────────────────────────────────── */
+  /* ── 5단계 마무리: 제목 5안 · 썸네일 · 3줄 체크 · 피클 넘기기 ── */
+  const UPX = { style: (RS.up && RS.up.prefs && RS.up.prefs.style) || 'docu', titles: [], titleSource: 'template', thumbImg: null, frame: null, thumbBlob: null, thumbText: '' };
+  let thumbTimer = null, checkTimer = null;
+
+  function upCtx() {
+    return {
+      project: S.project,
+      title: el('uTitle') ? el('uTitle').value : '',
+      desc: el('uDesc') ? el('uDesc').value : '',
+      tags: el('uTags') ? el('uTags').value : ''
+    };
+  }
+
   function bindUpload() {
-    el('uConnect').addEventListener('click', async () => {
-      if (!RS.ai.hasOauth()) { openSettings(); RS.toast('OAuth Client ID를 먼저 넣어주세요', 'err'); return; }
-      const b = el('uConnect');
-      b.disabled = true; b.innerHTML = '<span class="spin"></span> 연결중';
-      try {
-        await RS.tube.connect();
-        updateAuthUI();
-        RS.toast('Google 연결 완료', 'ok');
-      } catch (e) { RS.toast('연결 실패: ' + e.message, 'err'); }
-      finally { b.disabled = false; b.textContent = 'Google 연결'; }
+    if (!el('uTitle') || !RS.up) return;
+    el('uTitle').addEventListener('input', () => {
+      el('uTitleCount').textContent = el('uTitle').value.length + '/100';
+      const tt = el('uThumbText');
+      if (tt && !tt.dataset.touched) tt.value = RS.up.plain(el('uTitle').value).slice(0, 40);
+      scheduleThumb();
+      scheduleCheck();
     });
-    el('uTitle').addEventListener('input', () => { el('uTitleCount').textContent = el('uTitle').value.length + '/100'; });
+    el('uDesc').addEventListener('input', scheduleCheck);
+    el('uTags').addEventListener('input', scheduleCheck);
     el('uFile').addEventListener('change', e => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
       S.media.exportBlob = f;
       S.media.exportName = f.name;
-      el('uFileState').textContent = '선택 · ' + f.name + ' (' + (f.size / 1048576).toFixed(1) + 'MB)';
-      el('uFileState').className = 'hint ok';
+      syncUploadFields();
     });
-    el('uStart').addEventListener('click', startUpload);
+    el('uCopyMeta').addEventListener('click', copyMeta);
+    el('uCopyMeta2').addEventListener('click', copyMeta);
+    el('uTitleAI').addEventListener('click', aiTitles);
+    el('uThumbRefresh').addEventListener('click', () => { UPX.frame = null; refreshThumb(true); });
+    el('uThumbText').addEventListener('input', e => { e.target.dataset.touched = '1'; scheduleThumb(); });
+    el('uThumbSub').addEventListener('input', scheduleThumb);
+    el('uThumbSave').addEventListener('click', saveThumb);
+    el('uSaveThumb').addEventListener('click', saveThumb);
+    el('uSaveVideo').addEventListener('click', saveVideo);
+    el('uThumbBg').addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const img = new Image();
+      img.onload = () => {
+        UPX.thumbImg = img;
+        S.media.thumbImg = img;
+        el('uThumbBgClear').hidden = false;
+        el('uThumbState').textContent = '배경 · ' + f.name;
+        refreshThumb(true);
+      };
+      img.onerror = () => RS.toast('이미지를 읽지 못했습니다', 'err');
+      img.src = URL.createObjectURL(f);
+    });
+    el('uThumbBgClear').addEventListener('click', () => {
+      UPX.thumbImg = null; S.media.thumbImg = null;
+      el('uThumbBgClear').hidden = true;
+      el('uThumbState').textContent = '현재 영상 프레임 사용';
+      refreshThumb(true);
+    });
+    el('uCheckRun').addEventListener('click', () => {
+      const res = renderCheck(RS.up.precheck(upCtx()));
+      RS.toast(res.warn ? '체크 완료 — 경고 ' + res.warn + '건' : '체크 완료 — 3/3 통과', res.warn ? '' : 'ok');
+    });
+    el('uDescFix').addEventListener('click', fixDesc);
+    renderStyleChips();
   }
 
-  function updateAuthUI() {
-    const has = RS.ai.hasOauth();
-    const tag = el('uAuthTag');
-    const state = el('uConnState');
-    if (!has) {
-      tag.textContent = '미연결'; tag.className = 'tag';
-      state.textContent = 'OAuth Client ID가 없습니다'; state.className = 'conn-state warn';
-      el('uConnHint').textContent = '설정 → API 키에서 OAuth Client ID를 넣으면 연결됩니다. 1분이면 됩니다.';
-      return;
+  function scheduleThumb() {
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(() => drawThumbNow(), 220);
+  }
+  function scheduleCheck() {
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(() => renderCheck(RS.up.precheck(upCtx())), 320);
+  }
+
+  function renderStyleChips() {
+    const box = el('uThumbStyles');
+    if (!box) return;
+    box.innerHTML = RS.up.THUMB_STYLES.map(st =>
+      `<button class="chip${st.id === UPX.style ? ' on' : ''}" data-style="${st.id}" title="${U.esc(st.desc)}">${U.esc(st.label)}</button>`
+    ).join('');
+    box.querySelectorAll('[data-style]').forEach(b => b.addEventListener('click', () => {
+      UPX.style = b.dataset.style;
+      RS.up.savePrefs({ style: UPX.style });
+      renderStyleChips();
+      refreshThumb(false);
+    }));
+  }
+
+  function drawThumbNow() {
+    const c = el('uThumbCanvas');
+    if (!c || !RS.up) return;
+    const p = S.project;
+    const text = (el('uThumbText') && el('uThumbText').value.trim()) || RS.up.plain(el('uTitle') ? el('uTitle').value : '') || '제목을 넣으세요';
+    const sub = el('uThumbSub') ? el('uThumbSub').value.trim() : '';
+    const badge = (p.tag && p.tag.text) ? p.tag.text.replace(/^@/, '') : (p.hook && p.hook.line1 ? '' : '');
+    RS.up.drawThumb(c, {
+      style: UPX.style, text, sub, badge: badge || '',
+      img: UPX.thumbImg || UPX.frame, sample: (p.source && p.source.sample) || 'docu',
+      t: S.player.t || 0, zoom: p.zoom || 1.02
+    });
+    UPX.thumbText = text;
+    RS.up.thumbBlob(c).then(b => { UPX.thumbBlob = b; });
+  }
+
+  function refreshThumb(force) {
+    const c = el('uThumbCanvas');
+    if (!c || !RS.up) return;
+    if (UPX.frame && !force) { drawThumbNow(); return; }
+    RS.up.ready().then(() => RS.up.frameSource(S.player.t)).then(src => {
+      if (src) UPX.frame = src;
+      drawThumbNow();
+      if (el('uThumbState') && !UPX.thumbImg) {
+        el('uThumbState').textContent = src ? '배경 · 현재 영상 프레임' : '배경 · 샘플 이미지';
+      }
+    });
+  }
+
+  function renderTitles(list, source) {
+    UPX.titles = list || [];
+    UPX.titleSource = source || 'template';
+    const box = el('uTitleList');
+    if (!box) return;
+    const cur = RS.up.plain(el('uTitle') ? el('uTitle').value : '');
+    box.innerHTML = UPX.titles.map((t, i) =>
+      `<button class="title-item${RS.up.plain(t.text) === cur ? ' on' : ''}" data-i="${i}">
+        <span class="tkind">${U.esc(t.kind || '추천')}</span>
+        <span class="ttext">${U.esc(t.text)}</span>
+      </button>`
+    ).join('');
+    const badge = el('uTitleTag');
+    if (badge) badge.textContent = source === 'gemini' ? 'AI 5안' : '기본 5안';
+    box.querySelectorAll('.title-item').forEach(b => b.addEventListener('click', () => {
+      const t = UPX.titles[+b.dataset.i];
+      if (!t) return;
+      S.project.meta.titles[S.project.meta.selected || 0] = RS.up.clampTitle(t.text);
+      el('uTitle').value = S.project.meta.titles[S.project.meta.selected || 0];
+      el('uTitleCount').textContent = el('uTitle').value.length + '/100';
+      const tt = el('uThumbText');
+      if (tt) { tt.dataset.touched = ''; tt.value = RS.up.plain(t.text).slice(0, 40); }
+      box.querySelectorAll('.title-item').forEach(x => x.classList.toggle('on', x === b));
+      touch();
+      scheduleThumb();
+      scheduleCheck();
+      RS.toast('제목을 넣었습니다 — ' + t.kind);
+    }));
+  }
+
+  async function aiTitles() {
+    const btn = el('uTitleAI');
+    btn.disabled = true;
+    const old = btn.textContent;
+    btn.innerHTML = '<span class="spin"></span> 5안 만드는 중';
+    try {
+      const r = await RS.up.titlesAI(S.project);
+      renderTitles(r.list, r.source);
+      RS.toast(r.source === 'gemini' ? 'AI 제목 5안 완성' : '기본 5안으로 만들었습니다', 'ok');
+    } catch (e) {
+      renderTitles(RS.up.titlesSmart(S.project), 'template');
+      RS.toast('AI 호출 실패 — 기본 5안으로 대체했습니다', 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = old;
     }
-    if (RS.tube.token) {
-      tag.textContent = '연결됨'; tag.className = 'tag lime';
-      state.textContent = '연결됨 · ' + RS.tube.tokenAgeMin() + '분 전'; state.className = 'conn-state ok';
-      el('uConnHint').textContent = '토큰은 약 1시간 유효합니다. 만료되면 다시 연결하세요.';
-    } else {
-      tag.textContent = '대기'; tag.className = 'tag';
-      state.textContent = 'Client ID 있음 · Google 연결만 남았습니다'; state.className = 'conn-state';
-      el('uConnHint').textContent = 'Google 계정으로 한 번 승인하면 업로드할 수 있습니다.';
+  }
+
+  function renderCheck(res) {
+    const box = el('uCheckList');
+    if (!box) return res;
+    box.innerHTML = res.items.map(it => `<div class="audit-item ${it.ok ? 'ok' : 'warn'}">
+      <span class="ai-ico">${it.ok ? '✓' : '!'}</span>
+      <div class="ai-body"><b>${U.esc(it.title)}</b><span>${U.esc(it.detail)}</span></div>
+    </div>`).join('');
+    const badge = el('uCheckBadge');
+    if (badge) {
+      badge.textContent = res.warn ? '경고 ' + res.warn + '건' : '3/3 통과';
+      badge.className = 'tag ' + (res.warn ? 'audit-badge-warn' : 'audit-badge-ok');
     }
+    const fix = el('uCheckFix');
+    if (fix) fix.hidden = !res.items.some(it => it.fix);
+    return res;
+  }
+
+  function fixDesc() {
+    const desc = RS.up.withSafety(el('uDesc').value, RS.up.prefs.email);
+    S.project.meta.desc = desc;
+    el('uDesc').value = desc;
+    touch();
+    renderCheck(RS.up.precheck(upCtx()));
+    RS.toast('설명란에 삭제 안내 문구를 넣었습니다', 'ok');
+  }
+
+  async function copyMeta() {
+    const title = (el('uTitle').value || '').trim();
+    const desc = el('uDesc').value || '';
+    const txt = title + (desc ? '\n\n' + desc : '');
+    if (!txt.trim()) { RS.toast('복사할 제목이 없습니다', 'err'); return; }
+    const ok = await U.copy(txt);
+    RS.toast(ok ? '제목·설명을 복사했습니다' : '복사 실패 — 직접 선택해 주세요', ok ? 'ok' : 'err');
+  }
+
+  function saveVideo() {
+    const blob = S.media.exportBlob;
+    if (!blob) { RS.toast('먼저 미리보기 탭에서 영상을 렌더하세요', 'err'); setTab('preview'); return; }
+    const type = blob.type || '';
+    const ext = /mp4/i.test(type) || /\.mp4$/i.test(S.media.exportName || '') ? '.mp4' : '.webm';
+    const name = (S.media.exportName || '').replace(/\.[a-z0-9]+$/i, '');
+    U.download((name || fileBase()) + ext, blob);
+    RS.toast('완성 영상을 저장했습니다 — 참외 채팅에 올려주세요', 'ok');
+  }
+
+  async function saveThumb() {
+    const c = el('uThumbCanvas');
+    if (!c) return;
+    if (!UPX.thumbBlob) { drawThumbNow(); await new Promise(r => setTimeout(r, 180)); }
+    const blob = UPX.thumbBlob || await RS.up.thumbBlob(c);
+    if (!blob) { RS.toast('썸네일을 만들지 못했습니다', 'err'); return; }
+    U.download(fileBase() + '_thumb.png', blob);
+    RS.toast('썸네일 PNG를 저장했습니다', 'ok');
   }
 
   function syncUploadFields() {
     const p = S.project;
-    if (!el('uTitle')) return;
+    if (!el('uTitle') || !RS.up) return;
     if (document.activeElement !== el('uTitle')) el('uTitle').value = p.meta.titles[p.meta.selected] || p.meta.titles[0] || p.name || '';
-    if (document.activeElement !== el('uDesc')) el('uDesc').value = p.meta.desc || '';
-    if (document.activeElement !== el('uTags')) el('uTags').value = p.meta.tags || '';
-    el('uTitleCount').textContent = (el('uTitle').value || '').length + '/100';
-    el('uFileState').textContent = S.media.exportBlob ? ('렌더 파일 · ' + (S.media.exportName || 'video') + ' (' + (S.media.exportBlob.size / 1048576).toFixed(1) + 'MB)') : '렌더 파일 없음 — 미리보기 탭에서 먼저 렌더하세요';
-    el('uFileState').className = 'hint' + (S.media.exportBlob ? ' ok' : '');
-    updateAuthUI();
-  }
 
-  async function startUpload() {
-    if (!S.media.exportBlob) { RS.toast('먼저 미리보기 탭에서 영상을 렌더하세요', 'err'); setTab('preview'); return; }
-    if (!RS.tube.token) { RS.toast('Google 연결이 필요합니다', 'err'); return; }
-    const btn = el('uStart');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> 업로드중';
-    el('uProgWrap').hidden = false; el('uProgBar').style.width = '0%'; el('uProgTxt').textContent = '0%';
-    el('uOut').hidden = true;
-    try {
-      const file = S.media.exportBlob instanceof File ? S.media.exportBlob :
-        new File([S.media.exportBlob], S.media.exportName || 'reel.mp4', { type: S.media.exportBlob.type || 'video/mp4' });
-      const res = await RS.tube.upload({
-        file, title: el('uTitle').value, desc: el('uDesc').value, tags: el('uTags').value,
-        privacy: el('uPrivacy').value, madeForKids: el('uKids').value === 'true',
-        onProgress: pct => { el('uProgBar').style.width = pct + '%'; el('uProgTxt').textContent = pct + '%'; }
-      });
-      el('uProgBar').style.width = '100%'; el('uProgTxt').textContent = '100%';
-      el('uOut').hidden = false;
-      el('uOut').innerHTML = `<div class="ok">업로드 완료 · ${U.esc(el('uPrivacy').value)}</div>
-        <a href="https://youtube.com/watch?v=${U.esc(res.id)}" target="_blank" rel="noopener">https://youtube.com/watch?v=${U.esc(res.id)}</a>
-        <div class="hint">유튜브 스튜디오에서 처리 후 쇼츠로 노출됩니다. 썸네일은 미리보기 탭에서 만든 PNG를 스튜디오에 올리세요.</div>`;
-      RS.toast('유튜브 업로드 완료', 'ok');
-    } catch (e) {
-      el('uOut').hidden = false;
-      el('uOut').innerHTML = `<div class="err">업로드 실패: ${U.esc(e.message)}</div><div class="hint">토큰 만료(1시간)면 다시 연결하고, API 사용 설정·테스트 사용자 등록을 확인하세요.</div>`;
-      RS.toast('업로드 실패: ' + e.message, 'err');
-    } finally {
-      btn.disabled = false; btn.textContent = '업로드';
+    /* 설명란: “출처 · 원작자 요청 시 즉시 삭제합니다” 자동 포함 */
+    const safeDesc = RS.up.withSafety(p.meta.desc || '', RS.up.prefs.email);
+    if (safeDesc !== (p.meta.desc || '')) { p.meta.desc = safeDesc; touch(); }
+    if (document.activeElement !== el('uDesc')) el('uDesc').value = safeDesc;
+    if (document.activeElement !== el('uTags')) el('uTags').value = p.meta.tags || '';
+
+    el('uTitleCount').textContent = (el('uTitle').value || '').length + '/100';
+    el('uFileState').textContent = S.media.exportBlob
+      ? ('렌더 파일 · ' + (S.media.exportName || 'video') + ' (' + (S.media.exportBlob.size / 1048576).toFixed(1) + 'MB)')
+      : '렌더 파일 없음 — 미리보기 탭에서 먼저 렌더하세요';
+    el('uFileState').className = 'hint' + (S.media.exportBlob ? ' ok' : '');
+    const tag = el('uReadyTag');
+    if (tag) {
+      tag.textContent = S.media.exportBlob ? '파일 준비됨' : '파일 없음';
+      tag.className = 'tag' + (S.media.exportBlob ? ' lime' : '');
     }
+    const hint = el('uHandoffHint');
+    if (hint) hint.textContent = S.media.exportBlob
+      ? '준비 완료 — 두 파일을 참외 채팅에 올리면 업로드·예약까지 참외가 처리합니다.'
+      : '렌더 영상이 없으면 미리보기 탭에서 먼저 렌더하세요.';
+
+    const tt = el('uThumbText');
+    if (tt && !tt.dataset.touched) tt.value = RS.up.plain(el('uTitle').value || (p.hook && p.hook.line1) || '').slice(0, 40);
+    renderStyleChips();
+    refreshThumb(false);
+    if (!UPX.titles.length) renderTitles(RS.up.titlesSmart(p), 'template');
+    renderCheck(RS.up.precheck(upCtx()));
   }
 
   /* ── settings ───────────────────────────────────────── */
   function openSettings() {
     el('stYtKey').value = S.settings.youtube || '';
     el('stGemKey').value = S.settings.gemini || '';
-    el('stOauth').value = S.settings.oauth || '';
     el('stYtState').textContent = '';
     el('stGemState').textContent = '';
     const p = S.project;
@@ -2375,16 +2543,15 @@
     el('stSaveKeys').addEventListener('click', () => {
       S.settings.youtube = el('stYtKey').value.trim();
       S.settings.gemini = el('stGemKey').value.trim();
-      S.settings.oauth = el('stOauth').value.trim();
       RS.store.saveSettings(S.settings);
-      updateMode(); updateAuthUI();
+      updateMode();
       RS.toast('키를 저장했습니다 (이 브라우저에만)', 'ok');
     });
     el('stClearKeys').addEventListener('click', async () => {
       if (!(await RS.confirm('키 지우기', '저장된 API 키 3개를 지웁니다. 계속할까요?'))) return;
       S.settings = {}; RS.store.saveSettings({});
-      el('stYtKey').value = ''; el('stGemKey').value = ''; el('stOauth').value = '';
-      updateMode(); updateAuthUI(); RS.toast('키를 지웠습니다');
+      el('stYtKey').value = ''; el('stGemKey').value = '';
+      updateMode(); RS.toast('키를 지웠습니다');
     });
     el('stYtTest').addEventListener('click', async () => {
       const k = el('stYtKey').value.trim();
@@ -2537,7 +2704,6 @@
     updateMetaLine();
     updateMode();
     syncUploadFields();
-    updateAuthUI();
     renderStyleCards();
     if (full) lastActiveCue = null;
   }

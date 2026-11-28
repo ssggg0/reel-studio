@@ -962,3 +962,6 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
 .status-line{flex-wrap:wrap;row-gap:2px}
 .status-line .safe-note{display:inline-flex;align-items:center;gap:4px;margin-left:6px}
 @media (max-width:1000px){.status-line .safe-note{margin-left:0;flex:1 1 100%}}
+/* 빈 결과 안내는 결과 그리드 전체 폭 사용 */
+#discoverResults .rcard-empty{grid-column:1/-1}
+#discoverResults .rcard-empty .btn{margin-top:8px;margin-right:6px}

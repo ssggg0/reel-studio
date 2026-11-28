@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@700;900&family=Inter:wght@500;600;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261128e">
+<link rel="stylesheet" href="css/style.css?v=20261128f">
 </head>
 <body>
 <div id="app">
@@ -536,53 +536,86 @@
       </div>
     </section>
 
-    <!-- ⑤ 유튜브 업로드 -->
+    <!-- ⑤ 마무리 · 피클로 넘기기 -->
     <section class="panel" id="tab-upload" data-panel="upload" hidden>
       <div class="panel-head">
         <div>
           <span class="eyebrow">STEP 5 / 5</span>
-          <h1>유튜브 업로드</h1>
-          <p>렌더한 영상을 바로 비공개로 올리고, 확인한 뒤 공개로 바꾸는 흐름이 안전합니다.</p>
+          <h1>마무리 · 피클로 넘기기</h1>
+          <p>완성 MP4와 썸네일을 저장해 참외 채팅에 올리면, 참외가 최종 검수와 유튜브 저작권 '문제없음' 확인, 업로드·예약 공개까지 처리합니다.</p>
         </div>
-        <span class="tag" id="uAuthTag">미연결</span>
-      </div>
-
-      <div class="card" id="uConnectCard">
-        <div class="card-head"><h2>계정 연결</h2><span class="hint">Google OAuth</span></div>
-        <div class="conn-row">
-          <div class="conn-state" id="uConnState">OAuth Client ID가 없습니다</div>
-          <button class="btn primary sm" id="uConnect">Google 연결</button>
-        </div>
-        <p class="hint" id="uConnHint">설정 → API 키에서 OAuth Client ID를 넣으면 연결됩니다. 1분이면 됩니다.</p>
-        <details class="mini-help">
-          <summary>연결이 안 될 때 (3단계)</summary>
-          <ol>
-            <li>Google Cloud 콘솔 → <b>YouTube Data API v3</b> 사용 설정</li>
-            <li>OAuth 클라이언트 ID(웹) → 승인된 JavaScript 원본에 <code>https://ssggg0.github.io</code></li>
-            <li>OAuth 동의화면 → 테스트 사용자에 본인 구글 계정 추가</li>
-          </ol>
-        </details>
+        <span class="tag" id="uReadyTag">파일 없음</span>
       </div>
 
       <div class="card">
         <div class="card-head"><h2>영상 정보</h2><span class="hint" id="uFileState">렌더 파일 없음</span></div>
         <label class="field"><span class="lab">제목 <em id="uTitleCount">0/100</em></span><input id="uTitle" maxlength="100"></label>
-        <label class="field"><span class="lab">설명</span><textarea id="uDesc" rows="4"></textarea></label>
+        <label class="field"><span class="lab">설명 <em id="uDescSafe">삭제 안내 문구 자동 포함</em></span><textarea id="uDesc" rows="5"></textarea></label>
         <label class="field"><span class="lab">태그 <em>콤마</em></span><input id="uTags"></label>
-        <div class="field-row">
-          <label class="field"><span class="lab">공개 상태</span>
-            <select id="uPrivacy"><option value="private" selected>비공개 (추천)</option><option value="unlisted">일부공개</option><option value="public">공개</option></select>
-          </label>
-          <label class="field"><span class="lab">시청자</span>
-            <select id="uKids"><option value="false" selected>아동용 아님</option><option value="true">아동용</option></select>
-          </label>
-        </div>
         <div class="toolbar">
           <label class="btn outline sm file-btn"><input type="file" id="uFile" accept="video/*">다른 파일 고르기</label>
-          <button class="btn primary" id="uStart">업로드</button>
+          <button class="btn ghost sm" id="uCopyMeta">📋 제목·설명 복사</button>
         </div>
-        <div class="progress" id="uProgWrap" hidden><div class="progress-bar"><i id="uProgBar"></i></div><span id="uProgTxt">0%</span></div>
-        <div class="upload-out" id="uOut" hidden></div>
+      </div>
+
+      <div class="card" id="uTitleCard">
+        <div class="card-head">
+          <h2>제목 5안</h2>
+          <span class="tag" id="uTitleTag">딸깍 선택</span>
+          <button class="btn ghost sm" id="uTitleAI">🤖 AI로 5안</button>
+        </div>
+        <p class="hint">마음에 드는 제목을 한 번 누르면 위 제목 칸에 바로 들어갑니다.</p>
+        <div class="title-list" id="uTitleList"></div>
+      </div>
+
+      <div class="card" id="uThumbCard">
+        <div class="card-head">
+          <h2>썸네일 만들기</h2>
+          <span class="tag">1080×1920</span>
+          <button class="btn ghost sm" id="uThumbRefresh">🔄 다시 만들기</button>
+        </div>
+        <div class="chips" id="uThumbStyles"></div>
+        <label class="field"><span class="lab">썸네일 문구 <em>#단어 = 포인트 색</em></span><input id="uThumbText" maxlength="60" placeholder="이 강아지, 한국말은 몰라요"></label>
+        <div class="field-row">
+          <label class="field grow"><span class="lab">작은 줄 (선택)</span><input id="uThumbSub" maxlength="40" placeholder="부제·설명 한 줄"></label>
+        </div>
+        <div class="thumb-wrap" id="uThumbWrap">
+          <canvas id="uThumbCanvas"></canvas>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary sm" id="uThumbSave">⬇ 썸네일 저장 (PNG)</button>
+          <label class="btn ghost sm file-btn"><input type="file" id="uThumbBg" accept="image/*">배경 사진</label>
+          <button class="btn ghost sm" id="uThumbBgClear" hidden>빼기</button>
+          <span class="hint" id="uThumbState"></span>
+        </div>
+      </div>
+
+      <div class="card" id="uCheckCard">
+        <div class="card-head">
+          <h2>🛡️ 올리기 전 3줄 체크</h2>
+          <span class="tag" id="uCheckBadge">자동</span>
+          <button class="btn ghost sm" id="uCheckRun">다시 검사</button>
+        </div>
+        <div class="audit-list" id="uCheckList"></div>
+        <div class="toolbar" id="uCheckFix" hidden>
+          <button class="btn outline sm" id="uDescFix">🛠 설명란에 삭제 안내 넣기</button>
+        </div>
+        <p class="hint">정밀한 수익화·저작권 전수 검사는 참외가 직접 합니다. 여기선 금지어·위험 소재·삭제 안내만 봅니다.</p>
+      </div>
+
+      <div class="card handoff-card" id="uHandoff">
+        <div class="card-head"><h2>🥒 피클로 넘기기</h2><span class="tag lime">검수 · 업로드 · 예약</span></div>
+        <ol class="handoff-steps">
+          <li><b>1</b><span>완성 MP4와 썸네일 PNG를 저장합니다.</span></li>
+          <li><b>2</b><span>두 파일을 참외 채팅에 올립니다. 제목·설명은 <b>📋 복사</b>로 붙여넣습니다.</span></li>
+          <li><b>3</b><span>참외가 최종 검수 + 유튜브 저작권 '문제없음' 확인 후 업로드·예약 공개까지 마칩니다.</span></li>
+        </ol>
+        <div class="toolbar">
+          <button class="btn primary" id="uSaveVideo">⬇ 완성 MP4 저장</button>
+          <button class="btn outline" id="uSaveThumb">⬇ 썸네일 PNG 저장</button>
+          <button class="btn ghost" id="uCopyMeta2">📋 제목·설명 복사</button>
+        </div>
+        <p class="hint" id="uHandoffHint">렌더 영상이 없으면 미리보기 탭에서 먼저 렌더하세요.</p>
       </div>
 
       <div class="card">
@@ -591,8 +624,8 @@
           <li>세로 9:16 · 60초 이하 — 쇼츠 피드에 그대로 걸립니다.</li>
           <li>비속어·욕설은 0.1초 삐 처리 — 게시 직후 18세 제한이 붙는 걸 막습니다.</li>
           <li>타 채널 영상 재업로드·번역만 붙인 영상은 재사용 판정 위험이 있습니다.</li>
-          <li>제목·썸네일에 욕설·장애 비하 표현 금지.</li>
-          <li>첫 3초에 훅, 마지막은 결론 대신 기대감으로.</li>
+          <li>설명란에 “출처 · 원작자 요청 시 즉시 삭제합니다” 한 줄을 꼭 남깁니다.</li>
+          <li>첫 1.5초에 훅, 마지막은 결론 대신 기대감으로.</li>
         </ul>
       </div>
     </section>
@@ -661,20 +694,6 @@
             <ol>
               <li><a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> 접속</li>
               <li><b>API 키 만들기</b> → 복사 → 붙여넣기</li>
-            </ol>
-          </details>
-
-          <label class="field">
-            <span class="lab">Google OAuth Client ID <em>유튜브 업로드용</em></span>
-            <input id="stOauth" type="password" autocomplete="off" placeholder="1234567890-abc.apps.googleusercontent.com">
-          </label>
-          <details class="mini-help"><summary>클라이언트 ID 발급 3분</summary>
-            <ol>
-              <li>Google Cloud 콘솔 → API 및 서비스 → <b>OAuth 동의 화면</b> (외부, 테스트 사용자에 본인 계정)</li>
-              <li>사용자 인증 정보 → <b>OAuth 클라이언트 ID</b> → 웹 애플리케이션</li>
-              <li>승인된 JavaScript 원본: <code>https://ssggg0.github.io</code></li>
-              <li>승인된 리디렉션 URI는 비워둬도 됩니다 (팝업 방식)</li>
-              <li>YouTube Data API v3 사용 설정 필수</li>
             </ol>
           </details>
 
@@ -759,13 +778,13 @@
 
 <script src="js/sfx-pack.js?v=20261128d"></script>
 <script src="js/originals-data.js?v=20261128d"></script>
-<script src="js/safe-filter.js?v=20261128e"></script>
-<script src="js/core.js?v=20261128e"></script>
+<script src="js/safe-filter.js?v=20261128f"></script>
+<script src="js/core.js?v=20261128f"></script>
+<script src="js/upload-pro.js?v=20261128f"></script>
 <script src="js/audio.js?v=20261128d"></script>
 <script src="js/render.js?v=20261128d"></script>
 <script src="js/ai.js?v=20261128d"></script>
-<script src="js/tube.js?v=20261128e"></script>
-<script src="js/app.js?v=20261128e"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/tube.js?v=20261128f"></script>
+<script src="js/app.js?v=20261128f"></script>
 </body>
 </html>
