@@ -432,7 +432,8 @@
     const size = (p.sub.fontSize || 62) * k;
     const family = p.sub.font || '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
     const weight = p.sub.weight || 900;
-    const maxW = W * 0.84;
+    const SF = RS.safe || { subMaxW: 0.76 };
+    const maxW = W * SF.subMaxW;
     let fs = size;
     let lines = layoutLines(ctx, U.rich(cue.text, p.sub.autoNumber), maxW, size, weight, family);
     if (lines.length > 3) {
@@ -445,7 +446,9 @@
     const boxW = Math.max(...lines.map(l => l.w)) + padX * 2;
     const boxH = lines.length * lh + padY * 2;
     const cx = W / 2;
-    const cy = H * (p.sub.pos || 0.78);
+    /* 유튜브 UI 세이프존: 하단 제목·채널 영역과 겹치지 않게 위로 올립니다 */
+    const rawCy = H * (p.sub.pos || 0.78);
+    const cy = (RS.safe && RS.safe.clampY) ? RS.safe.clampY(rawCy, boxH + fs * 0.4, H) : rawCy;
 
     // intro animation
     const playing = !!(RS.state && RS.state.player && RS.state.player.playing);
@@ -493,16 +496,19 @@
     const ease = 1 - Math.pow(1 - into, 3);
     const fs = 30 * k * (p.card.scale || 1);
     const family = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
-    const maxW = W * 0.74;
+    const CF = RS.safe || { cardMaxW: 0.70, cardRight: 0.88 };
+    const maxW = W * CF.cardMaxW;
     const lines = layoutLines(ctx, U.rich(cue.comment.text, false), maxW, fs, 700, family).slice(0, 3);
     const lh = fs * 1.35;
     const av = fs * 2.1;
     const padX = fs * 0.62, padY = fs * 0.55;
     const name = cue.comment.name || p.card.name || '시청자';
-    const boxW = Math.min(W * 0.84, Math.max(...lines.map(l => l.w)) + av + padX * 2.4);
+    const boxW = Math.min(W * (CF.cardMaxW + 0.08), Math.max(...lines.map(l => l.w)) + av + padX * 2.4);
     const boxH = Math.max(av, lines.length * lh) + padY * 2;
-    const x = W * (p.card.x == null ? 0.06 : p.card.x);
-    const y = H * (p.card.y == null ? 0.60 : p.card.y) + (1 - ease) * 24 * k;
+    const rawX = W * (p.card.x == null ? 0.06 : p.card.x);
+    const x = Math.min(rawX, W * CF.cardRight - boxW);
+    const rawY = H * (p.card.y == null ? 0.60 : p.card.y) + (1 - ease) * 24 * k;
+    const y = (RS.safe && RS.safe.clampTop) ? RS.safe.clampTop(rawY, boxH + 24 * k, H) : rawY;
 
     ctx.save();
     ctx.globalAlpha = ease;

@@ -124,9 +124,19 @@
 
   function baseKeyword(p) {
     const meta = p.meta || {};
-    const t0 = plain(meta.titles && (meta.titles[meta.selected] || meta.titles[0]));
-    const src = t0 || plain(p.topic) || plain(p.hook && p.hook.line1) || plain(p.cues && p.cues[0] && p.cues[0].text) || plain(p.name) || '이 장면';
-    let s = src.replace(/[.!?~…]+$/g, '').trim();
+    const cands = [
+      plain(p.hook && p.hook.line1),
+      plain(p.cues && p.cues[0] && p.cues[0].text),
+      plain(meta.titles && (meta.titles[meta.selected] || meta.titles[0])),
+      plain(p.topic),
+      plain(p.name)
+    ].filter(Boolean);
+    let s = cands.find(c => c.length <= 22) || cands[0] || '이 장면';
+    if (s.indexOf(',') >= 0) s = s.split(',').pop().trim();
+    s = s
+      .replace(/[.!?~…\u3000]+$/g, '')
+      .replace(/(합니다|했습니다|하는|했던|하던|인다|한다)$/g, '')
+      .trim();
     if (s.length > 22) s = s.slice(0, 21).trim();
     return s || '이 장면';
   }
@@ -146,9 +156,9 @@
     const num = pickNumber(p);
     const hook2 = plain(p.hook && p.hook.line2);
     return [
-      { kind: '호기심형', text: kw + ', 아무도 말해주지 않은 이유', src: 'template' },
-      { kind: '숫자·충격형', text: num ? (num.n + (num.unit || '초') + ' 만에 이해되는 ' + kw) : ('딱 3초 만에 끝나는 ' + kw), src: 'template' },
-      { kind: '반전형', text: kw + '인 줄 알았는데 반전이 있었습니다', src: 'template' },
+      { kind: '호기심형', text: kw + ' — 아무도 말해주지 않은 이유', src: 'template' },
+      { kind: '숫자·충격형', text: num ? (num.n + (num.unit || '초') + ' 만에 끝나는 ' + kw) : (kw + ', 3초면 이해됩니다'), src: 'template' },
+      { kind: '반전형', text: kw + ' — 알고 보니 반전이 있었습니다', src: 'template' },
       { kind: '썰형', text: (hook2 || kw) + ' — 그 뒤에 벌어진 일', src: 'template' },
       { kind: '질문형', text: kw + ', 진짜 이게 맞을까요?', src: 'template' }
     ].map(t => ({ kind: t.kind, text: UP.clampTitle(t.text), src: t.src }));
@@ -412,9 +422,13 @@
       ctx.restore();
     });
 
-    ctx.fillStyle = '#FFE600';
-    ctx.beginPath(); ctx.moveTo(28, cy - 40); ctx.lineTo(28, cy + 40); ctx.lineTo(70, cy); ctx.closePath(); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(W - 28, cy - 40); ctx.lineTo(W - 28, cy + 40); ctx.lineTo(W - 70, cy); ctx.closePath(); ctx.fill();
+    /* 글자가 넓게 퍼졌을 때는 화살표를 빼서 겹치지 않게 */
+    const widest = fit.lines.reduce((m, l) => Math.max(m, l.w), 0);
+    if (widest < W * 0.78) {
+      ctx.fillStyle = '#FFE600';
+      ctx.beginPath(); ctx.moveTo(28, cy - 40); ctx.lineTo(28, cy + 40); ctx.lineTo(70, cy); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(W - 28, cy - 40); ctx.lineTo(W - 28, cy + 40); ctx.lineTo(W - 70, cy); ctx.closePath(); ctx.fill();
+    }
   }
 
   function drawCard(ctx, W, H, text, sub, badge) {

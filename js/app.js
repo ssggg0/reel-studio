@@ -442,24 +442,53 @@
   }
 
   /* ── one-click: script tools ────────────────────────── */
-  const EUM_SPECIAL = [['어려움','어렵습니다'],['쉬움','쉽습니다'],['나쁨','나쁩니다'],['다름','다릅니다'],['느림','느립니다'],['빠름','빠릅니다'],['아님','아닙니다'],['모름','모릅니다']];
-  const EUM_RE = /(했음|됐음|없음|있음|많음|적음|같음|모름|아님|생김|사라짐|바뀜|늘어남|줄어듦|커짐|작아짐|빠짐|넘침|막힘|열림|닫힘|걸림|풀림|보임|들림|남음|쌓임|터짐|끝남|시작됨|계속됨|유지됨|확인됨|발표됨|공개됨|결정됨|취소됨|증가함|감소함|상승함|하락함|폭등함|폭락함|마감됨|종료됨|바꿈|늘림|줄임|높음|낮음|좋음|나쁨|어려움|쉬움|느림|빠름|다름|작음|아님)$/;
+  /* 음슴체(~함·~임·~됨·~모름) 검출: 어미로 판단하되 명사는 제외 */
+  const EUM_SPECIAL = [['어려움', '어렵습니다'], ['쉬움', '쉽습니다'], ['나쁨', '나쁩니다'], ['다름', '다릅니다'], ['느림', '느립니다'], ['빠름', '빠릅니다'], ['아님', '아닙니다'], ['모름', '모릅니다']];
+  const EUM_NOUN = ['처음', '마음', '이름', '가슴', '모음', '자음', '소음', '잡음', '녹음', '방음', '고음', '저음', '단음', '장음', '중음', '여음', '흡음', '차음', '위임', '수임', '전임', '겸임', '상임', '생김', '움직임', '줄임', '다정함', '강함', '약함', '건강', '느낌', '다음', '구름', '보름', '주름', '고름', '노름', '서름', '모름'];
+  const EUM_RE = /(했음|됐음|었음|았음|였음|겠음|함|됨|임|짐|김|뀜|침|힘|림|남|듦|쁨|큼|끔|음|움|픔|름)$/;
   function lastToken(text) {
-    const t = U.strip(text).trim().replace(/[.!?~…"'”’]+$/, '');
-    if (!t) return '';
-    return t.split(/\s+/).pop();
+    const words = String(text || '').replace(/[.!?~…"'”’]+$/g, '').trim().split(/\s+/);
+    return words.length ? words[words.length - 1].replace(/[,.!?~…"'”’]+$/g, '') : '';
   }
-  function hasEumSum(text) { return EUM_RE.test(lastToken(text)); }
+  function eumWord(text) {
+    const t = String(text || '').replace(/[.!?~…"'”’]+$/g, '').trim();
+    const words = t.split(/\s+/).filter(Boolean);
+    if (!words.length) return '';
+    let w = words[words.length - 1].replace(/[,.!?~…"'”’]+$/g, '');
+    /* “안 됨”처럼 한 글자 어미로 끝나면 앞말과 붙여서 판단 */
+    if (w.length < 2 && words.length > 1) {
+      const prev = words[words.length - 2].replace(/[^가-힣]/g, '');
+      if (prev) w = prev + w;
+    }
+    return w;
+  }
+  function hasEumSum(text) {
+    const w = eumWord(text);
+    if (!w || w.length < 2) return false;
+    if (EUM_NOUN.indexOf(w) >= 0) return false;
+    return EUM_RE.test(w);
+  }
   function eumConvert(text) {
     const src = String(text);
     const m = /([가-힣]+)(\s*[.!?~…"'”’]*)$/.exec(src);
     if (!m) return src;
     const word = m[1], tail = m[2];
-    if (!EUM_RE.test(word)) return src;
+    if (EUM_NOUN.indexOf(word) >= 0) return src;
+    /* 한 글자 어미(안 됨 → 안 됩니다) */
+    if (word.length === 1) {
+      const one = { '됨': '됩니다', '함': '합니다', '임': '입니다', '짐': '집니다', '김': '깁니다', '음': '습니다' }[word];
+      if (!one) return src;
+      return src.slice(0, src.length - (word + tail).length) + one + tail;
+    }
+    if (word.length < 2) return src;
     let rep = null;
-    for (const [a, b] of EUM_SPECIAL) if (word.endsWith(a)) { rep = word.slice(0, -a.length) + b; break; }
+    for (const [a2, b2] of EUM_SPECIAL) if (word.endsWith(a2)) { rep = word.slice(0, -a2.length) + b2; break; }
     if (!rep) {
-      if (/함$/.test(word)) rep = word.replace(/함$/, '합니다');
+      if (/했음$/.test(word)) rep = word.replace(/했음$/, '했습니다');
+      else if (/됐음$/.test(word)) rep = word.replace(/됐음$/, '됐습니다');
+      else if (/(었|았|였)음$/.test(word)) rep = word.replace(/음$/, '습니다');
+      else if (/겠음$/.test(word)) rep = word.replace(/겠음$/, '겠습니다');
+      else if (/함$/.test(word)) rep = word.replace(/함$/, '합니다');
       else if (/됨$/.test(word)) rep = word.replace(/됨$/, '됩니다');
       else if (/임$/.test(word)) rep = word.replace(/임$/, '입니다');
       else if (/짐$/.test(word)) rep = word.replace(/짐$/, '집니다');
@@ -469,7 +498,14 @@
       else if (/힘$/.test(word)) rep = word.replace(/힘$/, '힙니다');
       else if (/림$/.test(word)) rep = word.replace(/림$/, '립니다');
       else if (/남$/.test(word)) rep = word.replace(/남$/, '납니다');
+      else if (/듦$/.test(word)) rep = word.replace(/듦$/, '듭니다');
+      else if (/쁨$/.test(word)) rep = word.replace(/쁨$/, '뿝니다');
+      else if (/큼$/.test(word)) rep = word.replace(/큼$/, '큽니다');
+      else if (/끔$/.test(word)) rep = word.replace(/끔$/, '낍니다');
       else if (/음$/.test(word)) rep = word.replace(/음$/, '습니다');
+      else if (/움$/.test(word)) rep = word.replace(/움$/, '웁니다');
+      else if (/픔$/.test(word)) rep = word.replace(/픔$/, '픕니다');
+      else if (/름$/.test(word)) rep = word.replace(/름$/, '릅니다');
     }
     if (!rep) return src;
     return src.slice(0, src.length - (word + tail).length) + rep + tail;
@@ -1499,7 +1535,7 @@
   }
 
   /* ── 0오류 자동 점검 ───────────────────────────────── */
-  const AUDIT_SAFE_Y = 1420;
+  const AUDIT_SAFE_Y = 1400;
   const SUB_FAMILY = '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
   let measureCanvas = null;
   function textCtx() {
@@ -1530,22 +1566,24 @@
   function subGeom(p, cue, W, H) {
     const family = p.sub.font || SUB_FAMILY;
     const weight = p.sub.weight || 900;
-    const maxW = W * 0.84;
+    const maxW = W * ((RS.safe && RS.safe.subMaxW) || 0.76);
     let fs = p.sub.fontSize || 62;
     let lines = wrapLineCount(cue.text, fs, weight, family, maxW);
     if (lines > 3) { fs = fs * 0.86; lines = wrapLineCount(cue.text, fs, weight, family, maxW); }
     const lh = fs * 1.24, padY = fs * 0.3;
     const boxH = Math.min(lines, 3) * lh + padY * 2;
-    const cy = H * (p.sub.pos || 0.78);
-    return { lines, fs, boxH, top: cy - boxH / 2, bottom: cy + boxH / 2, cy };
+    const raw = H * (p.sub.pos || 0.78);
+    const cy = (RS.safe && RS.safe.clampY) ? RS.safe.clampY(raw, boxH + fs * 0.4, H) : raw;
+    return { lines, fs, boxH, top: cy - boxH / 2, bottom: cy + boxH / 2, cy, moved: Math.abs(cy - raw) > 1 };
   }
   function cardGeom(p, cue, W, H) {
     if (!p.card || !p.card.on || !cue || !cue.comment || !cue.comment.on || !cue.comment.text) return null;
     const fs = 30, lh = fs * 1.35, av = fs * 2.1, padY = fs * 0.55;
-    const lines = Math.min(3, wrapLineCount(cue.comment.text, fs, 700, SUB_FAMILY, W * 0.74));
+    const lines = Math.min(3, wrapLineCount(cue.comment.text, fs, 700, SUB_FAMILY, W * ((RS.safe && RS.safe.cardMaxW) || 0.7)));
     const boxH = Math.max(av, lines * lh) + padY * 2;
-    const y = H * (p.card.y == null ? 0.6 : p.card.y);
-    return { top: y, bottom: y + boxH, boxH };
+    const raw = H * (p.card.y == null ? 0.6 : p.card.y);
+    const y = (RS.safe && RS.safe.clampTop) ? RS.safe.clampTop(raw, boxH, H) : raw;
+    return { top: y, bottom: y + boxH, boxH, moved: Math.abs(y - raw) > 1 };
   }
 
   function auditOnce() {
@@ -1567,7 +1605,7 @@
       const worst = Math.max(worstSub, worstCard);
       const src = worstCard > worstSub ? '댓글 카드(' + (ci + 1) + '번 큐)' : '자막(' + (wi + 1) + '번 큐)';
       items.push(worst <= AUDIT_SAFE_Y
-        ? { id: 'safe', ok: true, title: '하단 유튜브 UI 세이프존', detail: '자막·카드 모두 y ' + Math.round(Math.max(worst, 0)) + ' (기준 1,420) 안쪽입니다' }
+        ? { id: 'safe', ok: true, title: '하단 유튜브 UI 세이프존', detail: '자막·카드 모두 y ' + Math.round(Math.max(worst, 0)) + ' (기준 1,400) 안쪽 · 우측 아이콘 열도 비켜섰습니다' }
         : { id: 'safe', ok: false, title: '하단 유튜브 UI 세이프존', detail: src + '가 y ' + Math.round(worst) + '까지 내려갑니다 — 유튜브 제목·채널 영역과 겹칩니다' });
     }
 
@@ -2730,6 +2768,18 @@
     fix: () => auditFix(),
     import: t => oneClickImport(t),
     preset: k => applyDiscoverPreset(k),
+    style: id => applyPreset(RS.presetById(id)),
+    resync: () => syncProjectToUI(true),
+    styles: () => RS.presets.map(p => p.id),
+    geom: () => {
+      const p = S.project, W = 1080, H = p.ratio === '16:9' ? 607.5 : 1920;
+      let sub = 0, card = 0;
+      (p.cues || []).forEach(c => {
+        const g = subGeom(p, c, W, H); if (g.bottom > sub) sub = g.bottom;
+        const cg = cardGeom(p, c, W, H); if (cg && cg.bottom > card) card = cg.bottom;
+      });
+      return { subBottom: Math.round(sub), cardBottom: Math.round(card), safeY: AUDIT_SAFE_Y };
+    },
     errors: () => window.__rsErrors.slice()
   };
 

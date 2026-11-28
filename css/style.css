@@ -982,7 +982,7 @@ details.card[open] > summary{border-bottom:1px solid var(--line)}
   color:var(--accent-h);background:#fff;border:1px solid var(--accent-line);
   border-radius:999px;padding:3px 8px;margin-top:1px;
 }
-.title-item .ttext{font-size:13px;font-weight:700;line-height:1.45;color:var(--tx);word-break:keep-all}
+.title-item .ttext{flex:1 1 auto;min-width:0;text-align:left;font-size:13px;font-weight:700;line-height:1.45;color:var(--tx);word-break:keep-all}
 .title-item.on .ttext{color:var(--accent-h)}
 .thumb-wrap#uThumbWrap{margin-top:14px}
 #uThumbCanvas{width:208px;border-radius:14px}

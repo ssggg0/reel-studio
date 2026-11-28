@@ -250,6 +250,34 @@
     }
   ];
 
+  /* ── 유튜브 쇼츠 세이프존 (1080×1920 기준) ────────────────
+     우측 아이콘 열(좋아요·댓글·공유·리믹스)과 하단 UI(제목·채널명)를 침범하지 않는
+     자막·카드 안전 영역. 렌더와 오류 점검이 같은 값을 씁니다. */
+  RS.safe = {
+    bottomY: 1400,      /* 자막·카드 하단 한계 */
+    topY: 190,          /* 상단 훅 띠 아래 시작선 */
+    subMaxW: 0.76,      /* 자막 최대 폭(좌우 12% 여백 확보) */
+    cardMaxW: 0.70,     /* 댓글 카드 최대 폭 */
+    cardRight: 0.88,    /* 카드 오른쪽 끝 한계(우측 아이콘 열 회피) */
+    scale: H => (H && H > 1000 ? H / 1920 : 1),
+    /* 세로 중심 cy를 안전 영역 안으로 */
+    clampY(cy, boxH, H) {
+      if (!H || H <= 1000) return cy;
+      const k = this.scale(H);
+      const maxCy = this.bottomY * k - boxH / 2;
+      const minCy = this.topY * k + boxH / 2;
+      return Math.max(minCy, Math.min(cy, maxCy));
+    },
+    /* 상단 y(카드처럼 위에서 시작하는 박스)를 안전 영역 안으로 */
+    clampTop(y, boxH, H) {
+      if (!H || H <= 1000) return y;
+      const k = this.scale(H);
+      const minY = this.topY * k;
+      const maxY = this.bottomY * k - boxH;
+      return Math.max(minY, Math.min(y, Math.max(minY, maxY)));
+    }
+  };
+
   RS.presetById = id => P.find(p => p.id === id) || P[0];
   RS.hookStyles = { band: '상단 검은 띠', card: '흰 라운드 카드', pill: '뱃지 알약 띠', plain: '민무늬 큰 글씨' };
 
