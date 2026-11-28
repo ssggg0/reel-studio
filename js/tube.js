@@ -342,35 +342,68 @@
   const CHART_REGIONS = ['KR', 'US', 'JP', 'GB'];
   const CHART_CATS = [
     { id: '', tag: '전체' }, { id: '15', tag: '동물' }, { id: '23', tag: '코미디' },
-    { id: '24', tag: '엔터' }, { id: '20', tag: '게임' }, { id: '26', tag: '노하우' }, { id: '22', tag: '인물' }
+    { id: '24', tag: '엔터' }, { id: '20', tag: '게임' }, { id: '26', tag: '노하우' },
+    { id: '22', tag: '인물' }, { id: '10', tag: '음악' }, { id: '17', tag: '스포츠' },
+    { id: '25', tag: '뉴스' }, { id: '19', tag: '여행' }, { id: '2', tag: '자동차' }
   ];
   let chartTurn = 0;
+  /* 검색 한도가 찼을 때도 검색어와 결이 맞게 — 키워드 → 유튜브 카테고리 */
+  const CAT_HINT = [
+    [/(동물|강아지|고양이|댕댕|냥|멍|펫|animal|cat|dog|puppy)/i, '15'],
+    [/(게임|game|롤|마인크|브롤)/i, '20'],
+    [/(코미디|유머|웃긴|밈|개그|드립|funny|meme)/i, '23'],
+    [/(음악|노래|댄스|music|dance|커버)/i, '10'],
+    [/(요리|레시피|먹방|음식|food|cook|recipe)/i, '26'],
+    [/(운동|헬스|축구|야구|sport|workout|gym)/i, '17'],
+    [/(뉴스|이슈|사건|정치|news)/i, '25'],
+    [/(여행|풍경|travel|trip)/i, '19'],
+    [/(자동차|드라이브|car|drive)/i, '2']
+  ];
+  function catHint(q) {
+    const t = String(q || '');
+    for (const [re, id] of CAT_HINT) if (re.test(t)) return id;
+    return '';
+  }
   T.chart = async function (q, opts) {
     opts = opts || {};
     const n = chartTurn++;
     const wantRegion = (q && q.region) || CHART_REGIONS[n % CHART_REGIONS.length];
-    const cat = CHART_CATS[(opts.catIdx != null ? opts.catIdx : n) % CHART_CATS.length];
-    const params = { part: 'snippet,statistics,contentDetails', chart: 'mostPopular', maxResults: '50', regionCode: wantRegion };
-    if (cat.id) params.videoCategoryId = cat.id;
-    const ck = 'ch|' + JSON.stringify(params);
-    let d = cacheGet(ck);
-    if (!d) { d = await getJSON('/videos', params); cacheSet(ck, d); }
-    const shorts = (d.items || []).map(v => {
-      const st = v.statistics || {};
-      return {
-        id: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
-        views: +st.viewCount || 0, subs: 0, len: isoDur(v.contentDetails && v.contentDetails.duration),
-        days: daysAgo(v.snippet.publishedAt), published: v.snippet.publishedAt, region: wantRegion,
-        thumb: 'https://i.ytimg.com/vi/' + v.id + '/mqdefault.jpg',
-        url: 'https://www.youtube.com/shorts/' + v.id,
-        ratio: 0, kw: '', cat: catOf(v.snippet.title)
-      };
-    }).filter(v => v.len > 0 && v.len <= 61);
+    let firstCat = '';
+    if (opts.catIdx != null) firstCat = CHART_CATS[opts.catIdx % CHART_CATS.length].id;
+    else if (n === 0 && catHint(q && q.q)) firstCat = catHint(q && q.q);   /* 첫 장에는 검색어 결에 맞춰 */
+    else firstCat = CHART_CATS[n % CHART_CATS.length].id;
+    /* 그 카테고리에 쇼츠가 없을 때를 대비해 '전체'와 다음 카테고리까지 훑습니다 */
+    const tries = [firstCat, '', CHART_CATS[(n + 1) % CHART_CATS.length].id]
+      .filter((v, i, a) => a.indexOf(v) === i);
     const seen = opts.seen || (T.sess && T.sess.seen) || new Set();
-    const fresh = shorts.filter(v => !seen.has(v.id));
-    const pick = (fresh.length ? fresh : shorts).sort((a, b) => b.views - a.views).slice(0, 24);
+    let out = [], usedCat = firstCat;
+    for (const cid of tries) {
+      const params = { part: 'snippet,statistics,contentDetails', chart: 'mostPopular', maxResults: '50', regionCode: wantRegion };
+      if (cid) params.videoCategoryId = cid;
+      const ck = 'ch|' + JSON.stringify(params);
+      let d = cacheGet(ck);
+      if (!d) { d = await getJSON('/videos', params); cacheSet(ck, d); }
+      (d.items || []).forEach(v => {
+        const st = v.statistics || {};
+        const len = isoDur(v.contentDetails && v.contentDetails.duration);
+        if (!(len > 0 && len <= 61)) return;
+        if (out.some(x => x.id === v.id)) return;
+        out.push({
+          id: v.id, title: v.snippet.title, channel: v.snippet.channelTitle,
+          views: +st.viewCount || 0, subs: 0, len,
+          days: daysAgo(v.snippet.publishedAt), published: v.snippet.publishedAt, region: wantRegion,
+          thumb: 'https://i.ytimg.com/vi/' + v.id + '/mqdefault.jpg',
+          url: 'https://www.youtube.com/shorts/' + v.id,
+          ratio: 0, kw: '', cat: catOf(v.snippet.title)
+        });
+      });
+      if (out.length >= 12) { usedCat = cid; break; }
+    }
+    const fresh = out.filter(v => !seen.has(v.id));
+    const pick = (fresh.length ? fresh : out).sort((a, b) => b.views - a.views).slice(0, 24);
     pick.forEach(v => seen.add(v.id));
-    T.lastChart = { region: wantRegion, cat: cat.tag };
+    const catName = (CHART_CATS.find(c => c.id === usedCat) || CHART_CATS[0]).tag;
+    T.lastChart = { region: wantRegion, cat: catName };
     return pick;
   };
 
