@@ -4,7 +4,7 @@
   const RS = window.RS;
 
   const AI = RS.ai = {};
-  const MODEL_CANDIDATES = ['gemini-3.8-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+  const MODEL_CANDIDATES = ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-2.0-flash'];
 
   AI.hasGemini = () => !!(RS.state.settings && RS.state.settings.gemini);
   AI.hasYouTube = () => !!(RS.state.settings && RS.state.settings.youtube);
@@ -21,7 +21,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.9, topP: 0.95, maxOutputTokens: 4096, responseMimeType: 'application/json' }
+            generationConfig: { temperature: 0.9, topP: 0.95, maxOutputTokens: 8192, responseMimeType: 'application/json' }
           })
         });
         if (res.status === 404) { lastErr = new Error('모델 없음: ' + model); continue; }
