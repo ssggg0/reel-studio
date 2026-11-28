@@ -2017,6 +2017,7 @@
     const min = +f.minViews || 0;
     let shown = safe.filter(v => v.views >= min);
     if (!shown.length) shown = safe.slice();
+    if (RS.rank && f.sort !== 'date') shown = RS.rank.mix(shown);   // 해외 밈·글로벌 클립 우선 유지
     if (!RS.ai.hasYouTube()) shown = shown.slice(0, 12);   // 데모는 처음 화면과 같은 12건
     renderDiscover(shown, { mode: RS.ai.hasYouTube() ? 'live' : 'demo', q: f.q, removed: removedNow });
     setDiscoverStatus(RS.ai.hasYouTube() ? 'live' : 'demo', f.q, shown.length, { meta: null, relaxed: false, removed: removedNow });

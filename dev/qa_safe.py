@@ -19,18 +19,20 @@ os.makedirs(OUT, exist_ok=True)
 
 # ── 픽스처: 절반은 위험(방송·아이돌·영화·랭킹), 절반은 안전(단일 장면) ──
 SEARCH_ITEMS = [
-    ('KBS', '뮤직뱅크 1위 무대 풀영상', 'KBS Kpop'),
-    ('SBSNOW', '런닝맨 레전드 명장면 하이라이트', 'SBS NOW'),
-    ('M2', 'STUDIO CHOOM 직캠 풀버전', 'M2'),
-    ('NETFLIX', '넷플릭스 신작 공식 예고편', 'Netflix Korea'),
-    ('TOPMIX', '전국 강아지 랭킹 TOP 10 모음집', 'PetRank'),
-    ('MBC', '나 혼자 산다 예능 클립', 'MBCentertainment'),
-    ('cat01', '욕실에서 미끄러진 고양이 한 장면', '고양이일기'),
-    ('cat02', '창문 열어둔 여름밤의 최후', '해외밈번역'),
-    ('dog01', '북한말로 부르면 반응하는 강아지', '멍멍TV'),
-    ('tip01', '샤워기 물때 30초 만에 지우기', '살림한스푼'),
-    ('asmr01', 'toast asmr', 'toast'),
-    ('meme01', '테니스가 위험한 이유', '밈공장'),
+    # 위험 6건 (방송·아이돌·영화·랭킹 모음집) — 걸러져야 하는 항목
+    ('KBSNOW', '뮤직뱅크 1위 무대 풀영상', 'KBS Kpop'),
+    ('SBSNOW1', '런닝맨 레전드 명장면 하이라이트', 'SBS NOW'),
+    ('M2STUDIO', 'STUDIO CHOOM 직캠 풀버전', 'M2'),
+    ('NFLXKR01', '넷플릭스 신작 공식 예고편', 'Netflix Korea'),
+    ('TOPRANK1', '전국 강아지 랭킹 TOP 10 모음집', 'PetRank'),
+    ('MBCENT01', '나 혼자 산다 예능 클립', 'MBCentertainment'),
+    # 안전 6건 (단일 장면·해외 밈·동물) — 실제 영상 ID라 썸네일도 진짜
+    ('eS6ZBwjHoWI', '북한말로 불러야 알아듣는 강아지', '멍멍일기'),
+    ('WRirWdRi5gc', 'toast asmr🍞', 'toast'),
+    ('p3UsCxQuxeY', 'real vs. fake nail polish cracking ASMR🍓', 'nail.asmr'),
+    ('d6uF-zl7CB0', '누가 설계했는지 궁금한 미끄럼틀 대참사', '해외밈창고'),
+    ('KiEVKDr5XlQ', '감동적인 태국 반전 광고', 'ThaiAd'),
+    ('bwtSrNBnXKI', '테니스가 위험한 이유', 'funny clips'),
 ]
 
 def build_routes(page):
@@ -167,7 +169,7 @@ with sync_playwright() as pw:
     res['live_toggle_on'] = probe(p)
 
     p.evaluate("()=>document.getElementById('discoverResultHead').scrollIntoView({block:'start'})")
-    p.wait_for_timeout(400)
+    p.wait_for_timeout(2600)   # 토스트가 사라진 뒤 결과만 담기게
     p.screenshot(path=OUT + '/safe_filter_mobile.png')
     res['errs_live'] = errs2[:3]
     ctx.close()
