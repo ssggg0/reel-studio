@@ -227,7 +227,7 @@
       p.cues.push(c);
       renderCues(); touch(); selectCue(c.id); paintOverlay(true);
     });
-    el('cueFit').addEventListener('click', () => {
+    if (el('cueFit')) el('cueFit').addEventListener('click', () => {
       const p = S.project;
       if (!p.cues.length) return;
       const total = Math.max(U.totalDur(p), p.cues.length * 2.2);
